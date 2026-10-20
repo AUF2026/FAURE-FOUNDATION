@@ -1,1 +1,17 @@
-
+{
+  "institution": "FAURE FOUNDATION",
+  "catalogTitle": "Official Scientific Register",
+  "generatedAt": "2026-10-20T23:52:31.658368+00:00",
+  "count": 0,
+  "categories": [
+    "certifications",
+    "refutations",
+    "validations",
+    "manuscripts",
+    "theorems",
+    "proofs",
+    "data",
+    "protocols"
+  ],
+  "documents": []
+}
