@@ -7,7 +7,7 @@ import re
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "documents"
-OUTPUT = ROOT / "data" / "documents.json"
+OUTPUT = ROOT / "documents" / "data" / "documents.json"
 
 CATEGORIES = {
     "certifications": {
