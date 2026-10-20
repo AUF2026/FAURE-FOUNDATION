@@ -2015,5 +2015,171 @@ if (themeToggle) {
 }
 
 </script>
+<script>
+/* ============================================================
+   REPO LOGIC
+   ============================================================ */
+
+const REPO = "AUF2026/FAURE-FOUNDATION";
+const API = "https://api.github.com/repos/" + REPO + "/contents";
+
+const SECTIONS = [
+  {
+    name: "documents/certifications",
+    label: "Certifications",
+    desc: "Certificazioni e documenti di attestazione."
+  },
+  {
+    name: "documents/manuscripts",
+    label: "Manuscripts",
+    desc: "Manoscritti e documenti scientifici."
+  },
+  {
+    name: "documents/proofs",
+    label: "Proofs",
+    desc: "Dimostrazioni formali e verifiche."
+  },
+  {
+    name: "documents/protocols",
+    label: "Protocols",
+    desc: "Protocolli e procedure."
+  },
+  {
+    name: "documents/refutations",
+    label: "Refutations",
+    desc: "Confutazioni e analisi critiche."
+  },
+  {
+    name: "documents/theorems",
+    label: "Theorems",
+    desc: "Teoremi e risultati matematici."
+  },
+  {
+    name: "documents/validations",
+    label: "Validations",
+    desc: "Validazioni, test e verifiche."
+  },
+  {
+    name: "documents/data",
+    label: "Data",
+    desc: "Indice JSON e dati strutturati."
+  }
+];
+
+const sectionList = document.getElementById("sectionList");
+const fileList = document.getElementById("fileList");
+const viewerBody = document.getElementById("viewerBody");
+const viewerTitle = document.getElementById("viewerTitle");
+const sectionDesc = document.getElementById("sectionDesc");
+const sectionDescription = document.getElementById("sectionDescription");
+const titleAUF = document.getElementById("titleAUF");
+const heroAUF = document.getElementById("heroAUF");
+
+function colorFor(name){
+  let h=0;
+  for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+  return `hsl(${h%360} 60% 55%)`;
+}
+
+function setAccent(name){
+  const c = colorFor(name);
+  document.documentElement.style.setProperty("--accent", c);
+  titleAUF.style.color = c;
+  heroAUF.style.color = c;
+  document.getElementById("landingAUF").style.color = c;
+}
+
+SECTIONS.forEach(sec => {
+  const li = document.createElement("li");
+  li.className = "section-item";
+  li.textContent = sec.label;
+  li.onclick = (e) => loadSection(sec, e.currentTarget);
+  sectionList.appendChild(li);
+});
+
+async function loadSection(sec, el) {
+  document.querySelectorAll(".section-item").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+
+  setAccent(sec.label);
+
+  sectionDesc.textContent = sec.label;
+  sectionDescription.textContent = sec.desc;
+
+  const res = await fetch(`${API}/${sec.name}`);
+
+if (!res.ok) {
+  fileList.innerHTML = "";
+  viewerBody.textContent =
+    `Errore nel caricamento della sezione ${sec.label}: HTTP ${res.status}`;
+  return;
+}
+
+const data = await res.json();
+
+if (!Array.isArray(data)) {
+  viewerBody.textContent =
+    "La risposta GitHub non contiene un elenco di file.";
+  return;
+}
+
+fileList.innerHTML = "";
+viewerBody.textContent = "Seleziona un file.";
+viewerTitle.textContent = "Viewer";
+
+data.forEach(file => {
+  if (file.type !== "file") return;
+
+  const item = document.createElement("div");
+  item.className = "file-item";
+  item.textContent = file.name;
+  item.onclick = (e) => loadFile(file, e.currentTarget);
+  fileList.appendChild(item);
+});
+}
+
+async function loadFile(file, el) {
+  document.querySelectorAll(".file-item").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+
+  viewerTitle.textContent = file.name;
+
+  const ext = file.name.split(".").pop().toLowerCase();
+
+  if (ext === "pdf") {
+    viewerBody.innerHTML = `
+      <iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(file.download_url)}"></iframe>
+    `;
+    return;
+  }
+
+  const res = await fetch(file.download_url);
+  const text = await res.text();
+
+  if (ext === "md") {
+    viewerBody.innerHTML = marked.parse(text);
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise([viewerBody]);
+    }
+    return;
+  }
+
+  if (ext === "html") {
+    viewerBody.innerHTML = `<iframe sandbox="allow-scripts allow-same-origin"></iframe>`;
+    const iframe = viewerBody.querySelector("iframe");
+    const doc = iframe.contentDocument;
+    doc.open();
+    doc.write(text);
+    doc.close();
+    return;
+  }
+
+  viewerBody.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
+</script>
 </body>
 </html>
