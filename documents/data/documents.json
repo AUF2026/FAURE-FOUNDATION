@@ -1,8 +1,8 @@
 {
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
-  "schemaVersion": 2,
-  "generatedAt": "2026-10-21T16:49:13.797796+00:00",
+  "schemaVersion": 3,
+  "generatedAt": "2026-10-21T18:13:24.015264+00:00",
   "count": 96,
   "categoryCounts": {
     "certifications": 1,
@@ -100,8 +100,16 @@
     }
   ],
   "sources": [
-    "FAURE-FOUNDATION",
-    "AUF2026.github.io"
+    {
+      "name": "FAURE-FOUNDATION",
+      "url": "https://github.com/AUF2026/FAURE-FOUNDATION",
+      "branch": "main"
+    },
+    {
+      "name": "AUF2026.github.io",
+      "url": "https://github.com/AUF2026/AUF2026.github.io",
+      "branch": "main"
+    }
   ],
   "documents": [
     {
@@ -118,6 +126,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/bibliography/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/bibliography/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -146,6 +155,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/certifications/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/certifications/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -174,6 +184,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/code/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/code/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -202,6 +213,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/refutations/ChatGPT_FAIL.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/refutations/ChatGPT_FAIL.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -230,6 +242,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/refutations/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/refutations/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -258,6 +271,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/datasets/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/datasets/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -286,6 +300,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/data/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/data/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -314,6 +329,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-ARITHMETIC-ADDITIVE-REPRESENTATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-ARITHMETIC-ADDITIVE-REPRESENTATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -342,6 +358,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-ARITHMETIC-GEOMETRIC-STATE-EMBEDDING.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-ARITHMETIC-GEOMETRIC-STATE-EMBEDDING.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -370,6 +387,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-ARITHMETIC-IDENTITY.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-ARITHMETIC-IDENTITY.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -398,6 +416,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-ARITHMETIC-POWER.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-ARITHMETIC-POWER.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -426,6 +445,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-ARITHMETIC-SEPARATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-ARITHMETIC-SEPARATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -454,6 +474,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-DIOPHANTINE-GEOMETRIC-SEPARATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-DIOPHANTINE-GEOMETRIC-SEPARATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -482,6 +503,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -510,6 +532,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION-V2.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION-V2.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -538,6 +561,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-DIVISIBILITY-COORDINATEWISE.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-DIVISIBILITY-COORDINATEWISE.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -566,6 +590,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-GEOMETRIC-COMPLETION-BOUNDARY.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-GEOMETRIC-COMPLETION-BOUNDARY.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -594,6 +619,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-NO-GOD.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-NO-GOD.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -622,6 +648,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -650,6 +677,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-STABILIZED-IDEMPOTENT.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-STABILIZED-IDEMPOTENT.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -678,6 +706,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-UNIVERSAL-STABILIZATION.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-UNIVERSAL-STABILIZATION.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -706,6 +735,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -734,6 +764,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/proofs/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/proofs/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -762,6 +793,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/ARCHIVE-MAP.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/ARCHIVE-MAP.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -790,6 +822,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/AUTHOR-IDENTITY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/AUTHOR-IDENTITY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -818,6 +851,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/BIBLIOGRAPHIC-NOVELTY-MATRIX.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/BIBLIOGRAPHIC-NOVELTY-MATRIX.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -846,6 +880,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/CLAIMS.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/CLAIMS.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -874,6 +909,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/CONFIGURATION-MATRIX.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/CONFIGURATION-MATRIX.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -902,6 +938,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/CORE-GENEALOGY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/CORE-GENEALOGY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -930,6 +967,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/CORPUS-INDEX.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/CORPUS-INDEX.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -958,6 +996,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/EXTRACTION-STATUS.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/EXTRACTION-STATUS.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -986,6 +1025,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/FAURE-THEOREM-ARITHMETIC-IDENTITY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/FAURE-THEOREM-ARITHMETIC-IDENTITY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1014,6 +1054,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/FAURE-THEOREM-CANDIDATES.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/FAURE-THEOREM-CANDIDATES.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1042,6 +1083,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/FAURE-THEOREM-NO-GOD.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/FAURE-THEOREM-NO-GOD.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1070,6 +1112,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1098,6 +1141,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/Faure%20Universal%20Theory%20%E2%80%94%20Structural%20Overview%20%26%20Public%20Framework%20Declaration.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/Faure%20Universal%20Theory%20%E2%80%94%20Structural%20Overview%20%26%20Public%20Framework%20Declaration.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1126,6 +1170,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1154,6 +1199,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/LOCAL-CORPUS-MAP.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/LOCAL-CORPUS-MAP.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1182,6 +1228,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/LOCAL-CORPUS-ROOTS.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/LOCAL-CORPUS-ROOTS.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1210,6 +1257,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/NEXT-SESSION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/NEXT-SESSION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1238,6 +1286,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/OBJECT-REGISTRY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/OBJECT-REGISTRY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1266,6 +1315,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/PROOF-INGESTION-PROTOCOL.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/PROOF-INGESTION-PROTOCOL.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1294,6 +1344,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/PROOF-REGISTRY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/PROOF-REGISTRY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1322,6 +1373,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/REPOSITORY-MAP.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/REPOSITORY-MAP.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1350,6 +1402,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/RESEARCH-REGISTER.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/RESEARCH-REGISTER.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1378,6 +1431,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/SOURCE-INVENTORY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/SOURCE-INVENTORY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1406,6 +1460,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/SOURCE-MANIFEST.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/SOURCE-MANIFEST.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1434,6 +1489,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/STRUCTURAL-MAP.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/STRUCTURAL-MAP.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1462,6 +1518,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/docs/THEOREM-ORIGINALITY-MATRIX.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/docs/THEOREM-ORIGINALITY-MATRIX.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1490,6 +1547,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/manuscripts/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/manuscripts/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1518,6 +1576,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/AOS%20KERNEL%20-%20GLOBAL%20MONUMENT%20TRIGONOMETRY.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/AOS%20KERNEL%20-%20GLOBAL%20MONUMENT%20TRIGONOMETRY.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1546,6 +1605,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_LINEARE.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_LINEARE.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1574,6 +1634,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1602,6 +1663,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21_V2.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21_V2.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1630,6 +1692,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/COMPARAZIONE%20GRANDI%20vs%20FAURE%20-%20EQUAZIONI%20E%20SPIEGAZIONI.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/COMPARAZIONE%20GRANDI%20vs%20FAURE%20-%20EQUAZIONI%20E%20SPIEGAZIONI.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1658,6 +1721,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Donation.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Donation.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1686,6 +1750,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/EFFECTS%20LAB.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/EFFECTS%20LAB.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1714,6 +1779,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20Framework%20-%20Research%20Support.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20Framework%20-%20Research%20Support.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1742,6 +1808,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20-%20Glossario%20Mathlib.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20-%20Glossario%20Mathlib.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1770,6 +1837,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20Lean%20Verifier%20Sandbox.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20Lean%20Verifier%20Sandbox.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1798,6 +1866,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/FAURE%20-%20ToE%20.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/FAURE%20-%20ToE%20.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1826,6 +1895,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure-ToE%20Navigatore%20Materia%20Lineare.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure-ToE%20Navigatore%20Materia%20Lineare.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1854,6 +1924,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20ToE%20vs%20Schr%C3%B6dinger%20-%20Comparatore%20Numerico%20ad%20Alta%20Risoluzione.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20ToE%20vs%20Schr%C3%B6dinger%20-%20Comparatore%20Numerico%20ad%20Alta%20Risoluzione.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1882,6 +1953,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20TOE%20%E2%80%94%20Cella%20Tetraedrica%20Demonstrator.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20TOE%20%E2%80%94%20Cella%20Tetraedrica%20Demonstrator.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1910,6 +1982,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20TOE%20%E2%80%94%20Faure%20vs%20Modello%20Standard%20%E2%80%94%20Confronto%20Numerico%20Faure%20vs%20Modello%20Standard.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20TOE%20%E2%80%94%20Faure%20vs%20Modello%20Standard%20%E2%80%94%20Confronto%20Numerico%20Faure%20vs%20Modello%20Standard.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1938,6 +2011,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20TOE%20%E2%80%94%20FDM_Universal_Ratio_Matrix_Engine.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20TOE%20%E2%80%94%20FDM_Universal_Ratio_Matrix_Engine.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1966,6 +2040,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20TOE%20%E2%80%94%20Master%20Equation%20Comparator-TUPLA%20Demonstrator-FLEX.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20TOE%20%E2%80%94%20Master%20Equation%20Comparator-TUPLA%20Demonstrator-FLEX.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1994,6 +2069,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Faure%20TOE%20%E2%80%94%20P1-P16%20Lean4%20Demonstrator.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Faure%20TOE%20%E2%80%94%20P1-P16%20Lean4%20Demonstrator.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2022,6 +2098,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2050,6 +2127,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipercubo_3D.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipercubo_3D.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2078,6 +2156,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipersfera_3D.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipersfera_3D.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2106,6 +2185,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipersfera_6d.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipersfera_6d.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2134,6 +2214,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipersfera_6d_V2.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipersfera_6d_V2.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2162,6 +2243,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipersfera_6d_V3.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipersfera_6d_V3.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2190,6 +2272,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/ipersfera_6d_V4.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/ipersfera_6d_V4.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2218,6 +2301,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Navigatore%20Geometrico%202D-3D%20Armoniche%20della%20Materia.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Navigatore%20Geometrico%202D-3D%20Armoniche%20della%20Materia.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2246,6 +2330,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/PARADIGMA%20DETERMINISTICO%20AOS%20vs%20MODELLO%20PROBABILISTICO%20STANDARD.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/PARADIGMA%20DETERMINISTICO%20AOS%20vs%20MODELLO%20PROBABILISTICO%20STANDARD.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2274,6 +2359,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/Proof%20%26%20Doc%20Visualizer.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/Proof%20%26%20Doc%20Visualizer.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2302,6 +2388,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/protocols/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/protocols/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2330,6 +2417,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/theorems/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/theorems/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2358,6 +2446,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-ARITHMETIC-ADDITIVE-REPRESENTATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-ARITHMETIC-ADDITIVE-REPRESENTATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2386,6 +2475,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-ARITHMETIC-GEOMETRIC-STATE-EMBEDDING.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-ARITHMETIC-GEOMETRIC-STATE-EMBEDDING.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2414,6 +2504,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-ARITHMETIC-IDENTITY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-ARITHMETIC-IDENTITY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2442,6 +2533,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-ARITHMETIC-POWER.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-ARITHMETIC-POWER.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2470,6 +2562,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-ARITHMETIC-SEPARATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-ARITHMETIC-SEPARATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2498,6 +2591,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-DIOPHANTINE-GEOMETRIC-SEPARATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-DIOPHANTINE-GEOMETRIC-SEPARATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2526,6 +2620,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2554,6 +2649,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION-V2.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-DISCRETE-CONTINUOUS-REPRESENTATION-V2.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2582,6 +2678,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-DIVISIBILITY-COORDINATEWISE.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-DIVISIBILITY-COORDINATEWISE.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2610,6 +2707,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-GEOMETRIC-COMPLETION-BOUNDARY.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-GEOMETRIC-COMPLETION-BOUNDARY.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2638,6 +2736,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-NO-GOD.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-NO-GOD.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2666,6 +2765,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-PROPER-COMPLETION-SEPARATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2694,6 +2794,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-STABILIZED-IDEMPOTENT.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-STABILIZED-IDEMPOTENT.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2722,6 +2823,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/FAURE-THEOREM-UNIVERSAL-STABILIZATION.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/FAURE-THEOREM-UNIVERSAL-STABILIZATION.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2750,6 +2852,7 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/index.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2778,6 +2881,7 @@
       "repository": "FAURE-FOUNDATION",
       "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
       "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/validations/readme.md",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/validations/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
