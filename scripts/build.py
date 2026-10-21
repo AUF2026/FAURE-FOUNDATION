@@ -44,7 +44,7 @@ CATEGORIES = {
     "code": ("Codice sorgente", "CODE"),
     "docs": ("Documentazione", "DOCUMENTATION"),
     "pages": ("Pagine web", "PAGE"),
-    "Pdf": ("Manoscritti", "PDF"),
+    "pdf": ("Manoscritti", "PDF"),
 }
 
 CATEGORY_ALIASES = {
@@ -56,6 +56,7 @@ CATEGORY_ALIASES = {
     "confutazioni": "refutations",
     "validation": "validations",
     "validations": "validations",
+    "validazione": "validations",
     "validazioni": "validations",
     "manuscript": "manuscripts",
     "manuscripts": "manuscripts",
@@ -111,7 +112,6 @@ EXCLUDED_FILES = {
     "CODE_OF_CONDUCT.md",
 }
 
-# File di servizio esclusi quando si trovano alla radice.
 ROOT_SERVICE_FILES = {
     "index.html",
     "404.html",
@@ -143,9 +143,11 @@ def sha256_file(path):
 
 
 def is_excluded(path):
-    """Esclude file tecnici e temporanei, mai in base all'estensione."""
+    """Esclude file tecnici e temporanei, non le estensioni."""
 
-    if path.name in EXCLUDED_FILES:
+    if path.name.casefold() in {
+        name.casefold() for name in EXCLUDED_FILES
+    }:
         return True
 
     if any(
@@ -171,18 +173,16 @@ def is_excluded(path):
     ):
         return True
 
-    # IMPORTANTE:
-    # non filtrare per estensione.
-    # PDF, DOCX, XLSX, immagini, archivi, binari,
-    # nuovi formati e file senza estensione sono ammessi.
-
+    # Nessun filtro per estensione:
+    # sono ammessi PDF, DOCX, XLSX, immagini, archivi,
+    # file binari, formati nuovi e file senza estensione.
     return False
 
 
 def is_metadata_sidecar(path):
     """
-    Un JSON con lo stesso nome di un altro file viene considerato
-    metadato associato e non una voce documentale separata.
+    Esclude un JSON quando esiste un altro file con lo stesso
+    nome base nella stessa cartella.
     Gli altri JSON vengono indicizzati normalmente.
     """
 
@@ -244,7 +244,6 @@ def classify_document(relative_path):
         if category:
             return category
 
-    # Categoria predefinita per qualsiasi altra estensione.
     extension = path.suffix.lower()
 
     extension_categories = {
@@ -261,14 +260,15 @@ def classify_document(relative_path):
         ".py": "code",
         ".js": "code",
         ".ts": "code",
+        ".jsx": "code",
+        ".tsx": "code",
         ".css": "code",
+        ".scss": "code",
         ".lean": "proofs",
         ".thy": "proofs",
         ".v": "proofs",
-        "lean": "validations",
-        "lean": "validazione",
-        "tla": "validations",
-        "tla": "validazione",
+        ".tla": "validations",
+        ".pdf": "pdf",
     }
 
     return extension_categories.get(extension, "docs")
@@ -276,8 +276,8 @@ def classify_document(relative_path):
 
 def is_in_document_area(relative_path):
     """
-    Limita la scansione alle aree documentali previste.
-    Non limita le estensioni dei file.
+    Limita la scansione alle aree documentali previste,
+    senza limitare le estensioni dei file.
     """
 
     path = Path(relative_path)
@@ -288,14 +288,13 @@ def is_in_document_area(relative_path):
 
     lowered = [part.casefold() for part in parts]
 
-    # File alla radice: esclude soltanto quelli di servizio
-    # esplicitamente identificati.
+    # Alla radice vengono esclusi soltanto i file di servizio.
     if len(parts) == 1:
         return parts[0].casefold() not in {
             name.casefold() for name in ROOT_SERVICE_FILES
         }
 
-    # Aree documentali standard di entrambe le repository.
+    # Aree documentali standard.
     if lowered[0] in {"docs", "documents"}:
         return True
 
@@ -352,7 +351,6 @@ def collect_files(repository_root):
         key=lambda path: path.as_posix().casefold(),
     )
 
-
 def build_document(repository, repository_root, path):
     relative_path = path.relative_to(
         repository_root
@@ -391,6 +389,13 @@ def build_document(repository, repository_root, path):
     if not isinstance(external_links, list):
         external_links = []
 
+    verification_status = metadata.get(
+        "verificationStatus", "NOT_RECORDED"
+    )
+
+    if not isinstance(verification_status, str):
+        verification_status = "NOT_RECORDED"
+
     return {
         "id": f"{category}-{identity}",
         "title": title.strip(),
@@ -407,13 +412,11 @@ def build_document(repository, repository_root, path):
         "sourceUrl": source_url,
         "downloadUrl": download_url,
         "verification": {
-        "status": metadata.get(
-        "verificationStatus", "NOT_RECORDED"
-        ),
-        "report": metadata.get("verificationReport"),
-        "verifier": metadata.get("verifier"),
-        "verifiedAt": metadata.get("verifiedAt"),
-        "method": metadata.get("verificationMethod"),
+            "status": verification_status,
+            "report": metadata.get("verificationReport"),
+            "verifier": metadata.get("verifier"),
+            "verifiedAt": metadata.get("verifiedAt"),
+            "method": metadata.get("verificationMethod"),
         },
         "identifiers": {
             "doi": metadata.get("doi"),
@@ -439,8 +442,7 @@ def write_catalog(repository_roots):
                 )
                 documents.append(document)
 
-            except OSError as exc:
-                # Un file illeggibile non interrompe l'intero catalogo.
+            except (OSError, ValueError, TypeError) as exc:
                 print(f"[WARN] File ignorato {path}: {exc}")
                 continue
 
@@ -514,7 +516,7 @@ def write_catalog(repository_roots):
             stream.flush()
             os.fsync(stream.fileno())
 
-        # Verifica il JSON prima di sostituire il catalogo esistente.
+        # Verifica il JSON prima di sostituire il catalogo.
         with temp_path.open("r", encoding="utf-8") as stream:
             checked = json.load(stream)
 
