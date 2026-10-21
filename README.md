@@ -43,7 +43,7 @@ Research documents. Formal arguments. Supporting materials. Revisions.
 
 The public archive is the documentary record of the Foundation's work.
 
-OPEN THE ARCHIVE →
+[OPEN THE ARCHIVE →](<https://auf2026.github.io/FAURE-FOUNDATION/?utm_source=chatgpt.com#archive>)
 
 A STANDARD OF EXAMINATION
 
@@ -110,7 +110,7 @@ Documenti di ricerca. Argomentazioni formali. Materiali di supporto. Revisioni.
 
 L'archivio pubblico costituisce la documentazione del lavoro della Fondazione.
 
-ACCEDI ALL'ARCHIVIO →
+[ACCEDI ALL’ARCHIVIO →](<https://auf2026.github.io/FAURE-FOUNDATION/?utm_source=chatgpt.com#archive>)
 
 UNO STANDARD DI ESAME
 
