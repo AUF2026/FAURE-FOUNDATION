@@ -2710,6 +2710,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   
+
 /* =========================================================
    ARCHIVIO — CATALOGO, CATEGORIE, RICERCA E FILTRI
    ========================================================= */
@@ -2746,10 +2747,14 @@ async function loadScientificCatalog() {
   paperList.setAttribute("aria-busy", "true");
 
   try {
-    const response = await fetch(
-      "./documents/data/documents.json",
-      { cache: "no-store" }
+    const catalogURL = new URL(
+      "documents/data/documents.json",
+      document.baseURI
     );
+
+    const response = await fetch(catalogURL.href, {
+      cache: "no-store"
+    });
 
     if (!response.ok) {
       throw new Error(`Catalogo: HTTP ${response.status}`);
@@ -2770,50 +2775,140 @@ async function loadScientificCatalog() {
 
     const uncategorized = [];
     let loadedCount = 0;
+    let skippedCount = 0;
 
     for (const doc of catalog.documents) {
-      if (!doc || !doc.title || !doc.sourceUrl) continue;
+      if (!doc || typeof doc !== "object") {
+        skippedCount++;
+        continue;
+      }
 
-      const categoryId = String(doc.category || "").toLowerCase();
+      // Accetta i nomi dei campi URL usati dai cataloghi GitHub.
+      const sourceUrl =
+        doc.sourceUrl ||
+        doc.download_url ||
+        doc.downloadUrl ||
+        doc.raw_url ||
+        doc.rawUrl ||
+        doc.file_url ||
+        doc.fileUrl ||
+        doc.url ||
+        doc.href;
+
+      if (typeof sourceUrl !== "string" || !sourceUrl.trim()) {
+        console.warn("Documento senza URL:", doc);
+        skippedCount++;
+        continue;
+      }
+
+      let parsedURL;
+
+      try {
+        parsedURL = new URL(sourceUrl, document.baseURI);
+
+        if (
+          parsedURL.protocol !== "https:" &&
+          parsedURL.protocol !== "http:"
+        ) {
+          skippedCount++;
+          continue;
+        }
+      } catch (error) {
+        console.warn("URL documento non valido:", sourceUrl, error);
+        skippedCount++;
+        continue;
+      }
+
+      // Converte i link GitHub /blob/ nel percorso del file raw.
+      // Il viewer PDF.js potrà così ricevere un URL del file,
+      // anziché una pagina HTML della repository.
+      if (
+        parsedURL.hostname === "github.com" &&
+        parsedURL.pathname.includes("/blob/")
+      ) {
+        const match = parsedURL.pathname.match(
+          /^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/
+        );
+
+        if (match) {
+          const [, owner, repository, branch, path] = match;
+
+          parsedURL = new URL(
+            "https://raw.githubusercontent.com/" +
+            owner + "/" +
+            repository + "/" +
+            branch + "/" +
+            path
+          );
+
+          parsedURL.search = new URL(sourceUrl, document.baseURI).search;
+        }
+      }
+
+      const directURL = parsedURL.href;
+
+      const documentTitle = String(
+        doc.title ||
+        doc.filename ||
+        doc.file ||
+        doc.name ||
+        doc.id ||
+        "Documento senza titolo"
+      );
+
+      const categoryId = String(
+        doc.category || ""
+      ).trim().toLowerCase();
+
       const categoryLabel =
         doc.categoryLabel ||
         archiveCategoryLabels[categoryId] ||
         "Altri documenti";
 
       const row = document.createElement("a");
+
       row.className = "paper-row";
-      row.href = doc.sourceUrl;
+      row.href = directURL;
       row.target = "_blank";
       row.rel = "noopener noreferrer";
 
-      // Conserva la categoria reale del catalogo.
+      // Metadati utilizzati dalla ricerca e dal viewer esistente.
       row.dataset.type = categoryId;
       row.dataset.category = categoryId;
+      row.dataset.sourceUrl = directURL;
+      row.dataset.filename = String(
+        doc.filename || doc.file || doc.name || ""
+      );
 
       row.dataset.search = [
         doc.id,
-        doc.title,
+        documentTitle,
         doc.filename,
         doc.file,
+        doc.name,
         doc.type,
+        categoryId,
         categoryLabel,
         doc.repository,
         doc.repositoryUrl,
         doc.extension,
+        doc.path,
         doc.identifiers?.doi,
         doc.identifiers?.hal,
         doc.identifiers?.orcid
       ].filter(Boolean).join(" ");
 
       const title = document.createElement("strong");
-      title.textContent = doc.title;
+      title.textContent = documentTitle;
 
       const details = document.createElement("span");
       details.className = "paper-status";
       details.textContent = [
         categoryLabel,
         doc.repository || "Repository",
-        doc.extension || "file"
+        doc.extension || (
+          directURL.split(/[?#]/)[0].split(".").pop() || "file"
+        )
       ].join(" · ");
 
       row.append(title, details);
@@ -2852,10 +2947,203 @@ async function loadScientificCatalog() {
       list.className = "archive-category-documents";
 
       rows.sort((a, b) => {
-        const aTitle = a.querySelector("strong")?.textContent || "";
-        const bTitle = b.querySelector("strong")?.textContent || "";
+        const aTitle =
+          a.querySelector("strong")?.textContent || "";
+        const bTitle =
+          b.querySelector("strong")?.textContent || "";
+
         return aTitle.localeCompare(bTitle, "it");
       });
+
+      rows.forEach(row => list.appendChild(row));
+
+      section.append(heading, list);
+      fragment.appendChild(section);
+    }
+
+    for (const category of ARCHIVE_CATEGORIES) {
+      appendGroup(
+        category.id,
+        category.label,
+        groups.get(category.id)
+      );
+    }
+
+    appendGroup(
+      "other",
+      "Altri documenti",
+      uncategorized
+    );
+
+    paperList.replaceChildren(fragment);
+    paperList.setAttribute("aria-busy", "false");
+
+    if (status) {
+      status.textContent =
+        `${loadedCount} documenti caricati · ` +
+        `${catalog.sources?.length || 0} fonti` +
+        (skippedCount ? ` · ${skippedCount} record ignorati` : "");
+    }
+
+    if (sourceStatus) {
+      sourceStatus.textContent = Array.isArray(catalog.sources)
+        ? catalog.sources.join(" · ")
+        : "";
+    }
+
+    filterPapers();
+
+  } catch (error) {
+    console.error("Errore catalogo scientifico:", error);
+
+    paperList.setAttribute("aria-busy", "false");
+
+    if (status) {
+      status.textContent = `Errore: ${error.message}`;
+    }
+
+    if (sourceStatus) {
+      sourceStatus.textContent = "";
+    }
+
+    paperList.replaceChildren();
+
+    const message = document.createElement("p");
+    message.className = "search-empty";
+    message.textContent =
+      "Impossibile caricare il catalogo. " +
+      "Controllare documents/data/documents.json e la rete.";
+
+    paperList.appendChild(message);
+  }
+}
+
+function filterPapers() {
+  if (!paperList || !paperSearch || !paperFilter) return;
+
+  const query = paperSearch.value
+    .trim()
+    .toLocaleLowerCase("it");
+
+  const selectedType = paperFilter.value;
+  let visibleCount = 0;
+
+  // Recupera le righe dopo che il catalogo è stato caricato.
+  const rows = paperList.querySelectorAll(".paper-row");
+
+  rows.forEach(row => {
+    const searchableText = [
+      row.textContent,
+      row.dataset.search,
+      row.dataset.category
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase("it");
+
+    const matchesQuery =
+      !query || searchableText.includes(query);
+
+    const matchesCategory =
+      selectedType === "all" ||
+      row.dataset.category === selectedType;
+
+    row.hidden = !(matchesQuery && matchesCategory);
+
+    if (!row.hidden) visibleCount++;
+  });
+
+  // Nasconde le categorie senza risultati visibili.
+  paperList.querySelectorAll(".archive-category").forEach(section => {
+    const visibleRows = section.querySelectorAll(
+      ".paper-row:not([hidden])"
+    );
+
+    section.hidden = visibleRows.length === 0;
+
+    const count = section.querySelector(
+      ".archive-category-count"
+    );
+
+    if (count) {
+      count.textContent = String(visibleRows.length);
+    }
+  });
+
+  if (searchEmpty) {
+    searchEmpty.hidden = visibleCount !== 0;
+  }
+}
+
+if (paperSearch && paperFilter && paperList) {
+  paperSearch.addEventListener("input", filterPapers);
+  paperFilter.addEventListener("change", filterPapers);
+
+  /*
+   * Mantiene il catalogo nella pagina e apre il documento
+   * nel viewer già presente, quando la funzione è disponibile.
+   * Il fallback conserva il link diretto se il viewer non esiste.
+   */
+  paperList.addEventListener("click", event => {
+    const row = event.target.closest(".paper-row");
+
+    if (!row || !paperList.contains(row)) return;
+
+    if (
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    ) {
+      return;
+    }
+
+    const sourceUrl = row.dataset.sourceUrl || row.href;
+
+    if (typeof window.openArchiveDocument === "function") {
+      event.preventDefault();
+
+      window.openArchiveDocument({
+        title: row.querySelector("strong")?.textContent || "Documento",
+        name: row.dataset.filename ||
+          row.querySelector("strong")?.textContent ||
+          "Documento",
+        filename: row.dataset.filename || "",
+        sourceUrl
+      });
+    }
+  });
+
+  loadScientificCatalog();
+}
+
+/* =========================================================
+   LINK PDF: PROTEZIONE DEI SEGNAPOSTO
+   ========================================================= */
+
+document.querySelectorAll('a[data-pdf="true"]').forEach(link => {
+  link.addEventListener("click", event => {
+    const href = link.getAttribute("href") || "";
+
+    if (
+      href.startsWith("#document-placeholder-") ||
+      href === "#" ||
+      !href
+    ) {
+      event.preventDefault();
+
+      const status = link
+        .closest(".paper-row")
+        ?.querySelector(".paper-status");
+
+      if (status) {
+        status.textContent = "DOCUMENTO NON ANCORA DISPONIBILE";
+        status.setAttribute("role", "status");
+      }
+    }
+  });
+});
 
       rows.forEach(row => list.appendChild(row));
       section.append(heading, list);
