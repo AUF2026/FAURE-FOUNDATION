@@ -5,15 +5,17 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
-
-# Destinazione del catalogo aggregato
 DOCS = ROOT / "documents"
 OUTPUT = DOCS / "data" / "documents.json"
 
-# Repository da cui recuperare i documenti
+HASH_CHUNK_SIZE = 1024 * 1024
+PROGRESS_EVERY = 100
+TEMP_PREFIX = "auf2026-catalog-"
+
 SOURCE_REPOSITORIES = [
     {
         "name": "FAURE-FOUNDATION",
@@ -27,80 +29,72 @@ SOURCE_REPOSITORIES = [
     },
 ]
 
-# Elaborazione a piccoli blocchi per limitare la RAM
-HASH_CHUNK_SIZE = 1024 * 1024  # 1 MiB
-PROGRESS_EVERY = 100
-
-# Directory temporanea per i repository scaricati
-TEMP_PREFIX = "auf2026-catalog-"
-
 CATEGORIES = {
-    "certifications": {
-        "label": "CERTIFICAZIONI",
-        "type": "CERTIFICATION",
-    },
-    "refutations": {
-        "label": "CONFUTAZIONI",
-        "type": "REFUTATION",
-    },
-    "validations": {
-        "label": "VALIDAZIONI",
-        "type": "VALIDATION",
-    },
-    "manuscripts": {
-        "label": "MANOSCRITTI",
-        "type": "MANUSCRIPT",
-    },
-    "theorems": {
-        "label": "TEOREMI",
-        "type": "THEOREM",
-    },
-    "proofs": {
-        "label": "DIMOSTRAZIONI",
-        "type": "PROOF",
-    },
-    "data": {
-        "label": "DATI E VERIFICHE",
-        "type": "DATA",
-    },
-    "protocols": {
-        "label": "PROTOCOLLI",
-        "type": "PROTOCOL",
-    },
-    "bibliography": {
-        "label": "BIBLIOGRAFIA",
-        "type": "BIBLIOGRAPHY",
-    },
-    "datasets": {
-        "label": "DATASET",
-        "type": "DATASET",
-    },
-    "code": {
-        "label": "CODICE SORGENTE",
-        "type": "CODE",
-    },
-    "docs": {
-        "label": "DOCUMENTAZIONE",
-        "type": "DOCUMENTATION",
-    },
-    "pages": {
-        "label": "PAGINE",
-        "type": "PAGE",
-    },
+    "certifications": ("CERTIFICAZIONI", "CERTIFICATION"),
+    "refutations": ("CONFUTAZIONI", "REFUTATION"),
+    "validations": ("VALIDAZIONI", "VALIDATION"),
+    "manuscripts": ("MANOSCRITTI", "MANUSCRIPT"),
+    "theorems": ("TEOREMI", "THEOREM"),
+    "proofs": ("DIMOSTRAZIONI", "PROOF"),
+    "data": ("DATI E VERIFICHE", "DATA"),
+    "protocols": ("PROTOCOLLI", "PROTOCOL"),
+    "bibliography": ("BIBLIOGRAFIA", "BIBLIOGRAPHY"),
+    "datasets": ("DATASET", "DATASET"),
+    "code": ("CODICE SORGENTE", "CODE"),
+    "docs": ("DOCUMENTAZIONE", "DOCUMENTATION"),
+    "pages": ("PAGINE", "PAGE"),
 }
 
 EXCLUDED_DIRS = {
-    ".git",
-    ".github",
-    "__pycache__",
-    "node_modules",
-    ".venv",
-    "venv",
+    ".git", ".github", "__pycache__", "node_modules",
+    ".venv", "venv", ".next", ".nuxt", "dist",
+    "build", "coverage", ".idea", ".vscode",
 }
 
 EXCLUDED_FILES = {
-    ".DS_Store",
-    "Thumbs.db",
+    ".DS_Store", "Thumbs.db", "desktop.ini",
+}
+
+# File documentali, scientifici, testuali e sorgente.
+# Aggiungi qui eventuali estensioni specifiche del progetto.
+ALLOWED_EXTENSIONS = {
+    ".pdf", ".md", ".markdown", ".txt", ".rst",
+    ".html", ".htm", ".tex", ".bib", ".rtf",
+    ".doc", ".docx", ".odt",
+    ".json", ".jsonld", ".xml", ".yaml", ".yml",
+    ".csv", ".tsv", ".xlsx", ".xls", ".ods",
+    ".ipynb", ".py", ".pyi", ".r", ".jl",
+    ".lean", ".thy", ".v", ".vhd", ".sv",
+    ".c", ".h", ".cpp", ".hpp", ".rs", ".go",
+    ".java", ".js", ".jsx", ".ts", ".tsx",
+    ".css", ".scss", ".sh", ".bash", ".sql",
+    ".toml", ".ini", ".cfg", ".conf",
+    ".log", ".diff", ".patch", ".proto",
+    ".graphql", ".gql", ".m", ".mm",
+}
+
+EXTENSION_CATEGORY = {
+    ".pdf": "docs",
+    ".md": "docs",
+    ".markdown": "docs",
+    ".rst": "docs",
+    ".html": "pages",
+    ".htm": "pages",
+    ".tex": "manuscripts",
+    ".bib": "bibliography",
+    ".csv": "datasets",
+    ".tsv": "datasets",
+    ".xlsx": "datasets",
+    ".xls": "datasets",
+    ".ods": "datasets",
+    ".ipynb": "code",
+    ".py": "code",
+    ".pyi": "code",
+    ".r": "code",
+    ".jl": "code",
+    ".lean": "proofs",
+    ".thy": "proofs",
+    ".v": "proofs",
 }
 
 METADATA_SUFFIX = ".json"
@@ -126,134 +120,162 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def load_metadata(document):
-    metadata_path = document.with_suffix(METADATA_SUFFIX)
+def is_excluded(path):
+    if path.name in EXCLUDED_FILES:
+        return True
 
-    if metadata_path == OUTPUT or not metadata_path.is_file():
-        return {}
+    if any(part.casefold() in EXCLUDED_DIRS for part in path.parts):
+        return True
 
-    try:
-        with metadata_path.open("r", encoding="utf-8") as stream:
-            metadata = json.load(stream)
-    except (json.JSONDecodeError, OSError) as exc:
-        raise ValueError(
-            f"Metadati non validi: {metadata_path.relative_to(ROOT)}"
-        ) from exc
+    if path.is_symlink():
+        return True
 
-    if not isinstance(metadata, dict):
-        raise ValueError(
-            f"I metadati devono essere un oggetto JSON: "
-            f"{metadata_path.relative_to(ROOT)}"
-        )
+    # Non indicizzare il catalogo generato o i file temporanei.
+    if path.name == "documents.json" and "data" in path.parts:
+        return True
 
-    return metadata
+    if path.name.startswith(".documents-") and path.suffix == ".tmp":
+        return True
+
+    if path.suffix.lower() not in ALLOWED_EXTENSIONS:
+        return True
+
+    return False
 
 
 def is_metadata_sidecar(path):
-    """
-    Un file JSON viene considerato metadato soltanto se esiste
-    un altro file con lo stesso nome base nella stessa directory.
-
-    Esempio:
-        paper.pdf + paper.json -> paper.json è un sidecar.
-        records.json senza records.pdf -> records.json è un documento.
-    """
+    """Esclude x.json solo se accanto esiste x.pdf, x.md, ecc."""
     if path.suffix.lower() != METADATA_SUFFIX:
         return False
-
-    if path.resolve() == OUTPUT.resolve():
-        return True
 
     try:
         for sibling in path.parent.iterdir():
             if sibling == path or not sibling.is_file():
                 continue
 
-            if sibling.stem.casefold() == path.stem.casefold():
+            if sibling.stem.casefold() != path.stem.casefold():
+                continue
+
+            if sibling.suffix.lower() != METADATA_SUFFIX:
                 return True
+
     except OSError as exc:
-        raise OSError(
-            f"Impossibile esaminare {path.parent}"
-        ) from exc
+        print(f"[WARN] Metadati non controllabili: {path}: {exc}")
 
     return False
 
 
-def is_excluded(path):
-    if path.name in EXCLUDED_FILES:
-        return True
+def load_metadata(document):
+    metadata_path = document.with_suffix(METADATA_SUFFIX)
 
-    if any(part in EXCLUDED_DIRS for part in path.parts):
-        return True
+    if not metadata_path.is_file():
+        return {}
 
     try:
-        if path.resolve() == OUTPUT.resolve():
-            return True
-    except OSError:
-        return True
+        with metadata_path.open("r", encoding="utf-8") as stream:
+            metadata = json.load(stream)
 
-    if is_metadata_sidecar(path):
-        return True
+        if isinstance(metadata, dict):
+            return metadata
 
-    return False
+        print(f"[WARN] Metadati non oggetto JSON: {metadata_path}")
+
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        print(f"[WARN] Metadati ignorati: {metadata_path}: {exc}")
+
+    return {}
 
 
-def collect_files():
+def classify_document(relative_path):
+    parts = Path(relative_path).parts
+    extension = Path(relative_path).suffix.lower()
+
+    # Una categoria riconosciuta nel percorso ha la precedenza.
+    for part in parts[:-1]:
+        key = part.casefold()
+        if key in CATEGORIES:
+            return key
+
+    # Se il file non è in una categoria nota, usa l'estensione.
+    return EXTENSION_CATEGORY.get(extension, "docs")
+
+
+def collect_files(repository_root):
     """
-    Conserva in memoria soltanto i percorsi, non il contenuto
-    dei documenti. La lista viene ordinata in modo deterministico.
+    Scansiona tutta la repository, non soltanto documents/.
+    Conserva i percorsi, senza caricare i contenuti in memoria.
     """
     files = []
 
-    for folder in CATEGORIES:
-        directory = DOCS / folder
+    for current_root, dirs, filenames in os.walk(
+        repository_root,
+        topdown=True,
+        followlinks=False,
+    ):
+        current = Path(current_root)
 
-        if not directory.is_dir():
-            print(f"[INFO] Categoria assente: {folder}")
-            continue
-
-        for path in directory.rglob("*"):
-            if not path.is_file():
-                continue
-
-            if is_excluded(path):
-                continue
-
-            files.append((folder, path))
-
-    files.sort(
-        key=lambda item: (
-            CATEGORIES[item[0]]["label"].casefold(),
-            item[1].relative_to(ROOT).as_posix().casefold(),
+        dirs[:] = sorted(
+            [
+                name for name in dirs
+                if name.casefold() not in EXCLUDED_DIRS
+                and not (current / name).is_symlink()
+            ],
+            key=str.casefold,
         )
-    )
 
+        for filename in filenames:
+            path = current / filename
+
+            if not path.is_file() or is_excluded(path):
+                continue
+
+            if is_metadata_sidecar(path):
+                continue
+
+            files.append(path)
+
+    files.sort(key=lambda p: p.as_posix().casefold())
     return files
 
 
-def build_document(folder, path):
-    config = CATEGORIES[folder]
-    relative_path = path.relative_to(ROOT).as_posix()
+def build_document(repository, repository_root, path):
+    relative_path = path.relative_to(repository_root).as_posix()
+    category = classify_document(relative_path)
+    label, document_type = CATEGORIES[category]
+
     metadata = load_metadata(path)
     stat = path.stat()
 
-    # L'ID dipende dal percorso relativo, quindi file omonimi
-    # in sottocartelle diverse non collidono.
+    identity_input = (
+        repository["name"] + "/" + relative_path
+    )
     identity = hashlib.sha256(
-        relative_path.encode("utf-8")
-    ).hexdigest()[:16]
+        identity_input.encode("utf-8")
+    ).hexdigest()[:20]
 
     return {
-        "id": f"{folder}-{identity}",
-        "title": metadata.get("title", readable_title(path.name)),
-        "category": folder,
-        "categoryLabel": config["label"],
-        "type": config["type"],
+        "id": f"{category}-{identity}",
+        "title": metadata.get(
+            "title", readable_title(path.name)
+        ),
+        "category": category,
+        "categoryLabel": label,
+        "type": document_type,
         "file": relative_path,
         "filename": path.name,
         "extension": path.suffix.lower().lstrip("."),
         "sizeBytes": stat.st_size,
         "sha256": sha256_file(path),
+        "repository": repository["name"],
+        "repositoryUrl": (
+            f"https://github.com/AUF2026/"
+            f"{repository['name']}"
+        ),
+        "sourceUrl": (
+            f"https://github.com/AUF2026/"
+            f"{repository['name']}/blob/"
+            f"{repository['branch']}/{relative_path}"
+        ),
         "verification": {
             "status": metadata.get(
                 "verificationStatus", "NOT_RECORDED"
@@ -272,11 +294,12 @@ def build_document(folder, path):
     }
 
 
-def write_catalog(files):
+def write_catalog(repository_roots):
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
+    total_files = sum(len(files) for _, _, files in repository_roots)
+    processed = 0
     temp_path = None
-    count = 0
 
     try:
         with tempfile.NamedTemporaryFile(
@@ -297,48 +320,64 @@ def write_catalog(files):
             )
             stream.write(
                 '  "generatedAt": '
-                + json.dumps(
-                    datetime.now(timezone.utc).isoformat()
-                )
+                + json.dumps(datetime.now(timezone.utc).isoformat())
                 + ",\n"
             )
-            stream.write(f'  "count": {len(files)},\n')
+            stream.write(f'  "count": {total_files},\n')
             stream.write(
                 '  "categories": '
+                + json.dumps(list(CATEGORIES), ensure_ascii=False)
+                + ",\n"
+            )
+            stream.write(
+                '  "sources": '
                 + json.dumps(
-                    list(CATEGORIES.keys()), ensure_ascii=False
+                    [repo["name"] for repo, _, _ in repository_roots],
+                    ensure_ascii=False,
                 )
                 + ",\n"
             )
             stream.write('  "documents": [\n')
 
-            for index, (folder, path) in enumerate(files):
-                document = build_document(folder, path)
+            first = True
 
-                if index:
-                    stream.write(",\n")
+            for repository, repository_root, files in repository_roots:
+                for path in files:
+                    try:
+                        document = build_document(
+                            repository, repository_root, path
+                        )
 
-                # Scrive un solo documento alla volta.
-                stream.write(
-                    "    "
-                    + json.dumps(
-                        document,
-                        ensure_ascii=False,
-                        separators=(",", ":"),
-                    )
-                )
+                        if not first:
+                            stream.write(",\n")
 
-                count += 1
+                        stream.write(
+                            "    " + json.dumps(
+                                document,
+                                ensure_ascii=False,
+                                separators=(",", ":"),
+                            )
+                        )
+                        first = False
+                        processed += 1
 
-                if count % PROGRESS_EVERY == 0:
-                    print(f"[PROGRESS] {count}/{len(files)}")
+                        if processed % PROGRESS_EVERY == 0:
+                            print(
+                                f"[PROGRESS] "
+                                f"{processed}/{total_files}"
+                            )
+
+                    except (OSError, ValueError, TypeError) as exc:
+                        # Un singolo file problematico non interrompe
+                        # l'intero catalogo.
+                        print(f"[WARN] File ignorato: {path}: {exc}")
 
             stream.write("\n  ]\n")
             stream.write("}\n")
             stream.flush()
             os.fsync(stream.fileno())
 
-        # Verifica il JSON completo prima di sostituire il catalogo.
+        # Verifica la struttura prima di sostituire il catalogo.
         with temp_path.open("r", encoding="utf-8") as stream:
             json.load(stream)
 
@@ -352,24 +391,73 @@ def write_catalog(files):
             except OSError:
                 pass
 
-    return count
+    return processed
+
+
+def clone_repository(repository, destination):
+    print(f"[CLONE] {repository['name']}")
+
+    command = [
+        "git",
+        "clone",
+        "--depth", "1",
+        "--single-branch",
+        "--branch", repository["branch"],
+        repository["url"],
+        str(destination),
+    ]
+
+    subprocess.run(
+        command,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=None,
+        timeout=600,
+    )
 
 
 def main():
-    print("[START] Scansione documenti...")
-    files = collect_files()
+    print("[START] Catalogo aggregato AUF2026")
+    print(f"[INFO] Repository sorgente: {len(SOURCE_REPOSITORIES)}")
 
-    print(f"[INFO] File da indicizzare: {len(files)}")
-    print("[START] Generazione catalogo a blocchi...")
+    # Ogni clone e i suoi file temporanei vengono rimossi
+    # automaticamente al termine, anche se si verifica un errore.
+    with tempfile.TemporaryDirectory(prefix=TEMP_PREFIX) as temp_dir:
+        temp_root = Path(temp_dir)
+        repository_roots = []
 
-    count = write_catalog(files)
+        for index, repository in enumerate(SOURCE_REPOSITORIES):
+            clone_path = temp_root / f"source-{index}"
 
-    print(f"[OK] FAURE FOUNDATION: {count} file indicizzati.")
+            try:
+                clone_repository(repository, clone_path)
+            except (OSError, subprocess.SubprocessError) as exc:
+                raise RuntimeError(
+                    f"Impossibile recuperare la repository "
+                    f"{repository['name']}. Il catalogo precedente "
+                    f"è stato preservato. Dettagli: {exc}"
+                ) from exc
+
+            print(f"[SCAN] {repository['name']}")
+            files = collect_files(clone_path)
+            print(f"[INFO] {repository['name']}: {len(files)} file")
+
+            repository_roots.append(
+                (repository, clone_path, files)
+            )
+
+        total = sum(len(files) for _, _, files in repository_roots)
+        print(f"[INFO] Totale file candidati: {total}")
+        print("[START] Generazione incrementale del JSON")
+
+        count = write_catalog(repository_roots)
+
+    print(f"[OK] File indicizzati: {count}")
     print(f"[OK] Catalogo: {OUTPUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
     try:
         main()
-    except (OSError, ValueError, TypeError) as exc:
+    except (OSError, ValueError, TypeError, RuntimeError) as exc:
         raise SystemExit(f"[ERRORE] {exc}") from exc
