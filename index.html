@@ -2775,14 +2775,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ARCHIVIO: RICERCA E FILTRI */
+  
+  /* ARCHIVIO: RICERCA E FILTRI — FIX ASINCRONO */
 
   if (paperSearch && paperFilter && paperList) {
-    const papers = Array.from(
-      paperList.querySelectorAll(".paper-row")
-    );
 
     function filterPapers() {
+      // IMPORTANTE: recupera le righe aggiornate a ogni filtro.
+      // Il catalogo viene popolato in modo asincrono.
+      const papers = Array.from(
+        paperList.querySelectorAll(".paper-row")
+      );
+
       const query = paperSearch.value
         .trim()
         .toLocaleLowerCase("it");
@@ -2791,8 +2795,9 @@ document.addEventListener("DOMContentLoaded", () => {
       let visibleCount = 0;
 
       papers.forEach((paper) => {
-        const title = paper.textContent
-          .toLocaleLowerCase("it");
+        const text = (
+          paper.textContent || ""
+        ).toLocaleLowerCase("it");
 
         const extraSearch = (
           paper.dataset.search || ""
@@ -2802,29 +2807,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const matchesText =
           !query ||
-          title.includes(query) ||
+          text.includes(query) ||
           extraSearch.includes(query);
 
         const matchesType =
           selectedType === "all" ||
           type === selectedType;
 
-        const isVisible = matchesText && matchesType;
+        const visible = matchesText && matchesType;
 
-        paper.hidden = !isVisible;
+        paper.hidden = !visible;
 
-        if (isVisible) {
+        if (visible) {
           visibleCount++;
         }
       });
 
       if (searchEmpty) {
-        searchEmpty.hidden = visibleCount !== 0;
+        searchEmpty.hidden = visibleCount > 0;
       }
     }
 
     paperSearch.addEventListener("input", filterPapers);
     paperFilter.addEventListener("change", filterPapers);
+
+    // Riesegui i filtri quando il caricamento asincrono
+    // inserisce o sostituisce le righe del catalogo.
+    const catalogObserver = new MutationObserver(() => {
+      filterPapers();
+    });
+
+    catalogObserver.observe(paperList, {
+      childList: true,
+      subtree: true
+    });
 
     filterPapers();
   }
