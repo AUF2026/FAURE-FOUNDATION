@@ -3292,76 +3292,89 @@ function escapeHtml(s) {
     return;
   }
 
-  // Collega qui l'URL DIRETTO già presente nell'oggetto documento.
-  // Non usare URL GitHub /tree/ o /blob/.
-  function getPdfUrl(doc) {
-    return doc.pdf_url
-      || doc.download_url
-      || doc.file_url
-      || doc.url
-      || null;
-  }
-
   
-function openArchivePdf(doc) {
-  const url = getPdfUrl(doc);
+  // Restituisce l'URL diretto del documento, non la pagina HTML GitHub.
+  function getPdfUrl(doc) {
+    const url =
+      doc.pdf_url ||
+      doc.download_url ||
+      doc.file_url ||
+      doc.url ||
+      null;
 
-  if (!url) {
-    console.error("PDF URL missing:", doc);
-    return;
+    if (!url) return null;
+
+    let parsed;
+
+    try {
+      parsed = new URL(url, window.location.href);
+    } catch (error) {
+      console.error("Invalid document URL:", url, error);
+      return null;
+    }
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      console.error("Unsupported document URL:", url);
+      return null;
+    }
+
+    // Converte GitHub /blob/ in un URL diretto al file.
+    if (parsed.hostname === "github.com") {
+      const match = parsed.pathname.match(
+        /^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/
+      );
+
+      if (match) {
+        const [, owner, repo, branch, path] = match;
+
+        return (
+          "https://raw.githubusercontent.com/" +
+          `${owner}/${repo}/${branch}/${path}` +
+          parsed.search
+        );
+      }
+
+      // Non aprire pagine HTML della repository.
+      if (/\/(tree|blob)\//.test(parsed.pathname)) {
+        console.error("GitHub repository page is not a direct file URL:", parsed.href);
+        return null;
+      }
+    }
+
+    return parsed.href;
   }
 
-  let parsed;
+  function openArchivePdf(doc) {
+    const url = getPdfUrl(doc);
 
-  try {
-    parsed = new URL(url, window.location.href);
-  } catch (error) {
-    console.error("Invalid document URL:", url, error);
-    return;
+    if (!url) {
+      console.error("PDF URL missing or invalid:", doc);
+      return;
+    }
+
+    const viewer = document.getElementById("archive-pdf-viewer");
+    const frame = document.getElementById("archive-pdf-frame");
+    const title = document.getElementById("archive-pdf-title");
+
+    if (!viewer || !frame) {
+      console.error("Archive PDF viewer elements missing.");
+      return;
+    }
+
+    if (title) {
+      title.textContent =
+        doc.title || doc.name || "Document reader";
+    }
+
+    // Mostra il lettore nella pagina corrente.
+    frame.src = url;
+    viewer.hidden = false;
+
+    viewer.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
   }
-
-  if (!["http:", "https:"].includes(parsed.protocol)) {
-    console.error("Unsupported document URL:", url);
-    return;
-  }
-
-  // Non aprire pagine HTML della repository GitHub.
-  if (
-    parsed.hostname === "github.com" &&
-    /\/(blob|tree)\//.test(parsed.pathname)
-  ) {
-    console.error(
-      "Serve l'URL diretto del PDF, non una pagina GitHub:",
-      parsed.href
-    );
-    return;
-  }
-
-  // Recupera gli elementi del lettore.
-  const viewer = document.getElementById("archive-pdf-viewer");
-  const frame = document.getElementById("archive-pdf-frame");
-  const title = document.getElementById("archive-pdf-title");
-
-  if (!viewer || !frame) {
-    console.error("Archive PDF viewer elements missing.");
-    return;
-  }
-
-  if (title) {
-    title.textContent =
-      doc.title || doc.name || "Document reader";
-  }
-
-  // Apre il documento nella stessa pagina.
-  frame.src = parsed.href;
-  viewer.hidden = false;
-
-  viewer.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-
 
   function closeArchivePdf() {
     viewer.hidden = true;
