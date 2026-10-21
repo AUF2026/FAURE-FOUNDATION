@@ -1887,6 +1887,96 @@ select:focus-visible {
     transition: none;
   }
 }
+
+/* =========================================================
+   FAURE FOUNDATION · REAL PAGE EFFECTS
+   ========================================================= */
+
+/* Transizioni leggere sulle sezioni reali */
+#method .principle,
+#archive .paper-row,
+#archive .archive-controls,
+#standards .standards-list li,
+.round-link,
+.paper-link,
+.text-link {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    transform 220ms ease;
+}
+
+/* Principi: piccolo sollevamento, senza rotazioni */
+#method .principle {
+  position: relative;
+}
+
+#method .principle:hover {
+  transform: translateY(-2px);
+  border-color: var(--red);
+}
+
+/* Archivio: evidenziazione appena percettibile */
+#archive .paper-row {
+  background: transparent;
+}
+
+#archive .paper-row:hover {
+  background: color-mix(
+    in srgb,
+    var(--ink) 2.5%,
+    transparent
+  );
+}
+
+/* Link: risposta visiva sobria */
+.round-link:hover,
+.paper-link:hover,
+.text-link:hover {
+  transform: translateY(-1px);
+}
+
+/* Reveal progressivo delle sezioni effettive */
+.auf-reveal {
+  animation: auf-soft-reveal 650ms ease-out both;
+}
+
+@keyframes auf-soft-reveal {
+  from {
+    opacity: 0.65;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accessibilità */
+@media (prefers-reduced-motion: reduce) {
+  #method .principle,
+  #archive .paper-row,
+  #archive .archive-controls,
+  #standards .standards-list li,
+  .round-link,
+  .paper-link,
+  .text-link {
+    transition: none;
+  }
+
+  #method .principle:hover,
+  .round-link:hover,
+  .paper-link:hover,
+  .text-link:hover {
+    transform: none;
+  }
+
+  .auf-reveal {
+    animation: none;
+  }
+}
 </style>
 </head>
 
@@ -2680,195 +2770,98 @@ function escapeHtml(s) {
 }
 </script>
 
+
 <script>
-/* ============================================================
-   FAURE FOUNDATION · INTERACTION LAYER
-   Effetti sobri, accessibili e leggeri
-   ============================================================ */
+/* =========================================================
+   FAURE FOUNDATION · SUBTLE PAGE INTERACTIONS
+   Selettori adattati all'HTML effettivo
+   ========================================================= */
 
 (() => {
   "use strict";
 
-  const root = document.documentElement;
-
-  // Rispetta le preferenze di accessibilità del visitatore.
-  const reducedMotion = window.matchMedia(
+  const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
-  /* ==========================================================
-     01 · REVEAL DELLE SEZIONI
-     ========================================================== */
+  const selectors = [
+    "#method .principle",
+    "#archive .archive-heading",
+    "#archive .archive-controls",
+    "#archive .paper-row",
+    "#standards .standards-layout",
+    "#standards .standards-list li",
+    ".closing"
+  ];
 
-  const sections = document.querySelectorAll(
-    ".scientific-scope"
-  );
+  const reveal = element => {
+    if (!element || element.dataset.aufReveal === "done") {
+      return;
+    }
 
-  if (reducedMotion || !("IntersectionObserver" in window)) {
-    sections.forEach(section => {
-      section.classList.add("auf-revealed");
-    });
-  } else {
-    const observer = new IntersectionObserver(
+    element.dataset.aufReveal = "done";
+
+    if (reduceMotion) return;
+
+    if (!observer) {
+      element.classList.add("auf-reveal");
+      return;
+    }
+
+    observer.observe(element);
+  };
+
+  let observer = null;
+
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
 
-          entry.target.classList.add("auf-revealed");
-
+          entry.target.classList.add("auf-reveal");
           observer.unobserve(entry.target);
         });
       },
       {
-        threshold: 0.10,
-        rootMargin: "0px 0px -35px 0px"
+        threshold: 0.08,
+        rootMargin: "0px 0px -25px 0px"
       }
     );
-
-    sections.forEach(section => observer.observe(section));
   }
 
-  /* ==========================================================
-     02 · LUCE AMBIENTALE DELLE SCHEDE
-     ========================================================== */
-
-  if (!reducedMotion) {
-    document.querySelectorAll(".scope-card").forEach(card => {
-      card.addEventListener("pointermove", event => {
-        // Evita effetti da mouse sui dispositivi touch.
-        if (event.pointerType === "touch") return;
-
-        const rect = card.getBoundingClientRect();
-
-        card.style.setProperty(
-          "--focus-x",
-          `${event.clientX - rect.left}px`
-        );
-
-        card.style.setProperty(
-          "--focus-y",
-          `${event.clientY - rect.top}px`
-        );
-      }, { passive: true });
-
-      card.addEventListener("pointerleave", () => {
-        card.style.removeProperty("--focus-x");
-        card.style.removeProperty("--focus-y");
-      });
-    });
+  function scanPage() {
+    document.querySelectorAll(selectors.join(",")).forEach(reveal);
   }
 
-  /* ==========================================================
-     03 · FOCUS DEL REGISTRO DEI TEOREMI
-     ========================================================== */
+  scanPage();
 
-  const registry = document.getElementById(
-    "theoremRegistryLinks"
-  );
+  // Osserva anche le schede create dal catalogo JSON.
+  const paperList = document.getElementById("paperList");
 
-  if (registry && !reducedMotion) {
-    registry.addEventListener("pointerenter", event => {
-      if (event.pointerType === "touch") return;
+  if (paperList && "MutationObserver" in window) {
+    const listObserver = new MutationObserver(records => {
+      records.forEach(record => {
+        record.addedNodes.forEach(node => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-      registry.classList.remove("auf-scanning");
-
-      // Riavvia l'animazione soltanto quando necessario.
-      void registry.offsetWidth;
-
-      registry.classList.add("auf-scanning");
-    });
-
-    registry.addEventListener("animationend", event => {
-      if (event.target !== registry) return;
-
-      registry.classList.remove("auf-scanning");
-    });
-  }
-
-  /* ==========================================================
-     04 · FOCUS DEI NODI
-     ========================================================== */
-
-  const nodes = document.querySelectorAll(".node");
-
-  if (!reducedMotion && nodes.length > 1) {
-    nodes.forEach(node => {
-      node.addEventListener("pointerenter", event => {
-        if (event.pointerType === "touch") return;
-
-        nodes.forEach(other => {
-          if (other !== node) {
-            other.classList.add("auf-node-muted");
+          if (node.matches(".paper-row")) {
+            reveal(node);
           }
-        });
-      });
 
-      node.addEventListener("pointerleave", () => {
-        nodes.forEach(other => {
-          other.classList.remove("auf-node-muted");
-        });
-      });
-
-      // Supporto alla navigazione da tastiera.
-      node.addEventListener("focus", () => {
-        nodes.forEach(other => {
-          if (other !== node) {
-            other.classList.add("auf-node-muted");
-          }
-        });
-      });
-
-      node.addEventListener("blur", () => {
-        nodes.forEach(other => {
-          other.classList.remove("auf-node-muted");
+          node.querySelectorAll?.(".paper-row").forEach(reveal);
         });
       });
     });
+
+    listObserver.observe(paperList, {
+      childList: true,
+      subtree: true
+    });
   }
-
-  /* ==========================================================
-     05 · PROFONDITÀ DELLA PAGINA
-     ========================================================== */
-
-  let scrollScheduled = false;
-
-  function updateScrollDepth() {
-    const scrollHeight =
-      document.documentElement.scrollHeight;
-
-    const maxScroll = scrollHeight - window.innerHeight;
-
-    const progress = maxScroll > 0
-      ? Math.min(1, Math.max(0, window.scrollY / maxScroll))
-      : 0;
-
-    root.style.setProperty(
-      "--auf-scroll",
-      progress.toFixed(4)
-    );
-
-    scrollScheduled = false;
-  }
-
-  function onScroll() {
-    if (scrollScheduled) return;
-
-    scrollScheduled = true;
-    window.requestAnimationFrame(updateScrollDepth);
-  }
-
-  window.addEventListener("scroll", onScroll, {
-    passive: true
-  });
-
-  window.addEventListener("resize", onScroll, {
-    passive: true
-  });
-
-  updateScrollDepth();
 
 })();
 </script>
-
 </body>
 </html>
+
