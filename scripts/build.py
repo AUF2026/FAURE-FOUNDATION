@@ -8,6 +8,7 @@ import re
 import subprocess
 import tempfile
 
+
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "documents"
 OUTPUT = DOCS / "data" / "documents.json"
@@ -55,8 +56,6 @@ EXCLUDED_FILES = {
     ".DS_Store", "Thumbs.db", "desktop.ini",
 }
 
-# File documentali, scientifici, testuali e sorgente.
-# Aggiungi qui eventuali estensioni specifiche del progetto.
 ALLOWED_EXTENSIONS = {
     ".pdf", ".md", ".markdown", ".txt", ".rst",
     ".html", ".htm", ".tex", ".bib", ".rtf",
@@ -130,10 +129,14 @@ def is_excluded(path):
     if path.is_symlink():
         return True
 
-    # Non indicizzare il catalogo generato o i file temporanei.
-    if path.name == "documents.json" and "data" in path.parts:
+    # Non indicizzare il catalogo generato.
+    if (
+        path.name == "documents.json"
+        and "data" in path.parts
+    ):
         return True
 
+    # Non indicizzare file temporanei del catalogo.
     if path.name.startswith(".documents-") and path.suffix == ".tmp":
         return True
 
@@ -144,7 +147,7 @@ def is_excluded(path):
 
 
 def is_metadata_sidecar(path):
-    """Esclude x.json solo se accanto esiste x.pdf, x.md, ecc."""
+    """Esclude un JSON se accanto esiste un documento con lo stesso nome."""
     if path.suffix.lower() != METADATA_SUFFIX:
         return False
 
@@ -190,21 +193,18 @@ def classify_document(relative_path):
     parts = Path(relative_path).parts
     extension = Path(relative_path).suffix.lower()
 
-    # Una categoria riconosciuta nel percorso ha la precedenza.
+    # La categoria indicata nel percorso ha la precedenza.
     for part in parts[:-1]:
         key = part.casefold()
+
         if key in CATEGORIES:
             return key
 
-    # Se il file non è in una categoria nota, usa l'estensione.
     return EXTENSION_CATEGORY.get(extension, "docs")
 
 
 def collect_files(repository_root):
-    """
-    Scansiona tutta la repository, non soltanto documents/.
-    Conserva i percorsi, senza caricare i contenuti in memoria.
-    """
+    """Scansiona tutta la repository senza caricare i contenuti in memoria."""
     files = []
 
     for current_root, dirs, filenames in os.walk(
@@ -216,7 +216,8 @@ def collect_files(repository_root):
 
         dirs[:] = sorted(
             [
-                name for name in dirs
+                name
+                for name in dirs
                 if name.casefold() not in EXCLUDED_DIRS
                 and not (current / name).is_symlink()
             ],
@@ -234,7 +235,10 @@ def collect_files(repository_root):
 
             files.append(path)
 
-    files.sort(key=lambda p: p.as_posix().casefold())
+    files.sort(
+        key=lambda path: path.as_posix().casefold()
+    )
+
     return files
 
 
@@ -249,9 +253,18 @@ def build_document(repository, repository_root, path):
     identity_input = (
         repository["name"] + "/" + relative_path
     )
+
     identity = hashlib.sha256(
         identity_input.encode("utf-8")
     ).hexdigest()[:20]
+
+    encoded_path = relative_path
+
+    # Codifica i caratteri speciali per gli URL GitHub.
+    from urllib.parse import quote
+    encoded_path = quote(encoded_path, safe="/")
+
+    repository_url = repository["url"].removesuffix(".git")
 
     return {
         "id": f"{category}-{identity}",
@@ -267,14 +280,10 @@ def build_document(repository, repository_root, path):
         "sizeBytes": stat.st_size,
         "sha256": sha256_file(path),
         "repository": repository["name"],
-        "repositoryUrl": (
-            f"https://github.com/AUF2026/"
-            f"{repository['name']}"
-        ),
+        "repositoryUrl": repository_url,
         "sourceUrl": (
-            f"https://github.com/AUF2026/"
-            f"{repository['name']}/blob/"
-            f"{repository['branch']}/{relative_path}"
+            f"{repository_url}/blob/"
+            f"{repository['branch']}/{encoded_path}"
         ),
         "verification": {
             "status": metadata.get(
@@ -290,14 +299,22 @@ def build_document(repository, repository_root, path):
             "orcid": metadata.get("orcid"),
             "hal": metadata.get("hal"),
         },
-        "externalLinks": metadata.get("externalLinks", []),
+        "externalLinks": (
+            metadata.get("externalLinks", [])
+            if isinstance(metadata.get("externalLinks", []), list)
+            else []
+        ),
     }
 
 
 def write_catalog(repository_roots):
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
-    total_files = sum(len(files) for _, _, files in repository_roots)
+    total_candidates = sum(
+        len(files)
+        for _, _, files in repository_roots
+    )
+
     processed = 0
     temp_path = None
 
@@ -320,67 +337,85 @@ def write_catalog(repository_roots):
             )
             stream.write(
                 '  "generatedAt": '
-                + json.dumps(datetime.now(timezone.utc).isoformat())
+                + json.dumps(
+                    datetime.now(timezone.utc).isoformat()
+                )
                 + ",\n"
             )
-            stream.write(f'  "count": {total_files},\n')
+
+            # Il conteggio viene scritto dopo aver raccolto i documenti.
+            documents = []
+
+            for repository, repository_root, files in repository_roots:
+                for path in files:
+                    try:
+                        document = build_document(
+                            repository,
+                            repository_root,
+                            path,
+                        )
+                        documents.append(document)
+                        processed += 1
+
+                        if processed % PROGRESS_EVERY == 0:
+                            print(
+                                f"[PROGRESS] "
+                                f"{processed}/{total_candidates}"
+                            )
+
+                    except (OSError, ValueError, TypeError) as exc:
+                        # Un errore di lettura non deve produrre
+                        # silenziosamente un catalogo incompleto.
+                        raise RuntimeError(
+                            f"Impossibile indicizzare {path}: {exc}"
+                        ) from exc
+
+            stream.write(f'  "count": {len(documents)},\n')
             stream.write(
                 '  "categories": '
-                + json.dumps(list(CATEGORIES), ensure_ascii=False)
+                + json.dumps(
+                    list(CATEGORIES),
+                    ensure_ascii=False,
+                )
                 + ",\n"
             )
             stream.write(
                 '  "sources": '
                 + json.dumps(
-                    [repo["name"] for repo, _, _ in repository_roots],
+                    [
+                        repo["name"]
+                        for repo, _, _ in repository_roots
+                    ],
                     ensure_ascii=False,
                 )
                 + ",\n"
             )
             stream.write('  "documents": [\n')
 
-            first = True
+            for index, document in enumerate(documents):
+                if index:
+                    stream.write(",\n")
 
-            for repository, repository_root, files in repository_roots:
-                for path in files:
-                    try:
-                        document = build_document(
-                            repository, repository_root, path
-                        )
-
-                        if not first:
-                            stream.write(",\n")
-
-                        stream.write(
-                            "    " + json.dumps(
-                                document,
-                                ensure_ascii=False,
-                                separators=(",", ":"),
-                            )
-                        )
-                        first = False
-                        processed += 1
-
-                        if processed % PROGRESS_EVERY == 0:
-                            print(
-                                f"[PROGRESS] "
-                                f"{processed}/{total_files}"
-                            )
-
-                    except (OSError, ValueError, TypeError) as exc:
-                        # Un singolo file problematico non interrompe
-                        # l'intero catalogo.
-                        print(f"[WARN] File ignorato: {path}: {exc}")
+                stream.write(
+                    "    "
+                    + json.dumps(
+                        document,
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    )
+                )
 
             stream.write("\n  ]\n")
             stream.write("}\n")
             stream.flush()
             os.fsync(stream.fileno())
 
-        # Verifica la struttura prima di sostituire il catalogo.
+        # Controlla che il JSON sia valido prima di pubblicarlo.
         with temp_path.open("r", encoding="utf-8") as stream:
             json.load(stream)
 
+        # Sostituzione atomica: il vecchio catalogo rimane disponibile
+        # fino al completamento della nuova versione.
         os.replace(temp_path, OUTPUT)
         temp_path = None
 
@@ -418,11 +453,14 @@ def clone_repository(repository, destination):
 
 def main():
     print("[START] Catalogo aggregato AUF2026")
-    print(f"[INFO] Repository sorgente: {len(SOURCE_REPOSITORIES)}")
+    print(
+        f"[INFO] Repository sorgente: "
+        f"{len(SOURCE_REPOSITORIES)}"
+    )
 
-    # Ogni clone e i suoi file temporanei vengono rimossi
-    # automaticamente al termine, anche se si verifica un errore.
-    with tempfile.TemporaryDirectory(prefix=TEMP_PREFIX) as temp_dir:
+    with tempfile.TemporaryDirectory(
+        prefix=TEMP_PREFIX
+    ) as temp_dir:
         temp_root = Path(temp_dir)
         repository_roots = []
 
@@ -431,6 +469,7 @@ def main():
 
             try:
                 clone_repository(repository, clone_path)
+
             except (OSError, subprocess.SubprocessError) as exc:
                 raise RuntimeError(
                     f"Impossibile recuperare la repository "
@@ -439,16 +478,25 @@ def main():
                 ) from exc
 
             print(f"[SCAN] {repository['name']}")
+
             files = collect_files(clone_path)
-            print(f"[INFO] {repository['name']}: {len(files)} file")
+
+            print(
+                f"[INFO] {repository['name']}: "
+                f"{len(files)} file candidati"
+            )
 
             repository_roots.append(
                 (repository, clone_path, files)
             )
 
-        total = sum(len(files) for _, _, files in repository_roots)
+        total = sum(
+            len(files)
+            for _, _, files in repository_roots
+        )
+
         print(f"[INFO] Totale file candidati: {total}")
-        print("[START] Generazione incrementale del JSON")
+        print("[START] Generazione del JSON")
 
         count = write_catalog(repository_roots)
 
@@ -459,5 +507,12 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except (OSError, ValueError, TypeError, RuntimeError) as exc:
+
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        subprocess.SubprocessError,
+    ) as exc:
         raise SystemExit(f"[ERRORE] {exc}") from exc
