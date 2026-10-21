@@ -1891,6 +1891,268 @@ select:focus-visible {
     animation: none;
   }
 }
+
+
+/* =========================================
+   ARCHIVIO DOCUMENTALE — FAURE FOUNDATION
+   ========================================= */
+
+.archive-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+  align-items: end;
+  gap: clamp(24px, 5vw, 72px);
+  margin: 38px 0 48px;
+}
+
+.archive-intro {
+  max-width: 510px;
+  margin: 0 0 8px;
+  line-height: 1.8;
+  color: var(--muted, #777);
+}
+
+.archive-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
+  align-items: end;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line, #d8d5ce);
+  background: var(--surface, transparent);
+}
+
+.search-box > span {
+  flex: 0 0 auto;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--muted, #777);
+}
+
+.search-box input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.search-box:focus-within {
+  outline: 2px solid var(--accent, #777);
+  outline-offset: 2px;
+}
+
+.archive-filter {
+  display: grid;
+  gap: 9px;
+}
+
+.filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+}
+
+.archive-filter select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 36px 0 14px;
+  border: 1px solid var(--line, #d8d5ce);
+  border-radius: 0;
+  background: var(--surface, transparent);
+  color: inherit;
+  font: inherit;
+}
+
+.archive-overview {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line, #d8d5ce);
+  border-bottom: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-overview p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted, #777);
+}
+
+.archive-list {
+  display: grid;
+  gap: 32px;
+  padding-top: 12px;
+}
+
+.archive-category {
+  min-width: 0;
+  scroll-margin-top: 24px;
+}
+
+.archive-category-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-category-heading h3 {
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.archive-category-count {
+  flex: 0 0 auto;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #777);
+}
+
+.archive-document {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px 24px;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--line, #e4e1da);
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease;
+}
+
+.archive-document:hover {
+  color: var(--accent, #9b3027);
+}
+
+.archive-document:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.archive-document-main {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.archive-document-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.archive-document-meta {
+  font-size: 0.76rem;
+  line-height: 1.7;
+  color: var(--muted, #777);
+}
+
+.archive-document-type {
+  align-self: start;
+  padding: 5px 8px;
+  border: 1px solid var(--line, #d8d5ce);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #777);
+}
+
+.archive-document:hover .archive-document-type {
+  border-color: currentColor;
+  color: inherit;
+}
+
+.search-empty {
+  padding: 24px 0;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--muted, #777);
+}
+
+.archive-note {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-note .note-symbol {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+
+.archive-note p {
+  max-width: 760px;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--muted, #777);
+}
+
+@media (max-width: 720px) {
+  .archive-heading {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 28px 0 32px;
+  }
+
+  .archive-controls {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .archive-document {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .archive-document-type {
+    justify-self: start;
+  }
+
+  .archive-list {
+    gap: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-document {
+    transition: none;
+  }
+}
+
 </style>
 </head>
 
@@ -2095,89 +2357,113 @@ select:focus-visible {
       </section>
 
 
-      <!-- ARCHIVIO DOCUMENTALE -->
+      
+<!-- ARCHIVIO DOCUMENTALE -->
 
-      <section class="archive section-pad" id="archive">
+<section class="archive section-pad" id="archive">
 
-        <div class="section-kicker">
-          <span>02 — REGISTRO DOCUMENTALE</span>
-          <span>ACCESSO DIRETTO AI DOCUMENTI</span>
-        </div>
+  <div class="section-kicker">
+    <span>02 — REGISTRO DOCUMENTALE</span>
+    <span>ACCESSO DIRETTO AI DOCUMENTI</span>
+  </div>
 
-        <div class="archive-heading">
+  <div class="archive-heading">
+    <div>
+      <p class="eyebrow">DOCUMENTAZIONE PRIMARIA</p>
+      <h2>
+        Il lavoro.<br>
+        <span>Non la reputazione.</span>
+      </h2>
+    </div>
 
-          <div>
-            <p class="eyebrow">DOCUMENTAZIONE PRIMARIA</p>
-            <h2>
-              Il lavoro.<br>
-              <span>Non la reputazione.</span>
-            </h2>
-          </div>
+    <p class="archive-intro">
+      Un archivio organizzato per tipologia, provenienza e verificabilità.
+      Ogni voce rimanda al file sorgente nella repository di origine.
+      Il catalogo aggrega i documenti della FAURE FOUNDATION e del sito AUF2026.
+    </p>
+  </div>
 
-          <p class="archive-intro">
-            Un archivio organizzato per documenti, versioni, derivazioni
-            e verifiche. Ogni voce pubblicata deve rimandare a un PDF
-            effettivamente disponibile e identificabile.
-          </p>
+  <!-- RICERCA E FILTRI -->
 
-        </div>
+  <div class="archive-controls">
 
-        <!-- RICERCA E FILTRI -->
+    <label class="search-box" for="paperSearch">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        id="paperSearch"
+        placeholder="Cerca titolo, file, codice o repository..."
+        aria-label="Cerca nei documenti"
+        autocomplete="off">
+    </label>
 
-        <div class="archive-controls">
+    <div class="archive-filter">
+      <label class="filter-label" for="paperFilter">
+        TIPOLOGIA DOCUMENTALE
+      </label>
 
-          <label class="search-box">
-            <span aria-hidden="true">⌕</span>
+      <select id="paperFilter">
+        <option value="all">Tutte le tipologie</option>
+        <option value="certifications">Certificazioni</option>
+        <option value="refutations">Confutazioni</option>
+        <option value="validations">Validazioni</option>
+        <option value="manuscripts">Manoscritti</option>
+        <option value="theorems">Teoremi</option>
+        <option value="proofs">Dimostrazioni</option>
+        <option value="data">Dati e verifiche</option>
+        <option value="protocols">Protocolli</option>
+        <option value="bibliography">Bibliografia</option>
+        <option value="datasets">Dataset</option>
+        <option value="code">Codice sorgente</option>
+        <option value="docs">Documentazione</option>
+        <option value="pages">Pagine web</option>
+      </select>
+    </div>
 
-            <input
-              type="search"
-              id="paperSearch"
-              placeholder="Cerca titolo, codice o disciplina..."
-              aria-label="Cerca documenti">
-          </label>
+  </div>
 
-          <label class="filter-label" for="paperFilter">
-            TIPO DOCUMENTO
-          </label>
+  <!-- STATO DEL CATALOGO -->
 
-          <select id="paperFilter">
-            <option value="all">Tutti i documenti</option>
-            <option value="theory">Teoremi</option>
-            <option value="proof">Dimostrazioni</option>
-            <option value="data">Dati e verifiche</option>
-            <option value="protocol">Protocolli</option>
-            <option value="proof">Disruption</option>
-          </select>
+  <div class="archive-overview">
+    <p id="catalogStatus" role="status" aria-live="polite">
+      Caricamento del catalogo...
+    </p>
 
-        </div>
+    <p id="archiveSource"></p>
+  </div>
 
-        <!-- ELENCO DOCUMENTI -->
+  <!-- CATEGORIE E DOCUMENTI GENERATI DAL JSON -->
 
-        <div class="archive-list" id="paperList" aria-live="polite">
-  <p class="search-empty">Caricamento del catalogo...</p>
-</div>
+  <div
+    class="archive-list"
+    id="paperList"
+    aria-live="polite"
+    aria-busy="true">
 
-<p class="search-empty" id="searchEmpty" hidden>
-  Nessun documento corrisponde ai criteri selezionati.
-</p>
+    <p class="search-empty">Caricamento del catalogo...</p>
 
-<p class="search-empty" id="catalogStatus" role="status"></p>
+  </div>
 
-        <!-- NESSUN RISULTATO -->
+  <!-- NESSUN RISULTATO: UN SOLO ELEMENTO -->
 
-        <p class="search-empty" id="searchEmpty" hidden>
-          Nessun documento corrisponde ai criteri selezionati.
-        </p>
+  <p class="search-empty" id="searchEmpty" hidden>
+    Nessun documento corrisponde ai criteri selezionati.
+  </p>
 
-        <!-- NOTA DI INTEGRITÀ -->
+  <!-- NOTA DI INTEGRITÀ -->
 
-        <div class="archive-note">
+  <div class="archive-note">
+    <span class="note-symbol" aria-hidden="true">!</span>
+    <p>
+      La presenza nel registro documenta l'indicizzazione del file,
+      non costituisce da sola una certificazione scientifica.
+      Le informazioni di verifica sono riportate separatamente
+      quando disponibili.
+    </p>
+  </div>
 
-          <span class="note-symbol">!</span>
-          
-        </div>
+</section>
 
-      </section>
 
 
       <!-- STANDARD DI PUBBLICAZIONE -->
