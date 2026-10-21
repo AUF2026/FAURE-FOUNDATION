@@ -2776,74 +2776,170 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   
-  /* ARCHIVIO: RICERCA E FILTRI — FIX ASINCRONO */
+  
+/* ARCHIVIO: CLASSIFICAZIONE E MENU DOCUMENTI */
 
-  if (paperSearch && paperFilter && paperList) {
+if (paperSearch && paperFilter && paperList) {
+  const archiveGroups = [
+    { id: "manuscripts", label: "Manoscritti" },
+    { id: "papers", label: "Paper scientifici" },
+    { id: "reports", label: "Rapporti e documentazione" },
+    { id: "data", label: "Dataset e materiali" },
+    { id: "other", label: "Altri documenti" }
+  ];
 
-    function filterPapers() {
-      // IMPORTANTE: recupera le righe aggiornate a ogni filtro.
-      // Il catalogo viene popolato in modo asincrono.
-      const papers = Array.from(
-        paperList.querySelectorAll(".paper-row")
-      );
+  function classifyArchiveRow(row) {
+    const metadata = [
+      row.dataset.type,
+      row.dataset.category,
+      row.dataset.kind,
+      row.dataset.documentType,
+      row.dataset.search,
+      row.textContent
+    ].filter(Boolean).join(" ").toLowerCase();
 
-      const query = paperSearch.value
-        .trim()
-        .toLocaleLowerCase("it");
+    // Prima si cercano le indicazioni esplicite del catalogo.
+    const type = [
+      row.dataset.type,
+      row.dataset.category,
+      row.dataset.kind,
+      row.dataset.documentType
+    ].filter(Boolean).join(" ").toLowerCase();
 
-      const selectedType = paperFilter.value;
-      let visibleCount = 0;
+    if (/\b(manuscript|manuscripts|manoscritto|manoscritti)\b/.test(type))
+      return "manuscripts";
 
-      papers.forEach((paper) => {
-        const text = (
-          paper.textContent || ""
-        ).toLocaleLowerCase("it");
+    if (/\b(paper|scientific paper|research paper|articolo|articoli)\b/.test(type))
+      return "papers";
 
-        const extraSearch = (
-          paper.dataset.search || ""
-        ).toLocaleLowerCase("it");
+    if (/\b(report|rapport[oi]|documentazione|documentation)\b/.test(type))
+      return "reports";
 
-        const type = paper.dataset.type || "";
+    if (/\b(dataset|data set|dataset|materiali|supplementary material)\b/.test(type))
+      return "data";
 
-        const matchesText =
-          !query ||
-          text.includes(query) ||
-          extraSearch.includes(query);
+    // Fallback sul titolo/testo, solo se manca una categoria esplicita.
+    if (/\b(manuscript|manoscritto|manoscritti)\b/.test(metadata))
+      return "manuscripts";
 
-        const matchesType =
-          selectedType === "all" ||
-          type === selectedType;
+    if (/\b(dataset|data set|supplementary material)\b/.test(metadata))
+      return "data";
 
-        const visible = matchesText && matchesType;
+    if (/\b(report|rapporto|rapporti|technical report)\b/.test(metadata))
+      return "reports";
 
-        paper.hidden = !visible;
+    if (/\b(scientific paper|research paper|journal article)\b/.test(metadata))
+      return "papers";
 
-        if (visible) {
-          visibleCount++;
-        }
-      });
+    return "other";
+  }
 
-      if (searchEmpty) {
-        searchEmpty.hidden = visibleCount > 0;
-      }
+  function organizeArchive() {
+    const rows = Array.from(
+      paperList.querySelectorAll(".paper-row")
+    );
+
+    if (!rows.length) return;
+
+    // Salva i nodi originali: URL, eventi e contenuto restano intatti.
+    const buckets = Object.fromEntries(
+      archiveGroups.map(group => [group.id, []])
+    );
+
+    rows.forEach(row => {
+      buckets[classifyArchiveRow(row)].push(row);
+    });
+
+    let container = paperList.querySelector(
+      ":scope > .archive-organized"
+    );
+
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "archive-organized";
+      paperList.appendChild(container);
     }
 
-    paperSearch.addEventListener("input", filterPapers);
-    paperFilter.addEventListener("change", filterPapers);
+    // Rimuove soltanto le intestazioni generate da questa funzione.
+    container.replaceChildren();
 
-    // Riesegui i filtri quando il caricamento asincrono
-    // inserisce o sostituisce le righe del catalogo.
-    const catalogObserver = new MutationObserver(() => {
-      filterPapers();
+    archiveGroups.forEach(group => {
+      const items = buckets[group.id];
+      if (!items.length) return;
+
+      const section = document.createElement("section");
+      section.className = "archive-category";
+      section.dataset.category = group.id;
+
+      const heading = document.createElement("h3");
+      heading.className = "archive-category-title";
+      heading.textContent = `${group.label} (${items.length})`;
+
+      const list = document.createElement("div");
+      list.className = "archive-category-list";
+
+      items.forEach(row => list.appendChild(row));
+      section.append(heading, list);
+      container.appendChild(section);
     });
 
-    catalogObserver.observe(paperList, {
-      childList: true,
-      subtree: true
-    });
-
-    filterPapers();
+    filterOrganizedArchive();
   }
+
+  function filterOrganizedArchive() {
+    const query = paperSearch.value.trim().toLocaleLowerCase("it");
+    const selected = paperFilter.value;
+    let visible = 0;
+
+    paperList.querySelectorAll(".paper-row").forEach(row => {
+      const text = [
+        row.textContent,
+        row.dataset.search,
+        row.dataset.type,
+        row.dataset.category
+      ].filter(Boolean).join(" ").toLocaleLowerCase("it");
+
+      const group = row.closest(".archive-category");
+      const category = group?.dataset.category || "other";
+
+      const matchesText = !query || text.includes(query);
+      const matchesType =
+        selected === "all" ||
+        selected === category ||
+        row.dataset.type === selected ||
+        row.dataset.category === selected;
+
+      row.hidden = !(matchesText && matchesType);
+
+      if (!row.hidden) visible++;
+    });
+
+    paperList.querySelectorAll(".archive-category").forEach(section => {
+      const hasVisible = Array.from(
+        section.querySelectorAll(".paper-row")
+      ).some(row => !row.hidden);
+
+      section.hidden = !hasVisible;
+    });
+
+    if (searchEmpty) searchEmpty.hidden = visible > 0;
+  }
+
+  paperSearch.addEventListener("input", filterOrganizedArchive);
+  paperFilter.addEventListener("change", filterOrganizedArchive);
+
+  const archiveObserver = new MutationObserver(() => {
+    if (!paperList.querySelector(".archive-organized .paper-row")) {
+      organizeArchive();
+    } else {
+      filterOrganizedArchive();
+    }
+  });
+
+  archiveObserver.observe(paperList, { childList: true });
+
+  organizeArchive();
+}
 
   /* LINK PDF: PROTEZIONE DEI SEGNAPOSTO */
 
