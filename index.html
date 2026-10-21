@@ -2153,6 +2153,45 @@ select:focus-visible {
   }
 }
 
+
+.archive-reader-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+#archive-pdf-back {
+  appearance: none;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 9px 16px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease,
+              color 0.2s ease;
+}
+
+#archive-pdf-back:hover {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+#archive-pdf-back:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+#archive-pdf-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
 </style>
 </head>
 
@@ -2421,6 +2460,24 @@ select:focus-visible {
     </div>
 
   </div>
+
+  
+<div id="archive-pdf-viewer" hidden>
+  <div class="archive-reader-toolbar">
+    <button id="archive-pdf-back" type="button">
+      ← Back to archive
+    </button>
+    <span id="archive-pdf-title">Document reader</span>
+  </div>
+
+  <iframe
+    id="archive-pdf-frame"
+    title="PDF document reader"
+    style="width:100%;height:80vh;border:0;"
+    loading="lazy"
+    allowfullscreen>
+  </iframe>
+</div>
 
   <!-- STATO DEL CATALOGO -->
 
@@ -3223,7 +3280,100 @@ function escapeHtml(s) {
     });
   }
 
+
+(() => {
+  const viewer = document.getElementById("archive-pdf-viewer");
+  const frame = document.getElementById("archive-pdf-frame");
+  const title = document.getElementById("archive-pdf-title");
+  const back = document.getElementById("archive-pdf-back");
+
+  if (!viewer || !frame || !back) {
+    console.error("Archive PDF reader: container HTML missing.");
+    return;
+  }
+
+  // Collega qui l'URL DIRETTO già presente nell'oggetto documento.
+  // Non usare URL GitHub /tree/ o /blob/.
+  function getPdfUrl(doc) {
+    return doc.pdf_url
+      || doc.download_url
+      || doc.file_url
+      || doc.url
+      || null;
+  }
+
+  
+function openArchivePdf(doc) {
+  const url = getPdfUrl(doc);
+
+  if (!url) {
+    console.error("PDF URL missing:", doc);
+    return;
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(url, window.location.href);
+  } catch (error) {
+    console.error("Invalid document URL:", url, error);
+    return;
+  }
+
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    console.error("Unsupported document URL:", url);
+    return;
+  }
+
+  // Non aprire pagine HTML della repository GitHub.
+  if (
+    parsed.hostname === "github.com" &&
+    /\/(blob|tree)\//.test(parsed.pathname)
+  ) {
+    console.error(
+      "Serve l'URL diretto del PDF, non una pagina GitHub:",
+      parsed.href
+    );
+    return;
+  }
+
+  // Recupera gli elementi del lettore.
+  const viewer = document.getElementById("archive-pdf-viewer");
+  const frame = document.getElementById("archive-pdf-frame");
+  const title = document.getElementById("archive-pdf-title");
+
+  if (!viewer || !frame) {
+    console.error("Archive PDF viewer elements missing.");
+    return;
+  }
+
+  if (title) {
+    title.textContent =
+      doc.title || doc.name || "Document reader";
+  }
+
+  // Apre il documento nella stessa pagina.
+  frame.src = parsed.href;
+  viewer.hidden = false;
+
+  viewer.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+  function closeArchivePdf() {
+    viewer.hidden = true;
+    frame.src = "about:blank";
+  }
+
+  back.addEventListener("click", closeArchivePdf);
+
+  // Rende disponibile la funzione al gestore già presente nell'archivio.
+  window.openArchivePdf = openArchivePdf;
 })();
+
 </script>
 </body>
 </html>
