@@ -2,11 +2,11 @@
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T15:17:35.239893+00:00",
-  "count": 95,
+  "generatedAt": "2026-10-21T16:49:13.797796+00:00",
+  "count": 96,
   "categoryCounts": {
     "certifications": 1,
-    "refutations": 1,
+    "refutations": 2,
     "validations": 16,
     "manuscripts": 1,
     "theorems": 1,
@@ -30,7 +30,7 @@
       "id": "refutations",
       "label": "Confutazioni",
       "type": "REFUTATION",
-      "count": 1
+      "count": 2
     },
     {
       "id": "validations",
@@ -174,6 +174,34 @@
       "repository": "AUF2026.github.io",
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/code/index.html",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "refutations-89dade52108bd8b4dbbf",
+      "title": "ChatGPT FAIL",
+      "category": "refutations",
+      "categoryLabel": "Confutazioni",
+      "type": "REFUTATION",
+      "file": "documents/refutations/ChatGPT_FAIL.md",
+      "filename": "ChatGPT_FAIL.md",
+      "extension": "md",
+      "sizeBytes": 12987,
+      "sha256": "d7e914b7d5a6fe0b076345bba5a766c8b9fb674d21c1752d5b93228ee61a8aa3",
+      "repository": "FAURE-FOUNDATION",
+      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
+      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/refutations/ChatGPT_FAIL.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
