@@ -1,131 +1,137 @@
 FAURE FOUNDATION
-INDEPENDENT SCIENTIFIC INQUIRY
+A PARADIGMATIC FOUNDATIONAL REPOSITORY
 
 RESEARCH / FORMALIZATION / VERIFICATION / DISPROOF / CERTIFICATION
 
-Knowledge is not a declaration. It is a result to be examined.
+A foundational research initiative connected to the AUF2026 — Faure Framework.
 
-The Faure Foundation is an independent initiative devoted to scientific inquiry, mathematical reasoning, and the critical examination of formal propositions.
+The naked truth. No dogma. Only claims exposed to examination, evidence, and proof.
 
-Its work is centered on a single requirement: every claim must be open to scrutiny.
+What science hypothesizes must be subjected to rigorous analysis. What is formally demonstrated must be distinguished from what remains conjectural. What is claimed must be traceable to its supporting evidence.
 
-THE METHOD
+OPEN THE ARCHIVE →
 
-01 — DEFINE
+FOUNDATION WEBSITE · AUF2026 RESEARCH CORPUS · SOURCE REPOSITORY
 
-Establish the terms, premises, and scope of the proposition.
+01 — FOUNDATIONAL ORIGIN
 
-02 — FORMALIZE
+Faure Foundation is the dedicated research, documentation, and verification initiative associated with the AUF2026 research corpus authored and architected by Alain Faure.
 
-Express the problem through explicit structures and unambiguous reasoning.
+The underlying research program concerns mathematical structures, deterministic computation, formal systems, and the relationships between abstract structures and their computational or physical manifestations.
 
-03 — DEMONSTRATE
+Its documented mathematical architecture includes the Universal Faure Tuple:
 
-Develop the argument in a form that permits independent examination.
+𝑈
+𝐹
+=
+(
+𝑀
+,
+𝐺
+,
+𝐴
+,
+Ψ
+,
+Λ
+,
+Π
+)
 
-04 — VERIFY
+The Foundation provides a dedicated public identity for the examination, organization, and traceability of research claims, technical documents, proof artifacts, and validation records.
 
-Test the result against its assumptions, evidence, and possible counterexamples.
+Foundational source: AUF2026 — Author & Research Corpus
 
-05 — DOCUMENT
+02 — THE METHOD
+OPERATION	PURPOSE
+RESEARCH	Formulate propositions, investigate structures, and examine existing literature.
+FORMALIZATION	Express definitions, assumptions, and claims in precise mathematical or logical form.
+VERIFICATION	Check derivations, formal proofs, computational behavior, and declared requirements.
+DISPROOF	Identify counterexamples, contradictions, invalid assumptions, and failed verification conditions.
+CERTIFICATION	Issue documented assessments against explicitly declared criteria, supported by identifiable evidence.
 
-Preserve the reasoning, references, and revisions in a traceable record.
+Every operation must have a defined scope and an identifiable evidentiary basis.
+
+No result should be classified beyond what its supporting evidence establishes.
+
+03 — FORMAL VERIFICATION
+
+Formal verification may use tools and proof assistants appropriate to the proposition under examination.
+
+Potential verification environments
+
+Lean 4 + Mathlib — machine-checkable mathematical formalization.
+Coq — interactive theorem proving and formal reasoning.
+Isabelle — higher-order logic and formal proof development.
+TLA+ — specification and verification of systems and their behavior.
+
+The applicable toolchain, versions, dependencies, assumptions, source files, and verification status must be recorded for each relevant artifact.
+
+A machine-checked proof establishes the stated proposition within its formal assumptions and system. It does not automatically establish every broader scientific interpretation associated with that proposition.
+
+04 — EVIDENCE & TRACEABILITY
+
+Research claims must be distinguishable from their supporting evidence.
+
+Where applicable, each record should connect:
+
+The exact claim or theorem statement.
+Its definitions, premises, and assumptions.
+The mathematical derivation or formal proof.
+The relevant source files and computational artifacts.
+Reproducibility information and verification results.
+Bibliographic comparisons and documented limitations.
+The applicable version and revision history.
+
+Mathematical originality, correctness, generality, computational performance, and scientific applicability are separate dimensions of assessment.
+
+The absence of a bibliographic match is not, by itself, proof of absolute originality.
+
+05 — RESEARCH ARCHIVE
+
+The Foundation's public archive provides access to its research presentation and associated documentary materials.
+
+ACCESS THE FOUNDATION ARCHIVE →
+
+The underlying AUF2026 corpus provides the broader research context, including mathematical developments, formal verification, computational research, bibliographic analysis, and supporting documentation.
+
+EXPLORE THE AUF2026 CORPUS →
+
+The source repository remains the reference point for version-controlled materials. Public presentation, formal evidence, and research interpretation should remain distinguishable.
 
 06 — CERTIFICATION
 
-Issue formal certification documenting the level of examination, the verification criteria applied, and the results obtained. Upon request, certification may include formal verification artifacts and machine-checkable proofs using Lean 4 + Mathlib, TLA+, Coq, or Isabelle.
+The Foundation's proposed certification framework is intended to document the technical examination of a specified claim, artifact, or research result.
 
-The certification framework is intended to establish a rigorous, traceable standard of technical assessment, with explicit criteria and documented evidence for each certified result.
+A certification record should identify:
 
-THE ARCHIVE
+The object and scope of certification.
+The applicable criteria and assessment procedure.
+The tools, versions, and environments used.
+The evidence examined and results obtained.
+The limitations, unresolved conditions, and verification status.
+The issuing authority, date, and persistent record identifier.
 
-Research documents. Formal arguments. Supporting materials. Revisions.
+Where appropriate and actually performed, certification may incorporate machine-checkable proofs, reproducibility reports, formal specifications, and independent technical assessments.
 
-The public archive is the documentary record of the Foundation's work.
+References to ISO, NASA, CERN, or other institutions must not imply equivalence, endorsement, accreditation, or recognition without documented grounds.
 
-[OPEN THE ARCHIVE →](<https://auf2026.github.io/FAURE-FOUNDATION/?utm_source=chatgpt.com#archive>)
+A certificate must establish exactly what was examined, which criteria were satisfied, and what remains outside its scope.
 
-A STANDARD OF EXAMINATION
+07 — FOUNDATIONAL PRINCIPLE
 
-No proposition is exempt from criticism.
+The Foundation adopts an uncompromising commitment to examination.
 
-No conclusion is established by presentation alone.
+No dogma substitutes for evidence.
 
-No claim is strengthened merely by authority.
+No authority substitutes for reasoning.
 
-A result must be examined on the basis of its reasoning, its evidence, and the conditions under which it holds.
+No assertion substitutes for demonstration.
 
-FAURE FOUNDATION
+No formal proof should be interpreted beyond the proposition it establishes.
 
-A Paradigmatic Foundational Repository. The naked, unvarnished truth. What science hypothesizes finds absolute and deterministic truth here. No dogma, only truth.
+No certification should claim more than its documented scope permits.
 
-Website · Source repository
+The objective is to pursue the strongest defensible conclusions through explicit assumptions, rigorous examination, formal verification, and transparent records.
 
-2026 — Public research record
-
-## ITALIANO (ITA)
-
-FAURE FOUNDATION
-RICERCA SCIENTIFICA INDIPENDENTE
-
-RICERCA / FORMALIZZAZIONE / VERIFICA / CONFUTAZIONE / CERTIFICAZIONE
-
-La conoscenza non è una dichiarazione. È un risultato da esaminare.
-
-La Faure Foundation è un'iniziativa indipendente dedicata alla ricerca scientifica, al ragionamento matematico e all'esame critico delle proposizioni formali.
-
-Il suo lavoro si fonda su un unico requisito: ogni affermazione deve poter essere sottoposta a verifica critica.
-
-IL METODO
-
-01 — DEFINIRE
-
-Stabilire i termini, le premesse e l'ambito della proposizione.
-
-02 — FORMALIZZARE
-
-Esprimere il problema attraverso strutture esplicite e un ragionamento privo di ambiguità.
-
-03 — DIMOSTRARE
-
-Sviluppare l'argomentazione in una forma che consenta un esame indipendente.
-
-04 — VERIFICARE
-
-Esaminare il risultato alla luce delle sue ipotesi, delle evidenze e dei possibili controesempi.
-
-05 — DOCUMENTARE
-
-Conservare il ragionamento, i riferimenti e le revisioni in un archivio tracciabile.
-
-06 — CERTIFICAZIONE
-
-Rilascio di certificazioni formali che documentano il livello di esame, i criteri di verifica applicati e i risultati ottenuti. Su richiesta, la certificazione può includere artefatti di verifica formale e dimostrazioni verificabili automaticamente mediante Lean 4 + Mathlib, TLA+, Coq o Isabelle.
-
-Il sistema di certificazione mira a definire uno standard rigoroso e tracciabile di valutazione tecnica, fondato su criteri espliciti ed evidenze documentate per ogni risultato certificato.
-
-L'ARCHIVIO
-
-Documenti di ricerca. Argomentazioni formali. Materiali di supporto. Revisioni.
-
-L'archivio pubblico costituisce la documentazione del lavoro della Fondazione.
-
-[ACCEDI ALL’ARCHIVIO →](<https://auf2026.github.io/FAURE-FOUNDATION/?utm_source=chatgpt.com#archive>)
-
-UNO STANDARD DI ESAME
-
-Nessuna proposizione è esente da critica.
-
-Nessuna conclusione è dimostrata dalla sola presentazione.
-
-Nessuna affermazione acquista validità per la sola autorità di chi la formula.
-
-Un risultato deve essere esaminato sulla base del suo ragionamento, delle sue evidenze e delle condizioni entro cui è valido.
-
-FAURE FOUNDATION
-
-Un repository fondazionale paradigmatico. La verità nuda e cruda. Ciò che la scienza ipotizza qui trova verità assoluta e deterministica. Nessun dogma, solo verità.
-
-Sito web · Repository sorgente
-
-2026 — Archivio pubblico della ricerca
+**The claim must withstand examination. The evidence must remain accessible. The conclusion must follow from
