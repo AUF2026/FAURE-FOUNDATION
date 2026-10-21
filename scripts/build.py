@@ -8,11 +8,31 @@ import re
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Destinazione del catalogo aggregato
 DOCS = ROOT / "documents"
 OUTPUT = DOCS / "data" / "documents.json"
 
+# Repository da cui recuperare i documenti
+SOURCE_REPOSITORIES = [
+    {
+        "name": "FAURE-FOUNDATION",
+        "url": "https://github.com/AUF2026/FAURE-FOUNDATION.git",
+        "branch": "main",
+    },
+    {
+        "name": "AUF2026.github.io",
+        "url": "https://github.com/AUF2026/AUF2026.github.io.git",
+        "branch": "main",
+    },
+]
+
+# Elaborazione a piccoli blocchi per limitare la RAM
 HASH_CHUNK_SIZE = 1024 * 1024  # 1 MiB
 PROGRESS_EVERY = 100
+
+# Directory temporanea per i repository scaricati
+TEMP_PREFIX = "auf2026-catalog-"
 
 CATEGORIES = {
     "certifications": {
