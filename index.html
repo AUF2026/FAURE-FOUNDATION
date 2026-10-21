@@ -2343,6 +2343,109 @@ document.addEventListener("DOMContentLoaded", () => {
   const paperList = document.getElementById("paperList");
   const searchEmpty = document.getElementById("searchEmpty");
 
+  
+  /* CARICAMENTO DEL CATALOGO AGGREGATO */
+
+  async function loadScientificCatalog() {
+    if (!paperList) return;
+
+    const status = document.getElementById("catalogStatus");
+
+    try {
+      const response = await fetch(
+        "./documents/data/documents.json",
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const catalog = await response.json();
+
+      if (!Array.isArray(catalog.documents)) {
+        throw new Error("Formato del catalogo non valido");
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      const categoryTypes = {
+        theorems: "theory",
+        proofs: "proof",
+        data: "data",
+        protocols: "protocol",
+        certifications: "theory",
+        refutations: "theory",
+        validations: "theory",
+        manuscripts: "theory",
+        datasets: "data",
+        bibliography: "theory",
+        code: "proof",
+        docs: "theory",
+        pages: "theory"
+      };
+
+      for (const doc of catalog.documents) {
+        if (!doc || !doc.sourceUrl || !doc.title) continue;
+
+        const row = document.createElement("a");
+        row.className = "paper-row";
+        row.href = doc.sourceUrl;
+        row.target = "_blank";
+        row.rel = "noopener noreferrer";
+        row.dataset.type = categoryTypes[doc.category] || "theory";
+        row.dataset.search = [
+          doc.title,
+          doc.filename,
+          doc.categoryLabel,
+          doc.repository
+        ].filter(Boolean).join(" ");
+
+        const title = document.createElement("strong");
+        title.textContent = doc.title;
+
+        const details = document.createElement("span");
+        details.className = "paper-status";
+        details.textContent =
+          `${doc.categoryLabel || doc.category} · ` +
+          `${doc.repository || "Repository"} · ` +
+          `${doc.extension || "file"}`;
+
+        row.append(title, details);
+        fragment.appendChild(row);
+      }
+
+      paperList.replaceChildren(fragment);
+
+      if (status) {
+        status.textContent =
+          `${paperList.children.length} documenti caricati.`;
+      }
+
+      if (paperSearch && paperFilter) {
+        paperSearch.dispatchEvent(new Event("input"));
+      }
+    } catch (error) {
+      console.error("Errore catalogo scientifico:", error);
+
+      paperList.replaceChildren();
+
+      const message = document.createElement("p");
+      message.className = "search-empty";
+      message.textContent =
+        "Catalogo non disponibile. Riprova più tardi.";
+
+      paperList.appendChild(message);
+
+      if (status) {
+        status.textContent = error.message;
+      }
+    }
+  }
+
+  loadScientificCatalog();
+
+
   /* MENU MOBILE */
 
   function closeMenu() {
