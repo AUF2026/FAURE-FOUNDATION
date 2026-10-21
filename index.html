@@ -1521,15 +1521,141 @@ select:focus-visible {
 
         <!-- ELENCO DOCUMENTI -->
 
-        <div class="archive-list" id="paperList" aria-live="polite">
-  <p class="search-empty">Caricamento del catalogo...</p>
-</div>
+        <div class="archive-list" id="paperList">
 
-<p class="search-empty" id="searchEmpty" hidden>
-  Nessun documento corrisponde ai criteri selezionati.
-</p>
+          <article
+            class="paper-row"
+            data-type="theory"
+            data-search="teoria fondamentale modello assiomi">
 
-<p class="search-empty" id="catalogStatus" role="status"></p>
+            <div class="paper-index">DOC. 001</div>
+
+            <div class="paper-main">
+              <span class="paper-type">TEORIA / MODELLO</span>
+
+              <h3>Quadro teorico fondamentale</h3>
+
+              <p>
+                Definizioni, postulati, ipotesi e dominio di applicabilità.
+              </p>
+
+              <span class="paper-status">
+                STRUTTURA DA DOCUMENTARE
+              </span>
+            </div>
+
+            <a
+              class="paper-link"
+              href="#document-placeholder-001"
+              data-pdf="true"
+              aria-label="Apri PDF del documento 001">
+
+              <span>PDF</span>
+              <span class="paper-arrow">↗</span>
+            </a>
+
+          </article>
+
+          <article
+            class="paper-row"
+            data-type="proof"
+            data-search="dimostrazione formale derivazione lemma teorema">
+
+            <div class="paper-index">DOC. 002</div>
+
+            <div class="paper-main">
+              <span class="paper-type">DIMOSTRAZIONE / FORMALISMO</span>
+
+              <h3>Derivazioni e risultati formali</h3>
+
+              <p>
+                Passaggi inferenziali, lemmi, teoremi e condizioni necessarie.
+              </p>
+
+              <span class="paper-status">
+                STRUTTURA DA DOCUMENTARE
+              </span>
+            </div>
+
+            <a
+              class="paper-link"
+              href="#document-placeholder-002"
+              data-pdf="true"
+              aria-label="Apri PDF del documento 002">
+
+              <span>PDF</span>
+              <span class="paper-arrow">↗</span>
+            </a>
+
+          </article>
+
+          <article
+            class="paper-row"
+            data-type="data"
+            data-search="dati esperimenti risultati replicazione misure">
+
+            <div class="paper-index">DOC. 003</div>
+
+            <div class="paper-main">
+              <span class="paper-type">DATI / VERIFICA EMPIRICA</span>
+
+              <h3>Protocollo di verifica e risultati</h3>
+
+              <p>
+                Metodi di misura, dati, incertezze e criteri di confronto.
+              </p>
+
+              <span class="paper-status">
+                STRUTTURA DA DOCUMENTARE
+              </span>
+            </div>
+
+            <a
+              class="paper-link"
+              href="#document-placeholder-003"
+              data-pdf="true"
+              aria-label="Apri PDF del documento 003">
+
+              <span>PDF</span>
+              <span class="paper-arrow">↗</span>
+            </a>
+
+          </article>
+
+          <article
+            class="paper-row"
+            data-type="protocol"
+            data-search="protocollo revisione audit errori versioni">
+
+            <div class="paper-index">DOC. 004</div>
+
+            <div class="paper-main">
+              <span class="paper-type">PROTOCOLLO / CONTROLLO</span>
+
+              <h3>Registro delle revisioni e degli errori</h3>
+
+              <p>
+                Versionamento, correzioni, obiezioni e risposte documentate.
+              </p>
+
+              <span class="paper-status">
+                STRUTTURA DA DOCUMENTARE
+              </span>
+            </div>
+
+            <a
+              class="paper-link"
+              href="#document-placeholder-004"
+              data-pdf="true"
+              aria-label="Apri PDF del documento 004">
+
+              <span>PDF</span>
+              <span class="paper-arrow">↗</span>
+            </a>
+
+          </article>
+
+        </div>
 
         <!-- NESSUN RISULTATO -->
 
@@ -1890,330 +2016,170 @@ if (themeToggle) {
 
 </script>
 <script>
+/* ============================================================
+   REPO LOGIC
+   ============================================================ */
 
-/* =========================================================
-   FAURE FOUNDATION — ARCHIVIO DINAMICO
-   Fonte unica: documents/data/documents.json
-   ========================================================= */
+const REPO = "AUF2026/FAURE-FOUNDATION";
+const API = "https://api.github.com/repos/" + REPO + "/contents";
 
-(() => {
-  "use strict";
+const SECTIONS = [
+  {
+    name: "documents/certifications",
+    label: "Certifications",
+    desc: "Certificazioni e documenti di attestazione."
+  },
+  {
+    name: "documents/manuscripts",
+    label: "Manuscripts",
+    desc: "Manoscritti e documenti scientifici."
+  },
+  {
+    name: "documents/proofs",
+    label: "Proofs",
+    desc: "Dimostrazioni formali e verifiche."
+  },
+  {
+    name: "documents/protocols",
+    label: "Protocols",
+    desc: "Protocolli e procedure."
+  },
+  {
+    name: "documents/refutations",
+    label: "Refutations",
+    desc: "Confutazioni e analisi critiche."
+  },
+  {
+    name: "documents/theorems",
+    label: "Theorems",
+    desc: "Teoremi e risultati matematici."
+  },
+  {
+    name: "documents/validations",
+    label: "Validations",
+    desc: "Validazioni, test e verifiche."
+  },
+  {
+    name: "documents/data",
+    label: "Data",
+    desc: "Indice JSON e dati strutturati."
+  }
+];
 
-  const CATALOG_URL =
-    "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/data/documents.json";
+const sectionList = document.getElementById("sectionList");
+const fileList = document.getElementById("fileList");
+const viewerBody = document.getElementById("viewerBody");
+const viewerTitle = document.getElementById("viewerTitle");
+const sectionDesc = document.getElementById("sectionDesc");
+const sectionDescription = document.getElementById("sectionDescription");
+const titleAUF = document.getElementById("titleAUF");
+const heroAUF = document.getElementById("heroAUF");
 
-  const REPO_URL =
-    "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/";
+function colorFor(name){
+  let h=0;
+  for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+  return `hsl(${h%360} 60% 55%)`;
+}
 
-  const RAW_URL =
-    "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/";
+function setAccent(name){
+  const c = colorFor(name);
+  document.documentElement.style.setProperty("--accent", c);
+  titleAUF.style.color = c;
+  heroAUF.style.color = c;
+  document.getElementById("landingAUF").style.color = c;
+}
 
-  const CATEGORY_LABELS = {
-    certifications: "Certificazioni",
-    refutations: "Confutazioni",
-    validations: "Validazioni",
-    manuscripts: "Manoscritti",
-    theorems: "Teoremi",
-    proofs: "Dimostrazioni",
-    data: "Dati e verifiche",
-    protocols: "Protocolli"
-  };
+SECTIONS.forEach(sec => {
+  const li = document.createElement("li");
+  li.className = "section-item";
+  li.textContent = sec.label;
+  li.onclick = (e) => loadSection(sec, e.currentTarget);
+  sectionList.appendChild(li);
+});
 
-  const paperList = document.getElementById("paperList");
-  const paperSearch = document.getElementById("paperSearch");
-  const paperFilter = document.getElementById("paperFilter");
-  const searchEmpty = document.getElementById("searchEmpty");
-  const catalogStatus = document.getElementById("catalogStatus");
+async function loadSection(sec, el) {
+  document.querySelectorAll(".section-item").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
 
-  if (!paperList || !paperSearch || !paperFilter) return;
+  setAccent(sec.label);
 
-  let documents = [];
+  sectionDesc.textContent = sec.label;
+  sectionDescription.textContent = sec.desc;
 
-  function setStatus(message) {
-    if (catalogStatus) catalogStatus.textContent = message;
+  const res = await fetch(`${API}/${sec.name}`);
+
+if (!res.ok) {
+  fileList.innerHTML = "";
+  viewerBody.textContent =
+    `Errore nel caricamento della sezione ${sec.label}: HTTP ${res.status}`;
+  return;
+}
+
+const data = await res.json();
+
+if (!Array.isArray(data)) {
+  viewerBody.textContent =
+    "La risposta GitHub non contiene un elenco di file.";
+  return;
+}
+
+fileList.innerHTML = "";
+viewerBody.textContent = "Seleziona un file.";
+viewerTitle.textContent = "Viewer";
+
+data.forEach(file => {
+  if (file.type !== "file") return;
+
+  const item = document.createElement("div");
+  item.className = "file-item";
+  item.textContent = file.name;
+  item.onclick = (e) => loadFile(file, e.currentTarget);
+  fileList.appendChild(item);
+});
+}
+
+async function loadFile(file, el) {
+  document.querySelectorAll(".file-item").forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+
+  viewerTitle.textContent = file.name;
+
+  const ext = file.name.split(".").pop().toLowerCase();
+
+  if (ext === "pdf") {
+    viewerBody.innerHTML = `
+      <iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(file.download_url)}"></iframe>
+    `;
+    return;
   }
 
-  function safeFileUrl(path, base) {
-    const parts = String(path || "").split("/");
+  const res = await fetch(file.download_url);
+  const text = await res.text();
 
-    // Accetta esclusivamente percorsi relativi interni a documents/.
-    if (
-      parts[0] !== "documents" ||
-      parts.some(part =>
-        !part || part === "." || part === ".."
-      ) ||
-      String(path).startsWith("/")
-    ) {
-      return null;
+  if (ext === "md") {
+    viewerBody.innerHTML = marked.parse(text);
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise([viewerBody]);
     }
-
-    return base + parts.map(encodeURIComponent).join("/");
+    return;
   }
 
-  function formatSize(bytes) {
-    if (!Number.isFinite(bytes) || bytes < 0) return "";
-
-    if (bytes < 1024) return `${bytes} B`;
-
-    return `${(bytes / 1024).toLocaleString("it-IT", {
-      maximumFractionDigits: 1
-    })} KB`;
+  if (ext === "html") {
+    viewerBody.innerHTML = `<iframe sandbox="allow-scripts allow-same-origin"></iframe>`;
+    const iframe = viewerBody.querySelector("iframe");
+    const doc = iframe.contentDocument;
+    doc.open();
+    doc.write(text);
+    doc.close();
+    return;
   }
 
-  function createElement(tag, className, text) {
-    const element = document.createElement(tag);
+  viewerBody.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+}
 
-    if (className) element.className = className;
-    if (text !== undefined) element.textContent = text;
-
-    return element;
-  }
-
-  function populateFilters() {
-    const current = paperFilter.value;
-
-    paperFilter.replaceChildren();
-
-    paperFilter.add(
-      new Option("Tutti i documenti", "all")
-    );
-
-    const categories = [
-      ...new Set(documents.map(doc => doc.category).filter(Boolean))
-    ].sort((a, b) =>
-      (CATEGORY_LABELS[a] || a).localeCompare(
-        CATEGORY_LABELS[b] || b,
-        "it"
-      )
-    );
-
-    categories.forEach(category => {
-      paperFilter.add(
-        new Option(
-          CATEGORY_LABELS[category] || category,
-          category
-        )
-      );
-    });
-
-    if (
-      current === "all" ||
-      categories.includes(current)
-    ) {
-      paperFilter.value = current;
-    }
-  }
-
-  function renderDocuments() {
-    const query = paperSearch.value
-      .trim()
-      .toLocaleLowerCase("it");
-
-    const category = paperFilter.value;
-
-    const filtered = documents.filter(doc => {
-      const searchable = [
-        doc.id,
-        doc.title,
-        doc.filename,
-        doc.file,
-        doc.category,
-        doc.categoryLabel,
-        doc.type,
-        doc.identifiers?.doi,
-        doc.identifiers?.orcid,
-        doc.identifiers?.hal
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase("it");
-
-      return (
-        (!query || searchable.includes(query)) &&
-        (category === "all" || doc.category === category)
-      );
-    });
-
-    paperList.replaceChildren();
-
-    if (filtered.length === 0) {
-      const message = documents.length === 0
-        ? "Nessun documento è attualmente indicizzato."
-        : "Nessun documento corrisponde ai criteri selezionati.";
-
-      paperList.appendChild(
-        createElement("p", "search-empty", message)
-      );
-
-      if (searchEmpty) searchEmpty.hidden = true;
-      return;
-    }
-
-    filtered.forEach((doc, index) => {
-      const row = createElement("article", "paper-row");
-
-      row.dataset.type = doc.category || "";
-      row.dataset.search = [
-        doc.id,
-        doc.filename,
-        doc.file,
-        doc.identifiers?.doi
-      ].filter(Boolean).join(" ");
-
-      const number = createElement(
-        "div",
-        "paper-index",
-        `DOC. ${String(index + 1).padStart(3, "0")}`
-      );
-
-      const main = createElement("div", "paper-main");
-
-      main.appendChild(
-        createElement(
-          "span",
-          "paper-type",
-          doc.categoryLabel ||
-            CATEGORY_LABELS[doc.category] ||
-            doc.category ||
-            "DOCUMENTO"
-        )
-      );
-
-      main.appendChild(
-        createElement(
-          "h3",
-          "",
-          doc.title || doc.filename || doc.id || "Documento senza titolo"
-        )
-      );
-
-      main.appendChild(
-        createElement(
-          "p",
-          "",
-          [
-            doc.filename,
-            formatSize(doc.sizeBytes),
-            doc.identifiers?.doi
-              ? `DOI: ${doc.identifiers.doi}`
-              : ""
-          ].filter(Boolean).join(" · ")
-        )
-      );
-
-      const verification = doc.verification?.status;
-      main.appendChild(
-        createElement(
-          "span",
-          "paper-status",
-          verification && verification !== "NOT_RECORDED"
-            ? `VERIFICA: ${verification}`
-            : "STATO DELLA VERIFICA NON REGISTRATO"
-        )
-      );
-
-      row.append(number, main);
-
-      const url = safeFileUrl(doc.file, RAW_URL);
-      const repoUrl = safeFileUrl(doc.file, REPO_URL);
-
-      if (url && repoUrl) {
-        const link = createElement("a", "paper-link");
-
-        link.href = url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.setAttribute(
-          "aria-label",
-          `Apri ${doc.filename || doc.title}`
-        );
-
-        link.append(
-          createElement("span", "", "APRI"),
-          createElement("span", "paper-arrow", "↗")
-        );
-
-        row.appendChild(link);
-
-        const source = createElement("a", "text-link", "REPOSITORY ↗");
-        source.href = repoUrl;
-        source.target = "_blank";
-        source.rel = "noopener noreferrer";
-        source.style.gridColumn = "2";
-        source.style.marginTop = "8px";
-
-        main.appendChild(source);
-      } else {
-        row.appendChild(
-          createElement("span", "paper-status", "PERCORSO NON VALIDO")
-        );
-      }
-
-      paperList.appendChild(row);
-    });
-
-    if (searchEmpty) searchEmpty.hidden = true;
-
-    setStatus(
-      `${filtered.length} documenti visualizzati su ${documents.length}.`
-    );
-  }
-
-  async function loadCatalog() {
-    setStatus("Caricamento del catalogo...");
-
-    try {
-      const response = await fetch(
-        `${CATALOG_URL}?v=${Date.now()}`,
-        { cache: "no-store" }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const catalog = await response.json();
-
-      if (!Array.isArray(catalog.documents)) {
-        throw new Error("Il campo documents non è un array.");
-      }
-
-      documents = catalog.documents.filter(doc =>
-        doc &&
-        typeof doc === "object" &&
-        typeof doc.file === "string" &&
-        doc.file.startsWith("documents/")
-      );
-
-      populateFilters();
-      renderDocuments();
-
-      setStatus(
-        documents.length === 0
-          ? "Catalogo disponibile: nessun PDF indicizzato."
-          : `Catalogo aggiornato: ${documents.length} documenti.`
-      );
-    } catch (error) {
-      console.error("Errore archivio FAURE FOUNDATION:", error);
-
-      paperList.replaceChildren(
-        createElement(
-          "p",
-          "search-empty",
-          "Catalogo temporaneamente non disponibile. Riprova più tardi."
-        )
-      );
-
-      setStatus("Impossibile leggere il catalogo GitHub.");
-    }
-  }
-
-  paperSearch.addEventListener("input", renderDocuments);
-  paperFilter.addEventListener("change", renderDocuments);
-
-  loadCatalog();
-})();
-
+function escapeHtml(s) {
+  return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
 </script>
 </body>
 </html>
