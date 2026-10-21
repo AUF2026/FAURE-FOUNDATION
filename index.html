@@ -8,11 +8,8 @@
   <meta name="description" content="Foundation — ricerca indipendente, principi scientifici, dimostrazioni e documentazione verificabile.">
 
   <title>Foundation — Independent Scientific Inquiry</title>
-
-  <link rel="stylesheet" href="assets/css/style.css">
-  <script src="assets/js/main.js" defer></script>
-
-  <script>
+  
+<script>
 window.MathJax = {
   tex: {
     inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -1802,89 +1799,6 @@ select:focus-visible {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
-  }
-}
-
-    /* FAURE FOUNDATION · subtle interaction styles */
-
-.scientific-scope {
-  opacity: 1;
-  transform: none;
-}
-
-.scientific-scope.auf-revealed {
-  animation: auf-section-reveal 600ms ease-out both;
-}
-
-.scope-card {
-  position: relative;
-  isolation: isolate;
-}
-
-.scope-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: radial-gradient(
-    260px circle at var(--focus-x, 50%) var(--focus-y, 50%),
-    rgb(255 255 255 / 0.055),
-    transparent 72%
-  );
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-
-.scope-card:hover::after {
-  opacity: 1;
-}
-
-.node {
-  transition: opacity 180ms ease;
-}
-
-.node.auf-node-muted {
-  opacity: 0.45;
-}
-
-#theoremRegistryLinks.auf-scanning {
-  animation: auf-registry-focus 900ms ease-out;
-}
-
-@keyframes auf-section-reveal {
-  from {
-    opacity: 0.72;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes auf-registry-focus {
-  0% {
-    filter: brightness(1);
-  }
-  40% {
-    filter: brightness(1.08);
-  }
-  100% {
-    filter: brightness(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scientific-scope.auf-revealed,
-  #theoremRegistryLinks.auf-scanning {
-    animation: none;
-  }
-
-  .scope-card::after,
-  .node {
-    transition: none;
   }
 }
 
