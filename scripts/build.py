@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib.parse import quote
@@ -45,8 +46,6 @@ CATEGORIES = {
     "pages": ("Pagine web", "PAGE"),
 }
 
-# Cartelle che identificano una tipologia anche se il file
-# si trova dentro documents/ o docs/.
 CATEGORY_ALIASES = {
     "certification": "certifications",
     "certifications": "certifications",
@@ -84,64 +83,33 @@ CATEGORY_ALIASES = {
 }
 
 EXCLUDED_DIRS = {
-    ".git", ".github", "__pycache__", "node_modules",
-    ".venv", "venv", ".next", ".nuxt", "dist",
-    "build", "coverage", ".idea", ".vscode",
+    ".git",
+    ".github",
+    "__pycache__",
+    "node_modules",
+    ".venv",
+    "venv",
+    ".next",
+    ".nuxt",
+    "dist",
+    "build",
+    "coverage",
+    ".idea",
+    ".vscode",
 }
 
 EXCLUDED_FILES = {
-    ".DS_Store", "Thumbs.db", "desktop.ini",
-    "README.md", "LICENSE", "LICENSE.md",
-    "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
+    ".DS_Store",
+    "Thumbs.db",
+    "desktop.ini",
+    "README.md",
+    "LICENSE",
+    "LICENSE.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
 }
 
-ALLOWED_EXTENSIONS = {
-    ".pdf", ".md", ".markdown", ".txt", ".rst",
-    ".html", ".htm", ".tex", ".bib", ".rtf",
-    ".doc", ".docx", ".odt",
-    ".json", ".jsonld", ".xml", ".yaml", ".yml",
-    ".csv", ".tsv", ".xlsx", ".xls", ".ods",
-    ".ipynb", ".py", ".pyi", ".r", ".jl",
-    ".lean", ".thy", ".v", ".vhd", ".sv",
-    ".c", ".h", ".cpp", ".hpp", ".rs", ".go",
-    ".java", ".js", ".jsx", ".ts", ".tsx",
-    ".css", ".scss", ".sh", ".bash", ".sql",
-    ".toml", ".ini", ".cfg", ".conf",
-    ".log", ".diff", ".patch", ".proto",
-    ".graphql", ".gql", ".m", ".mm",
-}
-
-EXTENSION_CATEGORY = {
-    ".pdf": "docs",
-    ".md": "docs",
-    ".markdown": "docs",
-    ".txt": "docs",
-    ".rst": "docs",
-    ".rtf": "docs",
-    ".doc": "docs",
-    ".docx": "docs",
-    ".odt": "docs",
-    ".html": "pages",
-    ".htm": "pages",
-    ".tex": "manuscripts",
-    ".bib": "bibliography",
-    ".csv": "datasets",
-    ".tsv": "datasets",
-    ".xlsx": "datasets",
-    ".xls": "datasets",
-    ".ods": "datasets",
-    ".ipynb": "code",
-    ".py": "code",
-    ".pyi": "code",
-    ".r": "code",
-    ".jl": "code",
-    ".lean": "proofs",
-    ".thy": "proofs",
-    ".v": "proofs",
-}
-
-# File che non devono essere trattati come documenti scientifici
-# solo perché hanno un'estensione ammessa.
+# File di servizio esclusi quando si trovano alla radice.
 ROOT_SERVICE_FILES = {
     "index.html",
     "404.html",
@@ -174,6 +142,8 @@ def sha256_file(path):
 
 
 def is_excluded(path):
+    """Esclude file tecnici e temporanei, mai in base all'estensione."""
+
     if path.name in EXCLUDED_FILES:
         return True
 
@@ -188,7 +158,9 @@ def is_excluded(path):
 
     if (
         path.name == "documents.json"
-        and "data" in path.parts
+        and "data" in {
+            part.casefold() for part in path.parts
+        }
     ):
         return True
 
@@ -198,19 +170,30 @@ def is_excluded(path):
     ):
         return True
 
-    if path.suffix.lower() not in ALLOWED_EXTENSIONS:
-        return True
+    # IMPORTANTE:
+    # non filtrare per estensione.
+    # PDF, DOCX, XLSX, immagini, archivi, binari,
+    # nuovi formati e file senza estensione sono ammessi.
 
     return False
 
 
 def is_metadata_sidecar(path):
+    """
+    Un JSON con lo stesso nome di un altro file viene considerato
+    metadato associato e non una voce documentale separata.
+    Gli altri JSON vengono indicizzati normalmente.
+    """
+
     if path.suffix.lower() != METADATA_SUFFIX:
         return False
 
     try:
         for sibling in path.parent.iterdir():
             if sibling == path or not sibling.is_file():
+                continue
+
+            if sibling.is_symlink():
                 continue
 
             if sibling.stem.casefold() != path.stem.casefold():
@@ -240,7 +223,11 @@ def load_metadata(document):
 
         print(f"[WARN] Metadati non validi: {metadata_path}")
 
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+    ) as exc:
         print(f"[WARN] Metadati ignorati: {metadata_path}: {exc}")
 
     return {}
@@ -250,36 +237,70 @@ def classify_document(relative_path):
     path = Path(relative_path)
     parts = [part.casefold() for part in path.parts[:-1]]
 
-    # La cartella più specifica riconosciuta prevale sull'estensione.
+    # La cartella di categoria più specifica prevale.
     for part in reversed(parts):
         category = CATEGORY_ALIASES.get(part)
         if category:
             return category
 
-    return EXTENSION_CATEGORY.get(path.suffix.lower(), "docs")
+    # Categoria predefinita per qualsiasi altra estensione.
+    extension = path.suffix.lower()
+
+    extension_categories = {
+        ".html": "pages",
+        ".htm": "pages",
+        ".tex": "manuscripts",
+        ".bib": "bibliography",
+        ".csv": "datasets",
+        ".tsv": "datasets",
+        ".xlsx": "datasets",
+        ".xls": "datasets",
+        ".ods": "datasets",
+        ".ipynb": "code",
+        ".py": "code",
+        ".js": "code",
+        ".ts": "code",
+        ".css": "code",
+        ".lean": "proofs",
+        ".thy": "proofs",
+        ".v": "proofs",
+    }
+
+    return extension_categories.get(extension, "docs")
 
 
 def is_in_document_area(relative_path):
-    """Non indicizza automaticamente ogni file tecnico della repository."""
-    parts = Path(relative_path).parts
-    lowered = [part.casefold() for part in parts]
+    """
+    Limita la scansione alle aree documentali previste.
+    Non limita le estensioni dei file.
+    """
+
+    path = Path(relative_path)
+    parts = path.parts
 
     if not parts:
         return False
 
-    if len(parts) == 1:
-        return parts[0].casefold() not in ROOT_SERVICE_FILES
+    lowered = [part.casefold() for part in parts]
 
-    # Nella repository del sito, docs/ e documents/ sono aree
-    # documentali. Nella Foundation vengono accettate anche
-    # le cartelle di categoria direttamente alla radice.
+    # File alla radice: esclude soltanto quelli di servizio
+    # esplicitamente identificati.
+    if len(parts) == 1:
+        return parts[0].casefold() not in {
+            name.casefold() for name in ROOT_SERVICE_FILES
+        }
+
+    # Aree documentali standard di entrambe le repository.
     if lowered[0] in {"docs", "documents"}:
         return True
 
-    if any(part in CATEGORY_ALIASES for part in lowered[:-1]):
+    # Cartelle di categoria riconosciute anche alla radice.
+    if any(
+        part in CATEGORY_ALIASES
+        for part in lowered[:-1]
+    ):
         return True
 
-    # Le directory di servizio del sito non sono archivi scientifici.
     return False
 
 
@@ -309,7 +330,9 @@ def collect_files(repository_root):
             if not path.is_file() or is_excluded(path):
                 continue
 
-            relative = path.relative_to(repository_root).as_posix()
+            relative = path.relative_to(
+                repository_root
+            ).as_posix()
 
             if not is_in_document_area(relative):
                 continue
@@ -326,7 +349,10 @@ def collect_files(repository_root):
 
 
 def build_document(repository, repository_root, path):
-    relative_path = path.relative_to(repository_root).as_posix()
+    relative_path = path.relative_to(
+        repository_root
+    ).as_posix()
+
     category = classify_document(relative_path)
     label, document_type = CATEGORIES[category]
     metadata = load_metadata(path)
@@ -338,12 +364,25 @@ def build_document(repository, repository_root, path):
 
     repository_url = repository["url"].removesuffix(".git")
     encoded_path = quote(relative_path, safe="/")
+    branch = quote(repository["branch"], safe="")
+
+    source_url = (
+        f"{repository_url}/blob/{branch}/{encoded_path}"
+    )
+
+    download_url = (
+        f"https://raw.githubusercontent.com/"
+        f"AUF2026/{quote(repository['name'], safe='')}/"
+        f"{branch}/{encoded_path}"
+    )
 
     title = metadata.get("title")
+
     if not isinstance(title, str) or not title.strip():
         title = readable_title(path.name)
 
     external_links = metadata.get("externalLinks", [])
+
     if not isinstance(external_links, list):
         external_links = []
 
@@ -360,10 +399,8 @@ def build_document(repository, repository_root, path):
         "sha256": sha256_file(path),
         "repository": repository["name"],
         "repositoryUrl": repository_url,
-        "sourceUrl": (
-            f"{repository_url}/blob/"
-            f"{repository['branch']}/{encoded_path}"
-        ),
+        "sourceUrl": source_url,
+        "downloadUrl": download_url,
         "verification": {
             "status": metadata.get(
                 "verificationStatus", "NOT_RECORDED"
@@ -386,12 +423,21 @@ def write_catalog(repository_roots):
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
     documents = []
+
     for repository, repository_root, files in repository_roots:
         for path in files:
-            document = build_document(
-                repository, repository_root, path
-            )
-            documents.append(document)
+            try:
+                document = build_document(
+                    repository,
+                    repository_root,
+                    path,
+                )
+                documents.append(document)
+
+            except OSError as exc:
+                # Un file illeggibile non interrompe l'intero catalogo.
+                print(f"[WARN] File ignorato {path}: {exc}")
+                continue
 
             if len(documents) % PROGRESS_EVERY == 0:
                 print(f"[PROGRESS] {len(documents)} documenti")
@@ -401,17 +447,19 @@ def write_catalog(repository_roots):
             item["categoryLabel"].casefold(),
             item["title"].casefold(),
             item["repository"].casefold(),
+            item["file"].casefold(),
         )
     )
 
     counts = {category: 0 for category in CATEGORIES}
+
     for document in documents:
         counts[document["category"]] += 1
 
     catalog = {
         "institution": "FAURE FOUNDATION",
         "catalogTitle": "Official Scientific Register",
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "count": len(documents),
         "categoryCounts": counts,
@@ -422,10 +470,15 @@ def write_catalog(repository_roots):
                 "type": document_type,
                 "count": counts[category],
             }
-            for category, (label, document_type) in CATEGORIES.items()
+            for category, (label, document_type)
+            in CATEGORIES.items()
         ],
         "sources": [
-            repository["name"]
+            {
+                "name": repository["name"],
+                "url": repository["url"].removesuffix(".git"),
+                "branch": repository["branch"],
+            }
             for repository, _, _ in repository_roots
         ],
         "documents": documents,
@@ -444,22 +497,26 @@ def write_catalog(repository_roots):
             delete=False,
         ) as stream:
             temp_path = Path(stream.name)
+
             json.dump(
                 catalog,
                 stream,
                 ensure_ascii=False,
                 indent=2,
             )
+
             stream.write("\n")
             stream.flush()
             os.fsync(stream.fileno())
 
-        # Verifica il JSON prima della sostituzione.
+        # Verifica il JSON prima di sostituire il catalogo esistente.
         with temp_path.open("r", encoding="utf-8") as stream:
             checked = json.load(stream)
 
         if checked["count"] != len(checked["documents"]):
-            raise RuntimeError("Conteggio catalogo non coerente.")
+            raise RuntimeError(
+                "Conteggio catalogo non coerente."
+            )
 
         os.replace(temp_path, OUTPUT)
         temp_path = None
@@ -469,8 +526,11 @@ def write_catalog(repository_roots):
             temp_path.unlink(missing_ok=True)
 
     print("[INFO] Documenti per categoria:")
+
     for category, count in counts.items():
         print(f"  {CATEGORIES[category][0]}: {count}")
+
+    print(f"[INFO] Totale documenti: {len(documents)}")
 
     return len(documents)
 
@@ -479,7 +539,8 @@ def clone_repository(repository, destination):
     print(f"[CLONE] {repository['name']}")
 
     command = [
-        "git", "clone",
+        "git",
+        "clone",
         "--depth", "1",
         "--single-branch",
         "--branch", repository["branch"],
@@ -508,16 +569,21 @@ def main():
 
             try:
                 clone_repository(repository, clone_path)
-            except (OSError, subprocess.SubprocessError) as exc:
+
+            except (
+                OSError,
+                subprocess.SubprocessError,
+            ) as exc:
                 raise RuntimeError(
                     f"Impossibile recuperare {repository['name']}. "
                     f"Catalogo precedente preservato: {exc}"
                 ) from exc
 
             files = collect_files(clone_path)
+
             print(
                 f"[SCAN] {repository['name']}: "
-                f"{len(files)} documenti candidati"
+                f"{len(files)} file documentali"
             )
 
             repository_roots.append(
@@ -533,6 +599,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+
     except (
         OSError,
         ValueError,
