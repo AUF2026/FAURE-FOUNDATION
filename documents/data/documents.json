@@ -1,7 +1,8 @@
 {
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
-  "generatedAt": "2026-10-21T01:52:45.892336+00:00",
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-21T13:59:37.746738+00:00",
   "count": 8,
   "categories": [
     "certifications",
@@ -20,7 +21,7 @@
   ],
   "documents": [
     {
-      "id": "certifications-readme",
+      "id": "certifications-36decb5f3617e7f62300",
       "title": "Readme",
       "category": "certifications",
       "categoryLabel": "CERTIFICAZIONI",
@@ -45,7 +46,7 @@
       "externalLinks": []
     },
     {
-      "id": "refutations-readme",
+      "id": "refutations-88adbf4d843f042b5b1b",
       "title": "Readme",
       "category": "refutations",
       "categoryLabel": "CONFUTAZIONI",
@@ -70,7 +71,7 @@
       "externalLinks": []
     },
     {
-      "id": "data-readme",
+      "id": "data-84d4f631c369cd9fe26a",
       "title": "Readme",
       "category": "data",
       "categoryLabel": "DATI E VERIFICHE",
@@ -95,7 +96,7 @@
       "externalLinks": []
     },
     {
-      "id": "proofs-readme",
+      "id": "proofs-9d6cc2c90829b8a1d94d",
       "title": "Readme",
       "category": "proofs",
       "categoryLabel": "DIMOSTRAZIONI",
@@ -120,7 +121,7 @@
       "externalLinks": []
     },
     {
-      "id": "manuscripts-readme",
+      "id": "manuscripts-22cb8208049332b515a1",
       "title": "Readme",
       "category": "manuscripts",
       "categoryLabel": "MANOSCRITTI",
@@ -145,7 +146,7 @@
       "externalLinks": []
     },
     {
-      "id": "protocols-readme",
+      "id": "protocols-b6327efafd2ff82a6fa7",
       "title": "Readme",
       "category": "protocols",
       "categoryLabel": "PROTOCOLLI",
@@ -170,7 +171,7 @@
       "externalLinks": []
     },
     {
-      "id": "theorems-readme",
+      "id": "theorems-442e5f57530c5531efe5",
       "title": "Readme",
       "category": "theorems",
       "categoryLabel": "TEOREMI",
@@ -195,7 +196,7 @@
       "externalLinks": []
     },
     {
-      "id": "validations-readme",
+      "id": "validations-867daecd0330faf1e47f",
       "title": "Readme",
       "category": "validations",
       "categoryLabel": "VALIDAZIONI",
