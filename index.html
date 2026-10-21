@@ -3334,9 +3334,13 @@ function escapeHtml(s) {
         );
       }
 
+      
       // Non aprire pagine HTML della repository.
       if (/\/(tree|blob)\//.test(parsed.pathname)) {
-        console.error("GitHub repository page is not a direct file URL:", parsed.href);
+        console.error(
+          "GitHub repository page is not a direct file URL:",
+          parsed.href
+        );
         return null;
       }
     }
@@ -3366,9 +3370,10 @@ function escapeHtml(s) {
         doc.title || doc.name || "Document reader";
     }
 
-    // Mostra il lettore nella pagina corrente.
+    // Impedisce la navigazione alla repository e mostra il lettore.
     frame.src = url;
     viewer.hidden = false;
+    viewer.style.display = "block";
 
     viewer.scrollIntoView({
       behavior: "smooth",
