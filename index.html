@@ -11,7 +11,556 @@
 
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/main.js" defer></script>
+
+  <script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    tags: 'none'
+  },
+
+  options: {
+    skipHtmlTags: [
+      'script',
+      'noscript',
+      'style',
+      'textarea',
+      'pre',
+      'code'
+    ]
+  },
+
+  startup: {
+    typeset: true
+  }
+};
+</script>
+
+<script
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+
+  <script>
+
+  /*
+   * =========================================================
+   * MOBILE NAVIGATION
+   * =========================================================
+   */
+
+  const menuButton =
+    document.getElementById("menuButton");
+
+  const navLinks =
+    document.getElementById("navLinks");
+
+
+  if (menuButton && navLinks) {
+
+    menuButton.addEventListener(
+      "click",
+      () => {
+
+        navLinks.classList.toggle("open");
+
+      }
+    );
+
+
+    /*
+     * Close mobile navigation
+     * after selecting a link.
+     */
+
+    document
+      .querySelectorAll("#navLinks a")
+      .forEach(
+        link => {
+
+          link.addEventListener(
+            "click",
+            () => {
+
+              navLinks.classList.remove("open");
+
+            }
+          );
+
+        }
+      );
+
+  }
+
+
+  /*
+   * =========================================================
+   * AUF2026 DOCUMENT ARCHIVE
+   * =========================================================
+   *
+   * GitHub repository = source of truth.
+   *
+   * Current Markdown documents are read dynamically from:
+   *
+   *   /docs/
+   *
+   * Each document is opened through:
+   *
+   *   archive.html?doc=FILENAME.md
+   *
+   * archive.html is responsible for loading the Markdown
+   * source and rendering it as the public HTML archive page.
+   *
+   */
+
+
+  const ARCHIVE_API =
+    "https://api.github.com/repos/AUF2026/AUF2026.github.io/contents/docs";
+
+
+  /*
+   * =========================================================
+   * DOCUMENT TITLE
+   * =========================================================
+   *
+   * Convert repository filenames into readable titles.
+   *
+   * Example:
+   *
+   * THEOREM-ORIGINALITY-MATRIX.md
+   *
+   * becomes:
+   *
+   * Theorem Originality Matrix
+   *
+   */
+
+  function documentTitle(
+    filename
+  ) {
+
+    return filename
+
+      .replace(
+        /\.md$/i,
+        ""
+      )
+
+      .replace(
+        /[-_]+/g,
+        " "
+      )
+
+      .replace(
+        /\b\w/g,
+        character =>
+          character.toUpperCase()
+      );
+
+  }
+
+
+  /*
+   * =========================================================
+   * ARCHIVE DOCUMENT URL
+   * =========================================================
+   *
+   * IMPORTANT:
+   *
+   * The Markdown file is NOT opened directly.
+   *
+   * Instead:
+   *
+   * /docs/example.md
+   *
+   * becomes:
+   *
+   * archive.html?doc=example.md
+   *
+   */
+
+  function documentUrl(
+    filename
+  ) {
+
+    return (
+      "archive.html?doc=" +
+      encodeURIComponent(
+        filename
+      )
+    );
+
+  }
+
+/*
+ * =========================================================
+ * THEOREM REGISTRY
+ * =========================================================
+ *
+ * The theorem registry uses the same archive URL generator
+ * as the main research archive.
+ */
+
+const theoremRegistry =
+  document.getElementById(
+    "theoremRegistryLinks"
+  );
+
+const theoremDocuments = [
+  {
+    file: "THEOREM-ORIGINALITY-MATRIX.md",
+    title: "Theorem Originality Matrix"
+  },
+  {
+    file: "CLAIMS.md",
+    title: "Master Claim Matrix"
+  },
+  {
+    file: "BIBLIOGRAPHIC-NOVELTY-MATRIX.md",
+    title: "Bibliographic Novelty Matrix"
+  },
+  {
+    file: "PROOF-REGISTRY.md",
+    title: "Proof Registry"
+  }
+];
+
+if (theoremRegistry) {
+
+  theoremDocuments.forEach(
+    theorem => {
+
+      const link =
+        document.createElement("a");
+
+      link.className =
+        "archive-link";
+
+      link.href =
+        documentUrl(
+          theorem.file
+        );
+
+      link.textContent =
+        theorem.title + " →";
+
+      theoremRegistry.appendChild(
+        link
+      );
+
+    }
+  );
+
+}
+
+  /*
+ * =========================================================
+ * AUTHOR REGISTRY
+ * =========================================================
+ */
+
+const authorRegistry =
+  document.getElementById(
+    "authorRegistryLinks"
+  );
+
+const authorDocuments = [
+  {
+    file: "AUTHOR-IDENTITY.md",
+    title: "Author Identity Record"
+  },
+  {
+    file: "BIBLIOGRAPHIC-NOVELTY-MATRIX.md",
+    title: "Bibliographic Novelty Matrix"
+  },
+  {
+    file: "SOURCE-MANIFEST.md",
+    title: "Source Manifest"
+  }
+];
+
+if (authorRegistry) {
+
+  authorDocuments.forEach(
+    author => {
+
+      const link =
+        document.createElement("a");
+
+      link.className =
+        "archive-link";
+
+      link.href =
+        documentUrl(
+          author.file
+        );
+
+      link.textContent =
+        author.title + " →";
+
+      authorRegistry.appendChild(
+        link
+      );
+
+    }
+  );
+
+}
+
+  /*
+   * =========================================================
+   * ARCHIVE CONTAINERS
+   * =========================================================
+   *
+   * Documents can be rendered inside:
+   *
+   *   .archive-grid
+   *
+   * or:
+   *
+   *   .archive-links
+   *
+   */
+
+  const archiveContainers =
+    document.querySelectorAll(
+      ".archive-grid, .archive-links"
+    );
+
+
+  /*
+   * =========================================================
+   * LOAD DOCUMENTS FROM GITHUB
+   * =========================================================
+   */
+
+  async function loadArchiveDocuments() {
+
+    if (
+      !archiveContainers.length
+    ) {
+
+      return;
+
+    }
+
+
+    try {
+
+      const response =
+        await fetch(
+          ARCHIVE_API,
+          {
+            headers: {
+              "Accept":
+                "application/vnd.github+json"
+            }
+          }
+        );
+
+
+      if (
+        !response.ok
+      ) {
+
+        throw new Error(
+          "GitHub API returned HTTP " +
+          response.status
+        );
+
+      }
+
+
+      const files =
+        await response.json();
+
+
+      /*
+       * Keep only Markdown files.
+       */
+
+      const documents =
+        files
+
+          .filter(
+            file =>
+              file.type === "file" &&
+              /\.md$/i.test(
+                file.name
+              )
+          )
+
+          .sort(
+            (a, b) =>
+              a.name.localeCompare(
+                b.name
+              )
+          );
+
+
+      /*
+       * Generate archive entries.
+       */
+
+      archiveContainers.forEach(
+        container => {
+
+          /*
+           * Remove static/generated
+           * archive entries before rebuilding.
+           */
+
+          container.innerHTML = "";
+
+
+          documents.forEach(
+            file => {
+
+              const link =
+                document.createElement(
+                  "a"
+                );
+
+
+              link.className =
+                "archive-link";
+
+
+              /*
+               * Every document goes through
+               * archive.html.
+               */
+
+              link.href =
+                documentUrl(
+                  file.name
+                );
+
+
+              const strong =
+                document.createElement(
+                  "strong"
+                );
+
+
+              strong.textContent =
+                documentTitle(
+                  file.name
+                );
+
+
+              const span =
+                document.createElement(
+                  "span"
+                );
+
+
+              span.textContent =
+                "AUF2026 Research Document";
+
+
+              link.appendChild(
+                strong
+              );
+
+
+              link.appendChild(
+                span
+              );
+
+
+              container.appendChild(
+                link
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+      console.log(
+        "AUF2026 — " +
+        documents.length +
+        " Markdown documents loaded."
+      );
+
+
+    } catch (
+      error
+    ) {
+
+      console.error(
+        "AUF2026 archive loading error:",
+        error
+      );
+
+
+      archiveContainers.forEach(
+        container => {
+
+          container.innerHTML = `
+
+            <div class="archive-error">
+
+              <strong>
+                Research archive unavailable.
+              </strong>
+
+              <p>
+                The AUF2026 document index could not
+                be loaded from the repository.
+              </p>
+
+            </div>
+
+          `;
+
+        }
+      );
+
+    }
+
+  }
+
+
+  /*
+   * =========================================================
+   * INITIALIZE
+   * =========================================================
+   */
+
+  loadArchiveDocuments();
+
+
+  /*
+   * =========================================================
+   * CONSOLE IDENTITY
+   * =========================================================
+   */
+
+  console.log(
+    "AUF2026 — Faure Framework"
+  );
+
+  console.log(
+    "Research archive initialized."
+  );
+
+  console.log(
+    "GitHub repository: AUF2026/AUF2026.github.io"
+  );
+
+  console.log(
+    "Markdown source directory: /docs/"
+  );
   
+</script>
   <style>
   
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap');
@@ -2047,6 +2596,507 @@ async function loadFile(file, el) {
 function escapeHtml(s) {
   return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 }
+</script>
+<script>
+
+/* =========================================================
+   AUF2026
+   DEEP SCIENTIFIC WOW ENGINE
+   ========================================================= */
+
+(() => {
+
+  "use strict";
+
+
+  const root =
+    document.documentElement;
+
+
+  const reducedMotion =
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+
+  if (reducedMotion) {
+    return;
+  }
+
+
+  /* =======================================================
+     01 · GLOBAL OPTICAL FIELD
+     ======================================================= */
+
+  let tx =
+    window.innerWidth * .5;
+
+  let ty =
+    window.innerHeight * .35;
+
+
+  let cx =
+    tx;
+
+  let cy =
+    ty;
+
+
+  window.addEventListener(
+    "pointermove",
+    event => {
+
+      tx =
+        event.clientX;
+
+      ty =
+        event.clientY;
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  function opticalLoop() {
+
+    cx +=
+      (tx - cx) * .055;
+
+    cy +=
+      (ty - cy) * .055;
+
+
+    root.style.setProperty(
+      "--auf-mx",
+      cx + "px"
+    );
+
+
+    root.style.setProperty(
+      "--auf-my",
+      cy + "px"
+    );
+
+
+    requestAnimationFrame(
+      opticalLoop
+    );
+
+  }
+
+
+  opticalLoop();
+
+
+  /* =======================================================
+     02 · CINEMATIC SECTION REVEAL
+     ======================================================= */
+
+  const sections =
+    document.querySelectorAll(
+      ".scientific-scope"
+    );
+
+
+  if (
+    "IntersectionObserver" in window
+  ) {
+
+    const observer =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(
+            entry => {
+
+              if (
+                entry.isIntersecting
+              ) {
+
+                entry.target.classList.add(
+                  "auf-revealed"
+                );
+
+                const heading =
+                  entry.target.querySelector(
+                    ".section-heading"
+                  );
+
+
+                if (heading) {
+
+                  window.setTimeout(
+                    () => {
+
+                      heading.classList.add(
+                        "auf-heading"
+                      );
+
+                    },
+                    180
+                  );
+
+                }
+
+
+                observer.unobserve(
+                  entry.target
+                );
+
+              }
+
+            }
+          );
+
+        },
+        {
+          threshold: .12,
+
+          rootMargin:
+            "0px 0px -50px 0px"
+        }
+      );
+
+
+    sections.forEach(
+      section =>
+        observer.observe(
+          section
+        )
+    );
+
+  }
+  else {
+
+    sections.forEach(
+      section =>
+        section.classList.add(
+          "auf-revealed"
+        )
+    );
+
+  }
+
+
+  /* =======================================================
+     03 · CARD OPTICAL TRACKING
+     ======================================================= */
+
+  document
+    .querySelectorAll(
+      ".scope-card"
+    )
+    .forEach(
+      card => {
+
+        card.addEventListener(
+          "pointermove",
+          event => {
+
+            const rect =
+              card.getBoundingClientRect();
+
+
+            const x =
+              event.clientX -
+              rect.left;
+
+
+            const y =
+              event.clientY -
+              rect.top;
+
+
+            const px =
+              x / rect.width;
+
+
+            const py =
+              y / rect.height;
+
+
+            card.style.setProperty(
+              "--focus-x",
+              x + "px"
+            );
+
+
+            card.style.setProperty(
+              "--focus-y",
+              y + "px"
+            );
+
+
+            /*
+             * Deliberately stronger than
+             * previous versions.
+             */
+
+            const rotateX =
+              (.5 - py) * 6;
+
+
+            const rotateY =
+              (px - .5) * 8;
+
+
+            card.style.transform =
+              `
+              perspective(1200px)
+              rotateX(${rotateX}deg)
+              rotateY(${rotateY}deg)
+              translateZ(8px)
+              `;
+
+          },
+          {
+            passive: true
+          }
+        );
+
+
+        card.addEventListener(
+          "pointerleave",
+          () => {
+
+            card.style.transform =
+              "";
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =======================================================
+     04 · MAGNETIC LINKS
+     ======================================================= */
+
+  document
+    .querySelectorAll(
+      ".archive-link"
+    )
+    .forEach(
+      link => {
+
+        link.addEventListener(
+          "pointermove",
+          event => {
+
+            const rect =
+              link.getBoundingClientRect();
+
+
+            const dx =
+              event.clientX -
+              (
+                rect.left +
+                rect.width / 2
+              );
+
+
+            const dy =
+              event.clientY -
+              (
+                rect.top +
+                rect.height / 2
+              );
+
+
+            link.style.transform =
+              `
+              translate(
+                ${dx * .045}px,
+                ${dy * .045}px
+              )
+              `;
+
+          },
+          {
+            passive: true
+          }
+        );
+
+
+        link.addEventListener(
+          "pointerleave",
+          () => {
+
+            link.style.transform =
+              "";
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =======================================================
+     05 · THEOREM REGISTRY LASER
+     ======================================================= */
+
+  const registry =
+    document.getElementById(
+      "theoremRegistryLinks"
+    );
+
+
+  if (registry) {
+
+    let laserBusy =
+      false;
+
+
+    registry.addEventListener(
+      "mouseenter",
+      () => {
+
+        if (laserBusy) {
+          return;
+        }
+
+
+        laserBusy =
+          true;
+
+
+        registry.classList.remove(
+          "auf-scanning"
+        );
+
+
+        /*
+         * Force one fresh animation.
+         */
+
+        void registry.offsetWidth;
+
+
+        registry.classList.add(
+          "auf-scanning"
+        );
+
+
+        window.setTimeout(
+          () => {
+
+            registry.classList.remove(
+              "auf-scanning"
+            );
+
+            laserBusy =
+              false;
+
+          },
+          1250
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     06 · NODE FOCUS
+     ======================================================= */
+
+  const nodes =
+    document.querySelectorAll(
+      ".node"
+    );
+
+
+  nodes.forEach(
+    node => {
+
+      node.addEventListener(
+        "mouseenter",
+        () => {
+
+          nodes.forEach(
+            other => {
+
+              if (
+                other !== node
+              ) {
+
+                other.style.opacity =
+                  ".28";
+
+              }
+
+            }
+          );
+
+        }
+      );
+
+
+      node.addEventListener(
+        "mouseleave",
+        () => {
+
+          nodes.forEach(
+            other => {
+
+              other.style.opacity =
+                "";
+
+            }
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     07 · SCROLL DEPTH
+     ======================================================= */
+
+  function scrollDepth() {
+
+    const max =
+      document.documentElement
+        .scrollHeight -
+      window.innerHeight;
+
+
+    if (max <= 0) {
+      return;
+    }
+
+
+    root.style.setProperty(
+      "--auf-scroll",
+      window.scrollY / max
+    );
+
+  }
+
+
+  window.addEventListener(
+    "scroll",
+    scrollDepth,
+    {
+      passive: true
+    }
+  );
+
+
+  scrollDepth();
+
+
+})();
+
 </script>
 </body>
 </html>
