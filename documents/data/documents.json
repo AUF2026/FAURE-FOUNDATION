@@ -2,71 +2,72 @@
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
   "schemaVersion": 3,
-  "generatedAt": "2026-10-21T19:16:12.446397+00:00",
+  "generatedAt": "2026-10-21T21:19:03.652726+00:00",
   "count": 96,
   "categoryCounts": {
-    "certifications": 1,
-    "refutations": 2,
-    "validations": 16,
-    "manuscripts": 1,
-    "theorems": 1,
-    "proofs": 16,
-    "data": 1,
-    "protocols": 1,
+    "certifications": 0,
+    "refutations": 1,
+    "validations": 15,
+    "manuscripts": 0,
+    "theorems": 0,
+    "proofs": 15,
+    "data": 0,
+    "protocols": 0,
     "bibliography": 1,
     "datasets": 1,
     "code": 1,
     "docs": 26,
-    "pages": 28
+    "pages": 29,
+    "pdf": 7
   },
   "categories": [
     {
       "id": "certifications",
       "label": "Certificazioni",
       "type": "CERTIFICATION",
-      "count": 1
+      "count": 0
     },
     {
       "id": "refutations",
       "label": "Confutazioni",
       "type": "REFUTATION",
-      "count": 2
+      "count": 1
     },
     {
       "id": "validations",
       "label": "Validazioni",
       "type": "VALIDATION",
-      "count": 16
+      "count": 15
     },
     {
       "id": "manuscripts",
       "label": "Manoscritti",
       "type": "MANUSCRIPT",
-      "count": 1
+      "count": 0
     },
     {
       "id": "theorems",
       "label": "Teoremi",
       "type": "THEOREM",
-      "count": 1
+      "count": 0
     },
     {
       "id": "proofs",
       "label": "Dimostrazioni",
       "type": "PROOF",
-      "count": 16
+      "count": 15
     },
     {
       "id": "data",
       "label": "Dati e verifiche",
       "type": "DATA",
-      "count": 1
+      "count": 0
     },
     {
       "id": "protocols",
       "label": "Protocolli",
       "type": "PROTOCOL",
-      "count": 1
+      "count": 0
     },
     {
       "id": "bibliography",
@@ -96,7 +97,13 @@
       "id": "pages",
       "label": "Pagine web",
       "type": "PAGE",
-      "count": 28
+      "count": 29
+    },
+    {
+      "id": "pdf",
+      "label": "Manoscritti",
+      "type": "PDF",
+      "count": 7
     }
   ],
   "sources": [
@@ -127,35 +134,6 @@
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/bibliography/index.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/bibliography/index.html",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
-      "id": "certifications-f7e0c96ac76c44a61276",
-      "title": "Readme",
-      "category": "certifications",
-      "categoryLabel": "Certificazioni",
-      "type": "CERTIFICATION",
-      "file": "documents/certifications/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/certifications/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/certifications/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -229,35 +207,6 @@
       "externalLinks": []
     },
     {
-      "id": "refutations-f0830113def3611792df",
-      "title": "Readme",
-      "category": "refutations",
-      "categoryLabel": "Confutazioni",
-      "type": "REFUTATION",
-      "file": "documents/refutations/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/refutations/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/refutations/readme.md",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
       "id": "datasets-16dd60368e8c103668df",
       "title": "Index",
       "category": "datasets",
@@ -272,35 +221,6 @@
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/datasets/index.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/datasets/index.html",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
-      "id": "data-a843219b19b9f06d6305",
-      "title": "Readme",
-      "category": "data",
-      "categoryLabel": "Dati e verifiche",
-      "type": "DATA",
-      "file": "documents/data/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/data/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/data/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -736,35 +656,6 @@
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/index.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/index.html",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
-      "id": "proofs-5a45f2289e0eba34ce0b",
-      "title": "Readme",
-      "category": "proofs",
-      "categoryLabel": "Dimostrazioni",
-      "type": "PROOF",
-      "file": "documents/proofs/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/proofs/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/proofs/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1534,20 +1425,194 @@
       "externalLinks": []
     },
     {
-      "id": "manuscripts-1d64aaa8aefb5fafc458",
-      "title": "Readme",
-      "category": "manuscripts",
+      "id": "pdf-356d216e2e6c366cc593",
+      "title": "Faure Annals Submission Core",
+      "category": "pdf",
       "categoryLabel": "Manoscritti",
-      "type": "MANUSCRIPT",
-      "file": "documents/manuscripts/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/manuscripts/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/manuscripts/readme.md",
+      "type": "PDF",
+      "file": "pdf/Faure_Annals_Submission_Core.pdf",
+      "filename": "Faure_Annals_Submission_Core.pdf",
+      "extension": "pdf",
+      "sizeBytes": 971486,
+      "sha256": "e10ea9dc725f505b51b2f37792a5cacf1fa96727192a718a875618d86b739648",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Faure_Annals_Submission_Core.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Faure_Annals_Submission_Core.pdf",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-1264d3d4bfd8d6f5ac11",
+      "title": "Faure Annals Submission TOE COMPLETA",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/Faure_Annals_Submission_TOE_COMPLETA.pdf",
+      "filename": "Faure_Annals_Submission_TOE_COMPLETA.pdf",
+      "extension": "pdf",
+      "sizeBytes": 1373559,
+      "sha256": "3a9d430c0805ab975b8a2e930043132794e5ad51efab8a14711d6ac1cb1c9855",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Faure_Annals_Submission_TOE_COMPLETA.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Faure_Annals_Submission_TOE_COMPLETA.pdf",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-d9139fce6e2bc9d7a13f",
+      "title": "Faure Dimostrazione Soluzione Acqua Anomalia 0 4C",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/Faure_Dimostrazione_Soluzione_Acqua_Anomalia_0_4C.pdf",
+      "filename": "Faure_Dimostrazione_Soluzione_Acqua_Anomalia_0_4C.pdf",
+      "extension": "pdf",
+      "sizeBytes": 296489,
+      "sha256": "ff500815e52a643c713ecd6162a0acff3d4f6a1972ae5073a18ac6dade70530e",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Faure_Dimostrazione_Soluzione_Acqua_Anomalia_0_4C.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Faure_Dimostrazione_Soluzione_Acqua_Anomalia_0_4C.pdf",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-4d48790c2330ec72943a",
+      "title": "Faure Representation Invariance and Structural Minimality",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/Faure_Representation_Invariance_and_Structural_Minimality.pdf",
+      "filename": "Faure_Representation_Invariance_and_Structural_Minimality.pdf",
+      "extension": "pdf",
+      "sizeBytes": 197726,
+      "sha256": "5f76800145f62f392970d3cd3b1effb455e413f833e35e6c7daa3891d56aab9d",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Faure_Representation_Invariance_and_Structural_Minimality.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Faure_Representation_Invariance_and_Structural_Minimality.pdf",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-d5e2fa5b430eee945340",
+      "title": "Faure Representation Invariance and Structural Minimality Lean 25step",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/Faure_Representation_Invariance_and_Structural_Minimality_Lean_25step.pdf",
+      "filename": "Faure_Representation_Invariance_and_Structural_Minimality_Lean_25step.pdf",
+      "extension": "pdf",
+      "sizeBytes": 567091,
+      "sha256": "e46c4a4e1466541ecf6d15ba37743c4f00e024ae8ed4269f16c808dc49c34840",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Faure_Representation_Invariance_and_Structural_Minimality_Lean_25step.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Faure_Representation_Invariance_and_Structural_Minimality_Lean_25step.pdf",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-df5b9404891b6fcedefc",
+      "title": "Index",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/index.html",
+      "filename": "index.html",
+      "extension": "html",
+      "sizeBytes": 16862,
+      "sha256": "f6659535d5175d2af4a5169f01165130b033cf300b06912461ae79d90d2d0b4e",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/index.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/index.html",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pdf-e48261aa764af420cd8a",
+      "title": "Teatraedro strutturale deriva cost 1 137",
+      "category": "pdf",
+      "categoryLabel": "Manoscritti",
+      "type": "PDF",
+      "file": "pdf/Teatraedro strutturale deriva cost-1-137.pdf",
+      "filename": "Teatraedro strutturale deriva cost-1-137.pdf",
+      "extension": "pdf",
+      "sizeBytes": 368042,
+      "sha256": "6fd068133acad33f5036f82b7c98aa1dc8094460a7e2e444c589c7d9d038a670",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pdf/Teatraedro%20strutturale%20deriva%20cost-1-137.pdf",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pdf/Teatraedro%20strutturale%20deriva%20cost-1-137.pdf",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -1664,6 +1729,35 @@
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21_V2.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/pages/AOS%20KERNEL%20-%20ipersfera_2D_WOW%21_V2.html",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "pages-d12369985a841073525b",
+      "title": "Archive",
+      "category": "pages",
+      "categoryLabel": "Pagine web",
+      "type": "PAGE",
+      "file": "archive.html",
+      "filename": "archive.html",
+      "extension": "html",
+      "sizeBytes": 63070,
+      "sha256": "ea1c0df8f6628fa287ce629786dcf57c6d98e4764aad3cb1b60c577e52bc7667",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/archive.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/archive.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -2375,64 +2469,6 @@
       "externalLinks": []
     },
     {
-      "id": "protocols-4c28544987c850e20301",
-      "title": "Readme",
-      "category": "protocols",
-      "categoryLabel": "Protocolli",
-      "type": "PROTOCOL",
-      "file": "documents/protocols/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/protocols/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/protocols/readme.md",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
-      "id": "theorems-b8c66a75221ffbd35da1",
-      "title": "Readme",
-      "category": "theorems",
-      "categoryLabel": "Teoremi",
-      "type": "THEOREM",
-      "file": "documents/theorems/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/theorems/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/theorems/readme.md",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
       "id": "validations-1eb1ad1dffb3fc455e42",
       "title": "FAURE THEOREM ARITHMETIC ADDITIVE REPRESENTATION",
       "category": "validations",
@@ -2853,35 +2889,6 @@
       "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
       "sourceUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/validation/index.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/validation/index.html",
-      "verification": {
-        "status": "NOT_RECORDED",
-        "report": null,
-        "verifier": null,
-        "verifiedAt": null,
-        "method": null
-      },
-      "identifiers": {
-        "doi": null,
-        "orcid": null,
-        "hal": null
-      },
-      "externalLinks": []
-    },
-    {
-      "id": "validations-b8b3bdd91d772065f8f7",
-      "title": "Readme",
-      "category": "validations",
-      "categoryLabel": "Validazioni",
-      "type": "VALIDATION",
-      "file": "documents/validations/readme.md",
-      "filename": "readme.md",
-      "extension": "md",
-      "sizeBytes": 1,
-      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-      "repository": "FAURE-FOUNDATION",
-      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
-      "sourceUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/validations/readme.md",
-      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/validations/readme.md",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
