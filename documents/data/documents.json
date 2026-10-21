@@ -1,8 +1,8 @@
 {
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
-  "generatedAt": "2026-10-20T23:52:31.658368+00:00",
-  "count": 0,
+  "generatedAt": "2026-10-21T01:52:45.892336+00:00",
+  "count": 8,
   "categories": [
     "certifications",
     "refutations",
@@ -11,7 +11,213 @@
     "theorems",
     "proofs",
     "data",
-    "protocols"
+    "protocols",
+    "bibliography",
+    "datasets",
+    "code",
+    "docs",
+    "pages"
   ],
-  "documents": []
+  "documents": [
+    {
+      "id": "certifications-readme",
+      "title": "Readme",
+      "category": "certifications",
+      "categoryLabel": "CERTIFICAZIONI",
+      "type": "CERTIFICATION",
+      "file": "documents/certifications/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "refutations-readme",
+      "title": "Readme",
+      "category": "refutations",
+      "categoryLabel": "CONFUTAZIONI",
+      "type": "REFUTATION",
+      "file": "documents/refutations/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "data-readme",
+      "title": "Readme",
+      "category": "data",
+      "categoryLabel": "DATI E VERIFICHE",
+      "type": "DATA",
+      "file": "documents/data/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "proofs-readme",
+      "title": "Readme",
+      "category": "proofs",
+      "categoryLabel": "DIMOSTRAZIONI",
+      "type": "PROOF",
+      "file": "documents/proofs/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "manuscripts-readme",
+      "title": "Readme",
+      "category": "manuscripts",
+      "categoryLabel": "MANOSCRITTI",
+      "type": "MANUSCRIPT",
+      "file": "documents/manuscripts/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "protocols-readme",
+      "title": "Readme",
+      "category": "protocols",
+      "categoryLabel": "PROTOCOLLI",
+      "type": "PROTOCOL",
+      "file": "documents/protocols/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "theorems-readme",
+      "title": "Readme",
+      "category": "theorems",
+      "categoryLabel": "TEOREMI",
+      "type": "THEOREM",
+      "file": "documents/theorems/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "validations-readme",
+      "title": "Readme",
+      "category": "validations",
+      "categoryLabel": "VALIDAZIONI",
+      "type": "VALIDATION",
+      "file": "documents/validations/readme.md",
+      "filename": "readme.md",
+      "extension": "md",
+      "sizeBytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    }
+  ]
 }
