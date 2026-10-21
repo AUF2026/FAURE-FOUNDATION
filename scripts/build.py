@@ -28,27 +28,69 @@ CATEGORIES = {
     },
     "theorems": {
         "label": "TEOREMI",
-        "type": "theory",
+        "type": "THEOREM",
     },
     "proofs": {
         "label": "DIMOSTRAZIONI",
-        "type": "proof",
+        "type": "PROOF",
     },
     "data": {
         "label": "DATI E VERIFICHE",
-        "type": "data",
+        "type": "DATA",
     },
     "protocols": {
         "label": "PROTOCOLLI",
-        "type": "protocol",
+        "type": "PROTOCOL",
+    },
+    "bibliography": {
+        "label": "BIBLIOGRAFIA",
+        "type": "BIBLIOGRAPHY",
+    },
+    "datasets": {
+        "label": "DATASET",
+        "type": "DATASET",
+    },
+    "code": {
+        "label": "CODICE SORGENTE",
+        "type": "CODE",
+    },
+    "docs": {
+        "label": "DOCUMENTAZIONE",
+        "type": "DOCUMENTATION",
+    },
+    "pages": {
+        "label": "PAGINE",
+        "type": "PAGE",
     },
 }
+
+# Esclusioni tecniche: non sono documenti da catalogare.
+EXCLUDED_DIRS = {
+    ".git",
+    ".github",
+    "__pycache__",
+    "node_modules",
+    ".venv",
+    "venv",
+}
+
+# File generati o temporanei da ignorare.
+EXCLUDED_FILES = {
+    ".DS_Store",
+    "Thumbs.db",
+}
+
+# Metadati riconosciuti accanto a un documento:
+# esempio: paper.pdf + paper.json.
+METADATA_SUFFIX = ".json"
+
 
 def readable_title(filename):
     title = Path(filename).stem
     title = re.sub(r"[_-]+", " ", title)
     title = re.sub(r"\s+", " ", title).strip()
     return title[:1].upper() + title[1:] if title else filename
+
 
 def sha256_file(path):
     digest = hashlib.sha256()
@@ -59,16 +101,19 @@ def sha256_file(path):
 
     return digest.hexdigest()
 
-def load_metadata(pdf):
-    """
-    Metadata opzionali:
-    accanto a documento.pdf può esistere documento.json.
-    I metadati consentono di collegare verifiche,
-    identificativi e rapporti al PDF esatto.
-    """
-    metadata_path = pdf.with_suffix(".json")
 
-    if not metadata_path.is_file():
+def load_metadata(document):
+    """
+    Metadati opzionali:
+    accanto a documento.pdf, documento.lean, documento.md,
+    ecc. può esistere documento.json.
+
+    Il JSON associato viene utilizzato per arricchire
+    il documento e non viene indicizzato autonomamente.
+    """
+    metadata_path = document.with_suffix(METADATA_SUFFIX)
+
+    if not metadata_path.is_file() or metadata_path == OUTPUT:
         return {}
 
     try:
@@ -88,22 +133,43 @@ def load_metadata(pdf):
 
     return metadata
 
-def build_document(folder, config, pdf):
-    relative_path = pdf.relative_to(ROOT).as_posix()
-    metadata = load_metadata(pdf)
+
+def is_excluded(path):
+    if path.name in EXCLUDED_FILES:
+        return True
+
+    if any(part in EXCLUDED_DIRS for part in path.parts):
+        return True
+
+    # Evita di catalogare il catalogo stesso.
+    if path.resolve() == OUTPUT.resolve():
+        return True
+
+    # Evita di catalogare file JSON usati come metadati
+    # di un altro documento.
+    if path.suffix.lower() == ".json":
+        return True
+
+    return False
+
+
+def build_document(folder, config, path):
+    relative_path = path.relative_to(ROOT).as_posix()
+    metadata = load_metadata(path)
 
     return {
-        "id": f"{folder}-{pdf.stem}",
+        "id": f"{folder}-{path.stem}",
         "title": metadata.get(
-            "title", readable_title(pdf.name)
+            "title", readable_title(path.name)
         ),
         "category": folder,
         "categoryLabel": config["label"],
         "type": config["type"],
         "file": relative_path,
-        "filename": pdf.name,
-        "sizeBytes": pdf.stat().st_size,
-        "sha256": sha256_file(pdf),
+        "filename": path.name,
+        "extension": path.suffix.lower().lstrip("."),
+        "sizeBytes": path.stat().st_size,
+        "sha256": sha256_file(path),
         "verification": {
             "status": metadata.get(
                 "verificationStatus", "NOT_RECORDED"
@@ -121,6 +187,7 @@ def build_document(folder, config, pdf):
         "externalLinks": metadata.get("externalLinks", []),
     }
 
+
 def main():
     documents = []
 
@@ -128,18 +195,25 @@ def main():
         directory = DOCS / folder
         directory.mkdir(parents=True, exist_ok=True)
 
-        for pdf in sorted(
-            directory.rglob("*.pdf"),
+        files = sorted(
+            (
+                path
+                for path in directory.rglob("*")
+                if path.is_file() and not is_excluded(path)
+            ),
             key=lambda path: path.as_posix().casefold(),
-        ):
+        )
+
+        for path in files:
             documents.append(
-                build_document(folder, config, pdf)
+                build_document(folder, config, path)
             )
 
     documents.sort(
         key=lambda item: (
             item["categoryLabel"],
             item["title"].casefold(),
+            item["filename"].casefold(),
         )
     )
 
@@ -167,9 +241,10 @@ def main():
 
     print(
         f"FAURE FOUNDATION: "
-        f"{len(documents)} PDF indicizzati."
+        f"{len(documents)} file indicizzati."
     )
     print(f"Catalogo generato: {OUTPUT.relative_to(ROOT)}")
+
 
 if __name__ == "__main__":
     main()
