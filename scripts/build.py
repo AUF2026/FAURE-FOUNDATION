@@ -44,6 +44,7 @@ CATEGORIES = {
     "code": ("Codice sorgente", "CODE"),
     "docs": ("Documentazione", "DOCUMENTATION"),
     "pages": ("Pagine web", "PAGE"),
+    "Pdf": ("Manoscritti", "PDF"),
 }
 
 CATEGORY_ALIASES = {
@@ -80,6 +81,7 @@ CATEGORY_ALIASES = {
     "documentazione": "docs",
     "pages": "pages",
     "pagine": "pages",
+    "pdf": "pdf",
 }
 
 EXCLUDED_DIRS = {
@@ -113,7 +115,6 @@ EXCLUDED_FILES = {
 ROOT_SERVICE_FILES = {
     "index.html",
     "404.html",
-    "archive.html",
     "build.py",
     "catalog.yml",
     "catalog.yaml",
@@ -264,6 +265,10 @@ def classify_document(relative_path):
         ".lean": "proofs",
         ".thy": "proofs",
         ".v": "proofs",
+        "lean": "validations",
+        "lean": "validazione",
+        "tla": "validations",
+        "tla": "validazione",
     }
 
     return extension_categories.get(extension, "docs")
@@ -402,13 +407,13 @@ def build_document(repository, repository_root, path):
         "sourceUrl": source_url,
         "downloadUrl": download_url,
         "verification": {
-            "status": metadata.get(
-                "verificationStatus", "NOT_RECORDED"
-            ),
-            "report": metadata.get("verificationReport"),
-            "verifier": metadata.get("verifier"),
-            "verifiedAt": metadata.get("verifiedAt"),
-            "method": metadata.get("verificationMethod"),
+        "status": metadata.get(
+        "verificationStatus", "NOT_RECORDED"
+        ),
+        "report": metadata.get("verificationReport"),
+        "verifier": metadata.get("verifier"),
+        "verifiedAt": metadata.get("verifiedAt"),
+        "method": metadata.get("verificationMethod"),
         },
         "identifiers": {
             "doi": metadata.get("doi"),
