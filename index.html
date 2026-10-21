@@ -2255,8 +2255,8 @@ select:focus-visible {
   </span>
 
   <span class="brand-name">
-    AUF2026 - FAURE FOUNDATION<br>
-    <small>INDEPENDENT SCIENTIFIC INQUIRY & VALIDATION</small>
+    FAURE FOUNDATION<br>
+    <small>INDEPENDENT SCIENTIFIC INQUIRY</small>
   </span>
 
 </a>
@@ -2303,9 +2303,9 @@ select:focus-visible {
         <div class="hero-meta">
           <span>
             <i class="status-dot"></i>
-            RICERCA INDIPENDENTE - METODO EMPIRICO
+            RICERCA INDIPENDENTE
           </span>
-          <span>PRINCIPI · PROVE · FALSIFICABILITÀ · CERTIFICAZIONE</span>
+          <span>PRINCIPI · PROVE · FALSIFICABILITÀ</span>
         </div>
 
         <div class="hero-content">
@@ -2535,7 +2535,7 @@ select:focus-visible {
     <span class="note-symbol" aria-hidden="true">!</span>
     <p>
       La presenza nel registro documenta l'indicizzazione del file,
-      costituisce inoltre da sola una certificazione scientifica.
+      non costituisce da sola una certificazione scientifica.
       Le informazioni di verifica sono riportate separatamente
       quando disponibili.
     </p>
@@ -2617,7 +2617,7 @@ select:focus-visible {
 
         <h2>
           Nessuna tesi è<br>
-          al di sopra della<span>verità.</span>
+          al di sopra <span>della prova.</span>
         </h2>
 
         <a href="#archive" class="closing-link">
@@ -2710,10 +2710,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   
-
 /* =========================================================
    ARCHIVIO — CATALOGO, CATEGORIE, RICERCA E FILTRI
-   FAURE FOUNDATION · AUF2026
    ========================================================= */
 
 const ARCHIVE_CATEGORIES = [
@@ -2739,251 +2737,28 @@ const archiveCategoryLabels = Object.fromEntries(
   ])
 );
 
-/* ---------------------------------------------------------
-   ELEMENTI DOM
-   --------------------------------------------------------- */
-
-const archivePaperList =
-  document.getElementById("paperList");
-
-const archivePaperSearch =
-  document.getElementById("paperSearch");
-
-const archivePaperFilter =
-  document.getElementById("paperFilter");
-
-const archiveSearchEmpty =
-  document.getElementById("searchEmpty");
-
-const archiveCatalogStatus =
-  document.getElementById("catalogStatus");
-
-const archiveSourceStatus =
-  document.getElementById("archiveSource");
-
-/* ---------------------------------------------------------
-   UTILITÀ
-   --------------------------------------------------------- */
-
-function archiveText(value, fallback = "") {
-  if (typeof value === "string" && value.trim()) {
-    return value.trim();
-  }
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
-  return fallback;
-}
-
-function archiveNormalizeCategory(value) {
-  const category = archiveText(value)
-    .toLowerCase()
-    .replace(/\s+/g, "-");
-
-  const aliases = {
-    manuscript: "manuscripts",
-    manoscritti: "manuscripts",
-    theorem: "theorems",
-    teoremi: "theorems",
-    proof: "proofs",
-    dimostrazioni: "proofs",
-    refutation: "refutations",
-    confutazioni: "refutations",
-    validation: "validations",
-    validazioni: "validations",
-    certification: "certifications",
-    certificazioni: "certifications",
-    protocol: "protocols",
-    protocolli: "protocols",
-    dataset: "datasets",
-    bibliography: "bibliography",
-    bibliografia: "bibliography",
-    documentation: "docs",
-    documentazione: "docs",
-    pages: "pages",
-    page: "pages",
-    code: "code"
-  };
-
-  return aliases[category] || category;
-}
-
-function archiveGetFilename(doc) {
-  if (doc.filename) {
-    return archiveText(doc.filename);
-  }
-
-  if (doc.file) {
-    return String(doc.file).split("/").pop();
-  }
-
-  if (doc.sourceUrl) {
-    try {
-      return decodeURIComponent(
-        new URL(doc.sourceUrl).pathname.split("/").pop()
-      );
-    } catch (_) {
-      // Usa il titolo come ripiego.
-    }
-  }
-
-  return archiveText(doc.title, "Documento senza titolo");
-}
-
-function archiveGetExtension(doc) {
-  const explicit = archiveText(doc.extension)
-    .replace(/^\./, "")
-    .toLowerCase();
-
-  if (explicit) return explicit;
-
-  const filename = archiveGetFilename(doc);
-  const match = filename.match(/\.([^.]+)$/);
-
-  return match ? match[1].toLowerCase() : "file";
-}
-
-function archiveGetTitle(doc) {
-  const title = archiveText(doc.title);
-
-  if (title) return title;
-
-  const filename = archiveGetFilename(doc);
-
-  return filename.replace(/\.[^.]+$/, "")
-    .replace(/[_-]+/g, " ")
-    .trim() || "Documento senza titolo";
-}
-
-function archiveGetDocumentUrl(doc) {
-  /*
-   * Preferisce l'URL diretto al contenuto.
-   * sourceUrl è un ripiego: il lettore deve convertirlo
-   * in URL raw quando si tratta di GitHub /blob/.
-   */
-  return (
-    archiveText(doc.downloadUrl) ||
-    archiveText(doc.download_url) ||
-    archiveText(doc.rawUrl) ||
-    archiveText(doc.raw_url) ||
-    archiveText(doc.pdf_url) ||
-    archiveText(doc.file_url) ||
-    archiveText(doc.url) ||
-    archiveText(doc.sourceUrl) ||
-    ""
-  );
-}
-
-function archiveGetSources(sources) {
-  if (!Array.isArray(sources)) return [];
-
-  return sources.map(source => {
-    if (typeof source === "string") {
-      return source;
-    }
-
-    if (source && typeof source === "object") {
-      return archiveText(source.name) ||
-        archiveText(source.url);
-    }
-
-    return "";
-  }).filter(Boolean);
-}
-
-/* ---------------------------------------------------------
-   APERTURA NEL LETTORE INCORPORATO
-   --------------------------------------------------------- */
-
-function archiveOpenDocument(doc) {
-  if (typeof window.openArchivePdf !== "function") {
-    console.error(
-      "Archive: window.openArchivePdf non è disponibile. " +
-      "Verificare che il codice del lettore sia caricato."
-    );
-
-    if (archiveCatalogStatus) {
-      archiveCatalogStatus.textContent =
-        "Lettore documentale non disponibile. Ricaricare la pagina.";
-    }
-
-    return;
-  }
-
-  const url = archiveGetDocumentUrl(doc);
-
-  if (!url) {
-    console.error("Archive: URL del documento mancante.", doc);
-
-    if (archiveCatalogStatus) {
-      archiveCatalogStatus.textContent =
-        "Questo documento non dispone di un URL sorgente.";
-    }
-
-    return;
-  }
-
-  /*
-   * Passa il record completo al lettore.
-   * Non naviga alla repository e non apre una nuova scheda.
-   */
-  window.openArchivePdf({
-    ...doc,
-    title: archiveGetTitle(doc),
-    filename: archiveGetFilename(doc),
-    extension: archiveGetExtension(doc),
-    downloadUrl: url
-  });
-}
-
-/* ---------------------------------------------------------
-   CARICAMENTO DEL CATALOGO
-   --------------------------------------------------------- */
-
 async function loadScientificCatalog() {
-  if (!archivePaperList) {
-    console.error("Archive: elemento #paperList non trovato.");
-    return;
-  }
+  if (!paperList) return;
 
-  archivePaperList.setAttribute("aria-busy", "true");
+  const status = document.getElementById("catalogStatus");
+  const sourceStatus = document.getElementById("archiveSource");
 
-  if (archiveCatalogStatus) {
-    archiveCatalogStatus.textContent = "Caricamento catalogo…";
-  }
+  paperList.setAttribute("aria-busy", "true");
 
   try {
     const response = await fetch(
-      new URL(
-        "documents/data/documents.json",
-        document.baseURI
-      ).href,
-      {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json"
-        }
-      }
+      "./documents/data/documents.json",
+      { cache: "no-store" }
     );
 
     if (!response.ok) {
-      throw new Error(
-        `Catalogo: HTTP ${response.status}`
-      );
+      throw new Error(`Catalogo: HTTP ${response.status}`);
     }
 
     const catalog = await response.json();
 
-    if (
-      !catalog ||
-      typeof catalog !== "object" ||
-      !Array.isArray(catalog.documents)
-    ) {
-      throw new Error(
-        "Formato documents.json non valido: manca documents[]."
-      );
+    if (!catalog || !Array.isArray(catalog.documents)) {
+      throw new Error("Formato documents.json non valido");
     }
 
     const groups = new Map(
@@ -2995,58 +2770,30 @@ async function loadScientificCatalog() {
 
     const uncategorized = [];
     let loadedCount = 0;
-    let skippedCount = 0;
 
     for (const doc of catalog.documents) {
-      if (!doc || typeof doc !== "object") {
-        skippedCount++;
-        continue;
-      }
+      if (!doc || !doc.title || !doc.sourceUrl) continue;
 
-      const filename = archiveGetFilename(doc);
-      const titleText = archiveGetTitle(doc);
-      const categoryId = archiveNormalizeCategory(
-        doc.category
-      );
-
+      const categoryId = String(doc.category || "").toLowerCase();
       const categoryLabel =
-        archiveText(doc.categoryLabel) ||
+        doc.categoryLabel ||
         archiveCategoryLabels[categoryId] ||
         "Altri documenti";
 
       const row = document.createElement("a");
-
       row.className = "paper-row";
-      row.href = "#archive-pdf-viewer";
-      row.setAttribute("role", "button");
-      row.setAttribute("tabindex", "0");
-      row.setAttribute(
-        "aria-label",
-        `Apri documento: ${titleText}`
-      );
+      row.href = doc.sourceUrl;
+      row.target = "_blank";
+      row.rel = "noopener noreferrer";
 
+      // Conserva la categoria reale del catalogo.
       row.dataset.type = categoryId;
       row.dataset.category = categoryId;
 
-      const normalizedDoc = {
-        ...doc,
-        title: titleText,
-        filename,
-        extension: archiveGetExtension(doc),
-        downloadUrl: archiveGetDocumentUrl(doc)
-      };
-
-      /*
-       * Conserva il documento completo per il lettore.
-       * La proprietà è associata all'elemento, non serializzata
-       * dentro HTML: evita problemi di escaping dei dati.
-       */
-      row._archiveDocument = normalizedDoc;
-
       row.dataset.search = [
         doc.id,
-        titleText,
-        filename,
+        doc.title,
+        doc.filename,
         doc.file,
         doc.type,
         categoryLabel,
@@ -3055,42 +2802,21 @@ async function loadScientificCatalog() {
         doc.extension,
         doc.identifiers?.doi,
         doc.identifiers?.hal,
-        doc.identifiers?.orcid,
-        doc.verification?.status
+        doc.identifiers?.orcid
       ].filter(Boolean).join(" ");
 
       const title = document.createElement("strong");
-      title.textContent = titleText;
+      title.textContent = doc.title;
 
       const details = document.createElement("span");
       details.className = "paper-status";
-
       details.textContent = [
         categoryLabel,
-        archiveText(doc.repository, "Repository"),
-        archiveGetExtension(doc).toUpperCase()
+        doc.repository || "Repository",
+        doc.extension || "file"
       ].join(" · ");
 
       row.append(title, details);
-
-      /*
-       * Apertura tramite click e tastiera.
-       * Non usare href=sourceUrl: manderebbe alla pagina GitHub.
-       */
-      row.addEventListener("click", event => {
-        event.preventDefault();
-        archiveOpenDocument(row._archiveDocument);
-      });
-
-      row.addEventListener("keydown", event => {
-        if (
-          event.key === "Enter" ||
-          event.key === " "
-        ) {
-          event.preventDefault();
-          archiveOpenDocument(row._archiveDocument);
-        }
-      });
 
       if (groups.has(categoryId)) {
         groups.get(categoryId).push(row);
@@ -3107,7 +2833,6 @@ async function loadScientificCatalog() {
       if (!rows.length) return;
 
       const section = document.createElement("section");
-
       section.className = "archive-category";
       section.dataset.category = id;
 
@@ -3127,17 +2852,12 @@ async function loadScientificCatalog() {
       list.className = "archive-category-documents";
 
       rows.sort((a, b) => {
-        const aTitle =
-          a.querySelector("strong")?.textContent || "";
-
-        const bTitle =
-          b.querySelector("strong")?.textContent || "";
-
+        const aTitle = a.querySelector("strong")?.textContent || "";
+        const bTitle = b.querySelector("strong")?.textContent || "";
         return aTitle.localeCompare(bTitle, "it");
       });
 
       rows.forEach(row => list.appendChild(row));
-
       section.append(heading, list);
       fragment.appendChild(section);
     }
@@ -3156,103 +2876,62 @@ async function loadScientificCatalog() {
       uncategorized
     );
 
-    archivePaperList.replaceChildren(fragment);
-    archivePaperList.setAttribute("aria-busy", "false");
+    paperList.replaceChildren(fragment);
+    paperList.setAttribute("aria-busy", "false");
 
-    const sources = archiveGetSources(catalog.sources);
-
-    if (archiveCatalogStatus) {
-      archiveCatalogStatus.textContent =
+    if (status) {
+      status.textContent =
         `${loadedCount} documenti caricati · ` +
-        `${sources.length} fonti` +
-        (skippedCount ? ` · ${skippedCount} record ignorati` : "");
+        `${catalog.sources?.length || 0} fonti`;
     }
 
-    if (archiveSourceStatus) {
-      archiveSourceStatus.textContent =
-        sources.join(" · ");
+    if (sourceStatus) {
+      sourceStatus.textContent =
+        (catalog.sources || []).join(" · ");
     }
 
     filterPapers();
 
-    console.info(
-      `[Archive] Caricati ${loadedCount} documenti.`,
-      {
-        declaredCount: catalog.count,
-        actualCount: catalog.documents.length,
-        sources,
-        skippedCount
-      }
-    );
-
-    if (
-      Number.isInteger(catalog.count) &&
-      catalog.count !== catalog.documents.length
-    ) {
-      console.warn(
-        "[Archive] Il conteggio dichiarato nel JSON " +
-        "non corrisponde al numero effettivo di record."
-      );
-    }
-
   } catch (error) {
-    console.error(
-      "Errore catalogo scientifico:",
-      error
-    );
+    console.error("Errore catalogo scientifico:", error);
 
-    archivePaperList.setAttribute("aria-busy", "false");
-    archivePaperList.replaceChildren();
+    paperList.setAttribute("aria-busy", "false");
 
-    if (archiveCatalogStatus) {
-      archiveCatalogStatus.textContent =
-        `Errore catalogo: ${error.message}`;
+    if (status) {
+      status.textContent = `Errore: ${error.message}`;
     }
+
+    paperList.replaceChildren();
 
     const message = document.createElement("p");
-
     message.className = "search-empty";
     message.textContent =
       "Impossibile caricare il catalogo. " +
-      "Verificare documents/data/documents.json, " +
-      "il percorso di pubblicazione e la rete.";
+      "Controllare documents/data/documents.json e la rete.";
 
-    archivePaperList.appendChild(message);
+    paperList.appendChild(message);
   }
 }
 
-/* ---------------------------------------------------------
-   RICERCA E FILTRI
-   --------------------------------------------------------- */
-
 function filterPapers() {
-  if (!archivePaperList) return;
+  if (!paperList || !paperSearch || !paperFilter) return;
 
-  const query = archivePaperSearch
-    ? archivePaperSearch.value
-        .trim()
-        .toLocaleLowerCase("it")
-    : "";
+  const query = paperSearch.value
+    .trim()
+    .toLocaleLowerCase("it");
 
-  const selectedType = archivePaperFilter
-    ? archivePaperFilter.value
-    : "all";
-
+  const selectedType = paperFilter.value;
   let visibleCount = 0;
 
-  const rows = archivePaperList.querySelectorAll(
-    ".paper-row"
-  );
+  // Recupera le righe DOPO il caricamento, non prima.
+  const rows = paperList.querySelectorAll(".paper-row");
 
   rows.forEach(row => {
     const searchableText = [
       row.textContent,
       row.dataset.search,
       row.dataset.category
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLocaleLowerCase("it");
+    ].filter(Boolean).join(" ").toLocaleLowerCase("it");
 
     const matchesQuery =
       !query || searchableText.includes(query);
@@ -3263,62 +2942,39 @@ function filterPapers() {
 
     row.hidden = !(matchesQuery && matchesCategory);
 
-    if (!row.hidden) {
-      visibleCount++;
+    if (!row.hidden) visibleCount++;
+  });
+
+  // Nasconde le categorie che non hanno risultati visibili.
+  paperList.querySelectorAll(".archive-category").forEach(section => {
+    const visibleRows = section.querySelectorAll(
+      ".paper-row:not([hidden])"
+    );
+
+    section.hidden = visibleRows.length === 0;
+
+    const count = section.querySelector(".archive-category-count");
+    if (count) {
+      count.textContent = String(visibleRows.length);
     }
   });
 
-  archivePaperList
-    .querySelectorAll(".archive-category")
-    .forEach(section => {
-      const visibleRows = section.querySelectorAll(
-        ".paper-row:not([hidden])"
-      );
-
-      section.hidden = visibleRows.length === 0;
-
-      const count = section.querySelector(
-        ".archive-category-count"
-      );
-
-      if (count) {
-        count.textContent = String(visibleRows.length);
-      }
-    });
-
-  if (archiveSearchEmpty) {
-    archiveSearchEmpty.hidden = visibleCount !== 0;
+  if (searchEmpty) {
+    searchEmpty.hidden = visibleCount !== 0;
   }
 }
 
-/* ---------------------------------------------------------
-   INIZIALIZZAZIONE
-   --------------------------------------------------------- */
+if (paperSearch && paperFilter && paperList) {
+  paperSearch.addEventListener("input", filterPapers);
+  paperFilter.addEventListener("change", filterPapers);
 
-if (archivePaperSearch) {
-  archivePaperSearch.addEventListener(
-    "input",
-    filterPapers
-  );
+  loadScientificCatalog();
 }
 
-if (archivePaperFilter) {
-  archivePaperFilter.addEventListener(
-    "change",
-    filterPapers
-  );
-}
+  /* LINK PDF: PROTEZIONE DEI SEGNAPOSTO */
 
-loadScientificCatalog();
-
-/* ---------------------------------------------------------
-   LINK PDF: PROTEZIONE DEI SEGNAPOSTO
-   --------------------------------------------------------- */
-
-document
-  .querySelectorAll('a[data-pdf="true"]')
-  .forEach(link => {
-    link.addEventListener("click", event => {
+  document.querySelectorAll('a[data-pdf="true"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
       const href = link.getAttribute("href") || "";
 
       if (
@@ -3333,14 +2989,13 @@ document
           ?.querySelector(".paper-status");
 
         if (status) {
-          status.textContent =
-            "DOCUMENTO NON ANCORA DISPONIBILE";
-
+          status.textContent = "DOCUMENTO NON ANCORA DISPONIBILE";
           status.setAttribute("role", "status");
         }
       }
     });
   });
+});
 
 /* =========================================
    DARK / LIGHT MODE TOGGLE
@@ -3495,8 +3150,7 @@ if (themeToggle) {
     "cpp", "hpp", "cs", "go", "rs", "swift",
     "kt", "sql", "sh", "bash", "bat", "ps1",
     "diff", "patch", "makefile", "dockerfile",
-    "graphql", "gql", "ipynb", "srt", "vtt", "lean",
-    "tla"
+    "graphql", "gql", "ipynb", "srt", "vtt"
   ]);
 
   let requestSequence = 0;
@@ -4394,4 +4048,3 @@ if (themeToggle) {
 </script>
 </body>
 </html>
-
