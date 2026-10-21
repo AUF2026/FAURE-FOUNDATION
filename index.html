@@ -1805,6 +1805,88 @@ select:focus-visible {
   }
 }
 
+    /* FAURE FOUNDATION · subtle interaction styles */
+
+.scientific-scope {
+  opacity: 1;
+  transform: none;
+}
+
+.scientific-scope.auf-revealed {
+  animation: auf-section-reveal 600ms ease-out both;
+}
+
+.scope-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.scope-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--focus-x, 50%) var(--focus-y, 50%),
+    rgb(255 255 255 / 0.055),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.scope-card:hover::after {
+  opacity: 1;
+}
+
+.node {
+  transition: opacity 180ms ease;
+}
+
+.node.auf-node-muted {
+  opacity: 0.45;
+}
+
+#theoremRegistryLinks.auf-scanning {
+  animation: auf-registry-focus 900ms ease-out;
+}
+
+@keyframes auf-section-reveal {
+  from {
+    opacity: 0.72;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auf-registry-focus {
+  0% {
+    filter: brightness(1);
+  }
+  40% {
+    filter: brightness(1.08);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scientific-scope.auf-revealed,
+  #theoremRegistryLinks.auf-scanning {
+    animation: none;
+  }
+
+  .scope-card::after,
+  .node {
+    transition: none;
+  }
+}
 </style>
 </head>
 
@@ -2597,506 +2679,196 @@ function escapeHtml(s) {
   return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 }
 </script>
-<script>
 
-/* =========================================================
-   AUF2026
-   DEEP SCIENTIFIC WOW ENGINE
-   ========================================================= */
+<script>
+/* ============================================================
+   FAURE FOUNDATION · INTERACTION LAYER
+   Effetti sobri, accessibili e leggeri
+   ============================================================ */
 
 (() => {
-
   "use strict";
 
+  const root = document.documentElement;
 
-  const root =
-    document.documentElement;
+  // Rispetta le preferenze di accessibilità del visitatore.
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
 
+  /* ==========================================================
+     01 · REVEAL DELLE SEZIONI
+     ========================================================== */
 
-  const reducedMotion =
-    window.matchMedia &&
-    window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-
-  if (reducedMotion) {
-    return;
-  }
-
-
-  /* =======================================================
-     01 · GLOBAL OPTICAL FIELD
-     ======================================================= */
-
-  let tx =
-    window.innerWidth * .5;
-
-  let ty =
-    window.innerHeight * .35;
-
-
-  let cx =
-    tx;
-
-  let cy =
-    ty;
-
-
-  window.addEventListener(
-    "pointermove",
-    event => {
-
-      tx =
-        event.clientX;
-
-      ty =
-        event.clientY;
-
-    },
-    {
-      passive: true
-    }
+  const sections = document.querySelectorAll(
+    ".scientific-scope"
   );
 
-
-  function opticalLoop() {
-
-    cx +=
-      (tx - cx) * .055;
-
-    cy +=
-      (ty - cy) * .055;
-
-
-    root.style.setProperty(
-      "--auf-mx",
-      cx + "px"
-    );
-
-
-    root.style.setProperty(
-      "--auf-my",
-      cy + "px"
-    );
-
-
-    requestAnimationFrame(
-      opticalLoop
-    );
-
-  }
-
-
-  opticalLoop();
-
-
-  /* =======================================================
-     02 · CINEMATIC SECTION REVEAL
-     ======================================================= */
-
-  const sections =
-    document.querySelectorAll(
-      ".scientific-scope"
-    );
-
-
-  if (
-    "IntersectionObserver" in window
-  ) {
-
-    const observer =
-      new IntersectionObserver(
-        entries => {
-
-          entries.forEach(
-            entry => {
-
-              if (
-                entry.isIntersecting
-              ) {
-
-                entry.target.classList.add(
-                  "auf-revealed"
-                );
-
-                const heading =
-                  entry.target.querySelector(
-                    ".section-heading"
-                  );
-
-
-                if (heading) {
-
-                  window.setTimeout(
-                    () => {
-
-                      heading.classList.add(
-                        "auf-heading"
-                      );
-
-                    },
-                    180
-                  );
-
-                }
-
-
-                observer.unobserve(
-                  entry.target
-                );
-
-              }
-
-            }
-          );
-
-        },
-        {
-          threshold: .12,
-
-          rootMargin:
-            "0px 0px -50px 0px"
-        }
-      );
-
-
-    sections.forEach(
-      section =>
-        observer.observe(
-          section
-        )
-    );
-
-  }
-  else {
-
-    sections.forEach(
-      section =>
-        section.classList.add(
-          "auf-revealed"
-        )
-    );
-
-  }
-
-
-  /* =======================================================
-     03 · CARD OPTICAL TRACKING
-     ======================================================= */
-
-  document
-    .querySelectorAll(
-      ".scope-card"
-    )
-    .forEach(
-      card => {
-
-        card.addEventListener(
-          "pointermove",
-          event => {
-
-            const rect =
-              card.getBoundingClientRect();
-
-
-            const x =
-              event.clientX -
-              rect.left;
-
-
-            const y =
-              event.clientY -
-              rect.top;
-
-
-            const px =
-              x / rect.width;
-
-
-            const py =
-              y / rect.height;
-
-
-            card.style.setProperty(
-              "--focus-x",
-              x + "px"
-            );
-
-
-            card.style.setProperty(
-              "--focus-y",
-              y + "px"
-            );
-
-
-            /*
-             * Deliberately stronger than
-             * previous versions.
-             */
-
-            const rotateX =
-              (.5 - py) * 6;
-
-
-            const rotateY =
-              (px - .5) * 8;
-
-
-            card.style.transform =
-              `
-              perspective(1200px)
-              rotateX(${rotateX}deg)
-              rotateY(${rotateY}deg)
-              translateZ(8px)
-              `;
-
-          },
-          {
-            passive: true
-          }
-        );
-
-
-        card.addEventListener(
-          "pointerleave",
-          () => {
-
-            card.style.transform =
-              "";
-
-          }
-        );
-
+  if (reducedMotion || !("IntersectionObserver" in window)) {
+    sections.forEach(section => {
+      section.classList.add("auf-revealed");
+    });
+  } else {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("auf-revealed");
+
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.10,
+        rootMargin: "0px 0px -35px 0px"
       }
     );
 
-
-  /* =======================================================
-     04 · MAGNETIC LINKS
-     ======================================================= */
-
-  document
-    .querySelectorAll(
-      ".archive-link"
-    )
-    .forEach(
-      link => {
-
-        link.addEventListener(
-          "pointermove",
-          event => {
-
-            const rect =
-              link.getBoundingClientRect();
-
-
-            const dx =
-              event.clientX -
-              (
-                rect.left +
-                rect.width / 2
-              );
-
-
-            const dy =
-              event.clientY -
-              (
-                rect.top +
-                rect.height / 2
-              );
-
-
-            link.style.transform =
-              `
-              translate(
-                ${dx * .045}px,
-                ${dy * .045}px
-              )
-              `;
-
-          },
-          {
-            passive: true
-          }
-        );
-
-
-        link.addEventListener(
-          "pointerleave",
-          () => {
-
-            link.style.transform =
-              "";
-
-          }
-        );
-
-      }
-    );
-
-
-  /* =======================================================
-     05 · THEOREM REGISTRY LASER
-     ======================================================= */
-
-  const registry =
-    document.getElementById(
-      "theoremRegistryLinks"
-    );
-
-
-  if (registry) {
-
-    let laserBusy =
-      false;
-
-
-    registry.addEventListener(
-      "mouseenter",
-      () => {
-
-        if (laserBusy) {
-          return;
-        }
-
-
-        laserBusy =
-          true;
-
-
-        registry.classList.remove(
-          "auf-scanning"
-        );
-
-
-        /*
-         * Force one fresh animation.
-         */
-
-        void registry.offsetWidth;
-
-
-        registry.classList.add(
-          "auf-scanning"
-        );
-
-
-        window.setTimeout(
-          () => {
-
-            registry.classList.remove(
-              "auf-scanning"
-            );
-
-            laserBusy =
-              false;
-
-          },
-          1250
-        );
-
-      }
-    );
-
+    sections.forEach(section => observer.observe(section));
   }
 
+  /* ==========================================================
+     02 · LUCE AMBIENTALE DELLE SCHEDE
+     ========================================================== */
 
-  /* =======================================================
-     06 · NODE FOCUS
-     ======================================================= */
+  if (!reducedMotion) {
+    document.querySelectorAll(".scope-card").forEach(card => {
+      card.addEventListener("pointermove", event => {
+        // Evita effetti da mouse sui dispositivi touch.
+        if (event.pointerType === "touch") return;
 
-  const nodes =
-    document.querySelectorAll(
-      ".node"
-    );
+        const rect = card.getBoundingClientRect();
 
+        card.style.setProperty(
+          "--focus-x",
+          `${event.clientX - rect.left}px`
+        );
 
-  nodes.forEach(
-    node => {
+        card.style.setProperty(
+          "--focus-y",
+          `${event.clientY - rect.top}px`
+        );
+      }, { passive: true });
 
-      node.addEventListener(
-        "mouseenter",
-        () => {
+      card.addEventListener("pointerleave", () => {
+        card.style.removeProperty("--focus-x");
+        card.style.removeProperty("--focus-y");
+      });
+    });
+  }
 
-          nodes.forEach(
-            other => {
+  /* ==========================================================
+     03 · FOCUS DEL REGISTRO DEI TEOREMI
+     ========================================================== */
 
-              if (
-                other !== node
-              ) {
-
-                other.style.opacity =
-                  ".28";
-
-              }
-
-            }
-          );
-
-        }
-      );
-
-
-      node.addEventListener(
-        "mouseleave",
-        () => {
-
-          nodes.forEach(
-            other => {
-
-              other.style.opacity =
-                "";
-
-            }
-          );
-
-        }
-      );
-
-    }
+  const registry = document.getElementById(
+    "theoremRegistryLinks"
   );
 
+  if (registry && !reducedMotion) {
+    registry.addEventListener("pointerenter", event => {
+      if (event.pointerType === "touch") return;
 
-  /* =======================================================
-     07 · SCROLL DEPTH
-     ======================================================= */
+      registry.classList.remove("auf-scanning");
 
-  function scrollDepth() {
+      // Riavvia l'animazione soltanto quando necessario.
+      void registry.offsetWidth;
 
-    const max =
-      document.documentElement
-        .scrollHeight -
-      window.innerHeight;
+      registry.classList.add("auf-scanning");
+    });
 
+    registry.addEventListener("animationend", event => {
+      if (event.target !== registry) return;
 
-    if (max <= 0) {
-      return;
-    }
+      registry.classList.remove("auf-scanning");
+    });
+  }
 
+  /* ==========================================================
+     04 · FOCUS DEI NODI
+     ========================================================== */
+
+  const nodes = document.querySelectorAll(".node");
+
+  if (!reducedMotion && nodes.length > 1) {
+    nodes.forEach(node => {
+      node.addEventListener("pointerenter", event => {
+        if (event.pointerType === "touch") return;
+
+        nodes.forEach(other => {
+          if (other !== node) {
+            other.classList.add("auf-node-muted");
+          }
+        });
+      });
+
+      node.addEventListener("pointerleave", () => {
+        nodes.forEach(other => {
+          other.classList.remove("auf-node-muted");
+        });
+      });
+
+      // Supporto alla navigazione da tastiera.
+      node.addEventListener("focus", () => {
+        nodes.forEach(other => {
+          if (other !== node) {
+            other.classList.add("auf-node-muted");
+          }
+        });
+      });
+
+      node.addEventListener("blur", () => {
+        nodes.forEach(other => {
+          other.classList.remove("auf-node-muted");
+        });
+      });
+    });
+  }
+
+  /* ==========================================================
+     05 · PROFONDITÀ DELLA PAGINA
+     ========================================================== */
+
+  let scrollScheduled = false;
+
+  function updateScrollDepth() {
+    const scrollHeight =
+      document.documentElement.scrollHeight;
+
+    const maxScroll = scrollHeight - window.innerHeight;
+
+    const progress = maxScroll > 0
+      ? Math.min(1, Math.max(0, window.scrollY / maxScroll))
+      : 0;
 
     root.style.setProperty(
       "--auf-scroll",
-      window.scrollY / max
+      progress.toFixed(4)
     );
 
+    scrollScheduled = false;
   }
 
+  function onScroll() {
+    if (scrollScheduled) return;
 
-  window.addEventListener(
-    "scroll",
-    scrollDepth,
-    {
-      passive: true
-    }
-  );
+    scrollScheduled = true;
+    window.requestAnimationFrame(updateScrollDepth);
+  }
 
+  window.addEventListener("scroll", onScroll, {
+    passive: true
+  });
 
-  scrollDepth();
+  window.addEventListener("resize", onScroll, {
+    passive: true
+  });
 
+  updateScrollDepth();
 
 })();
-
 </script>
+
 </body>
 </html>
