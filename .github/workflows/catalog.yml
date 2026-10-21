@@ -1,3 +1,4 @@
+
 name: Build scientific catalog
 
 on:
@@ -5,40 +6,76 @@ on:
     branches:
       - main
     paths:
-      - 'documents/**'
-      - 'scripts/build.py'
-      - '.github/workflows/catalog.yml'
+      - "documents/**"
+      - "scripts/build.py"
+      - ".github/workflows/catalog.yml"
+
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: scientific-catalog-main
+  cancel-in-progress: false
+
 jobs:
   build:
+    name: Generate and validate catalog
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Generate catalog
-        run: python scripts/build.py
+        run: python -u scripts/build.py
+
+      - name: Validate generated JSON
+        run: |
+          python -m json.tool documents/data/documents.json > /dev/null
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("documents/data/documents.json")
+
+          with path.open("r", encoding="utf-8") as stream:
+              catalog = json.load(stream)
+
+          assert isinstance(catalog, dict), "Root JSON non valido"
+          assert isinstance(catalog.get("documents"), list), \
+              "'documents' deve essere una lista"
+          assert catalog.get("count") == len(catalog["documents"]), \
+              "Il conteggio non corrisponde ai documenti"
+
+          ids = [item["id"] for item in catalog["documents"]]
+          assert len(ids) == len(set(ids)), "ID duplicati nel catalogo"
+
+          print(f"JSON valido: {len(ids)} documenti.")
+          PY
 
       - name: Commit generated catalog
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add documents/data/documents.json
 
-          if ! git diff --cached --quiet; then
-            git commit -m "Update scientific catalog"
-            git push
-          else
+          if git diff --cached --quiet; then
             echo "Catalog unchanged; no commit needed."
+            exit 0
           fi
+
+          git commit -m "Update scientific catalog"
+          git push origin HEAD:main
