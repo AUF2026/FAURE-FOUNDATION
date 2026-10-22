@@ -4808,37 +4808,110 @@ select:focus-visible {
     });
   }
   
-    /* =======================================================
-     REPOSITORY INDEX — 5. APERTURA FILE NEL VISUALIZZATORE
-     ======================================================= */
+    
+/* =======================================================
+   REPOSITORY INDEX — 5. APERTURA FILE NEL VISUALIZZATORE
+   HTML → pagina renderizzata in nuova scheda
+   Altri file → visualizzatore FAUREViewer
+   ======================================================= */
 
-  function openEntry(entry) {
-    const viewer = window.FAUREViewer;
+function openEntry(entry) {
+  if (!entry || !entry.raw) {
+    const status = $("#repoExplorerStatus");
+    if (status) status.textContent = "URL del documento non disponibile.";
+    return;
+  }
 
-    if (!viewer || typeof viewer.openUrl !== "function") {
-      const status = $("#repoExplorerStatus");
+  const ext = String(entry.ext || "")
+    .replace(/^\./, "")
+    .toLowerCase();
 
-      if (status) {
-        status.textContent =
-          "Visualizzatore non disponibile. " +
-          "Verifica che il modulo FAUREViewer sia caricato.";
+  // HTML: apri la pagina renderizzata, non il codice sorgente.
+  if (ext === "html" || ext === "htm") {
+    let pageUrl;
+
+    try {
+      const rawUrl = new URL(entry.raw);
+
+      // GitHub raw → GitHub Pages, quando il file appartiene
+      // alla repository pubblicata come sito.
+      const match = rawUrl.pathname.match(
+        /^\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/
+      );
+
+      if (
+        rawUrl.hostname === "raw.githubusercontent.com" &&
+        match &&
+        match[1].toLowerCase() === "auf2026" &&
+        match[2].toLowerCase() === "auf2026.github.io"
+      ) {
+        const branch = match[3];
+        const filePath = match[4];
+
+        pageUrl =
+          "https://auf2026.github.io/" +
+          filePath.split("/").map(encodeURIComponent).join("/");
+      } else {
+        // Fallback: visualizza l'HTML pubblicamente tramite preview.
+        const sourceUrl = entry.raw.replace(
+          /^https:\/\/raw\.githubusercontent\.com\//,
+          "https://github.com/"
+        ).replace(
+          /^https:\/\/github\.com\/([^/]+\/[^/]+)\/([^/]+)\/(.+)$/,
+          "https://github.com/$1/blob/$2/$3"
+        );
+
+        pageUrl =
+          "https://htmlpreview.github.io/?" +
+          encodeURIComponent(sourceUrl);
       }
-
+    } catch (error) {
+      console.error("URL HTML non valido:", error);
       return;
     }
 
-    viewer.openUrl({
-      title: entry.name,
-      url: entry.raw,
-      extension: entry.ext,
-      repository: entry.repoLabel,
-      path: entry.path,
-      size: entry.size,
-      owner: entry.owner,
-      repo: entry.repo,
-      branch: entry.branch
-    });
+    const opened = window.open(pageUrl, "_blank", "noopener,noreferrer");
+
+    if (!opened) {
+      const status = $("#repoExplorerStatus");
+      if (status) {
+        status.textContent =
+          "Nuova scheda bloccata dal browser. " +
+          "Consenti i popup per aprire la pagina HTML.";
+      }
+    }
+
+    return;
   }
+
+  // PDF, Markdown e altri formati: mantieni il visualizzatore esistente.
+  const viewer = window.FAUREViewer;
+
+  if (!viewer || typeof viewer.openUrl !== "function") {
+    const status = $("#repoExplorerStatus");
+
+    if (status) {
+      status.textContent =
+        "Visualizzatore non disponibile. " +
+        "Verifica che il modulo FAUREViewer sia caricato.";
+    }
+
+    return;
+  }
+
+  viewer.openUrl({
+    title: entry.name,
+    url: entry.raw,
+    extension: ext,
+    repository: entry.repoLabel,
+    path: entry.path,
+    size: entry.size,
+    owner: entry.owner,
+    repo: entry.repo,
+    branch: entry.branch
+  });
+}
+
 
   /* =======================================================
      REPOSITORY INDEX — 6. RENDER DELL'INDICE
@@ -5438,6 +5511,7 @@ function safeUrl(value) {
     });
   }
 
+  
   /* =======================================================
      FAUREViewer — 4. APERTURA E CHIUSURA
      ======================================================= */
@@ -5752,6 +5826,7 @@ async function renderPDF(url) {
   }
 }
 
+  
   
     /* =======================================================
      FAUREViewer — 9. LETTURA DEI DOCUMENTI REMOTI
