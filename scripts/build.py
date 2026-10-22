@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib.parse import quote
@@ -20,11 +19,15 @@ TEMP_PREFIX = "auf2026-catalog-"
 SOURCE_REPOSITORIES = [
     {
         "name": "FAURE-FOUNDATION",
+        "owner": "AUF2026",
+        "repo": "FAURE-FOUNDATION",
         "url": "https://github.com/AUF2026/FAURE-FOUNDATION.git",
         "branch": "main",
     },
     {
         "name": "AUF2026.github.io",
+        "owner": "AUF2026",
+        "repo": "AUF2026.github.io",
         "url": "https://github.com/AUF2026/AUF2026.github.io.git",
         "branch": "main",
     },
@@ -44,7 +47,6 @@ CATEGORIES = {
     "code": ("Codice sorgente", "CODE"),
     "docs": ("Documentazione", "DOCUMENTATION"),
     "pages": ("Pagine web", "PAGE"),
-    "pdf": ("Manoscritti", "PDF"),
 }
 
 CATEGORY_ALIASES = {
@@ -63,9 +65,11 @@ CATEGORY_ALIASES = {
     "manoscritti": "manuscripts",
     "theorem": "theorems",
     "theorems": "theorems",
+    "teorema": "theorems",
     "teoremi": "theorems",
     "proof": "proofs",
     "proofs": "proofs",
+    "dimostrazione": "proofs",
     "dimostrazioni": "proofs",
     "data": "data",
     "datasets": "datasets",
@@ -82,42 +86,24 @@ CATEGORY_ALIASES = {
     "documentazione": "docs",
     "pages": "pages",
     "pagine": "pages",
-    "pdf": "pdf",
+    "pdf": "manuscripts",
 }
 
 EXCLUDED_DIRS = {
-    ".git",
-    ".github",
-    "__pycache__",
-    "node_modules",
-    ".venv",
-    "venv",
-    ".next",
-    ".nuxt",
-    "dist",
-    "build",
-    "coverage",
-    ".idea",
-    ".vscode",
+    ".git", ".github", "__pycache__", "node_modules",
+    ".venv", "venv", ".next", ".nuxt", "dist", "build",
+    "coverage", ".idea", ".vscode",
 }
 
 EXCLUDED_FILES = {
-    ".DS_Store",
-    "Thumbs.db",
-    "desktop.ini",
-    "README.md",
-    "LICENSE",
-    "LICENSE.md",
-    "CONTRIBUTING.md",
-    "CODE_OF_CONDUCT.md",
+    ".DS_Store", "Thumbs.db", "desktop.ini",
+    "README.md", "LICENSE", "LICENSE.md",
+    "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
 }
 
 ROOT_SERVICE_FILES = {
-    "index.html",
-    "404.html",
-    "build.py",
-    "catalog.yml",
-    "catalog.yaml",
+    "index.html", "404.html", "build.py",
+    "catalog.yml", "catalog.yaml",
 }
 
 METADATA_SUFFIX = ".json"
@@ -143,8 +129,6 @@ def sha256_file(path):
 
 
 def is_excluded(path):
-    """Esclude file tecnici e temporanei, non le estensioni."""
-
     if path.name.casefold() in {
         name.casefold() for name in EXCLUDED_FILES
     }:
@@ -161,9 +145,7 @@ def is_excluded(path):
 
     if (
         path.name == "documents.json"
-        and "data" in {
-            part.casefold() for part in path.parts
-        }
+        and "data" in {part.casefold() for part in path.parts}
     ):
         return True
 
@@ -173,18 +155,11 @@ def is_excluded(path):
     ):
         return True
 
-    # Nessun filtro per estensione:
-    # sono ammessi PDF, DOCX, XLSX, immagini, archivi,
-    # file binari, formati nuovi e file senza estensione.
     return False
 
 
 def is_metadata_sidecar(path):
-    """
-    Esclude un JSON quando esiste un altro file con lo stesso
-    nome base nella stessa cartella.
-    Gli altri JSON vengono indicizzati normalmente.
-    """
+    """Esclude JSON affiancati al documento cui appartengono."""
 
     if path.suffix.lower() != METADATA_SUFFIX:
         return False
@@ -204,7 +179,7 @@ def is_metadata_sidecar(path):
                 return True
 
     except OSError as exc:
-        print(f"[WARN] Impossibile controllare {path}: {exc}")
+        print(f"[WARN] Metadati non controllabili {path}: {exc}")
 
     return False
 
@@ -229,7 +204,7 @@ def load_metadata(document):
         UnicodeError,
         json.JSONDecodeError,
     ) as exc:
-        print(f"[WARN] Metadati ignorati: {metadata_path}: {exc}")
+        print(f"[WARN] Metadati ignorati {metadata_path}: {exc}")
 
     return {}
 
@@ -238,7 +213,7 @@ def classify_document(relative_path):
     path = Path(relative_path)
     parts = [part.casefold() for part in path.parts[:-1]]
 
-    # La cartella di categoria più specifica prevale.
+    # Le cartelle specializzate hanno la precedenza.
     for part in reversed(parts):
         category = CATEGORY_ALIASES.get(part)
         if category:
@@ -259,6 +234,7 @@ def classify_document(relative_path):
         ".ipynb": "code",
         ".py": "code",
         ".js": "code",
+        ".mjs": "code",
         ".ts": "code",
         ".jsx": "code",
         ".tsx": "code",
@@ -268,18 +244,13 @@ def classify_document(relative_path):
         ".thy": "proofs",
         ".v": "proofs",
         ".tla": "validations",
-        ".pdf": "pdf",
+        ".pdf": "manuscripts",
     }
 
     return extension_categories.get(extension, "docs")
 
 
 def is_in_document_area(relative_path):
-    """
-    Limita la scansione alle aree documentali previste,
-    senza limitare le estensioni dei file.
-    """
-
     path = Path(relative_path)
     parts = path.parts
 
@@ -288,17 +259,14 @@ def is_in_document_area(relative_path):
 
     lowered = [part.casefold() for part in parts]
 
-    # Alla radice vengono esclusi soltanto i file di servizio.
     if len(parts) == 1:
         return parts[0].casefold() not in {
             name.casefold() for name in ROOT_SERVICE_FILES
         }
 
-    # Aree documentali standard.
     if lowered[0] in {"docs", "documents"}:
         return True
 
-    # Cartelle di categoria riconosciute anche alla radice.
     if any(
         part in CATEGORY_ALIASES
         for part in lowered[:-1]
@@ -320,8 +288,7 @@ def collect_files(repository_root):
 
         dirs[:] = sorted(
             [
-                name
-                for name in dirs
+                name for name in dirs
                 if name.casefold() not in EXCLUDED_DIRS
                 and not (current / name).is_symlink()
             ],
@@ -351,6 +318,7 @@ def collect_files(repository_root):
         key=lambda path: path.as_posix().casefold(),
     )
 
+
 def build_document(repository, repository_root, path):
     relative_path = path.relative_to(
         repository_root
@@ -365,18 +333,26 @@ def build_document(repository, repository_root, path):
         f"{repository['name']}/{relative_path}".encode("utf-8")
     ).hexdigest()[:20]
 
-    repository_url = repository["url"].removesuffix(".git")
-    encoded_path = quote(relative_path, safe="/")
-    branch = quote(repository["branch"], safe="")
+    owner = repository["owner"]
+    repo = repository["repo"]
+    branch = repository["branch"]
 
-    source_url = (
-        f"{repository_url}/blob/{branch}/{encoded_path}"
+    repository_url = (
+        f"https://github.com/{owner}/{repo}"
     )
 
-    download_url = (
+    encoded_path = quote(relative_path, safe="/")
+    encoded_branch = quote(branch, safe="")
+
+    # Pagina GitHub per consultare il file.
+    source_page_url = (
+        f"{repository_url}/blob/{encoded_branch}/{encoded_path}"
+    )
+
+    # Contenuto grezzo leggibile con fetch() dal visualizzatore.
+    raw_url = (
         f"https://raw.githubusercontent.com/"
-        f"AUF2026/{quote(repository['name'], safe='')}/"
-        f"{branch}/{encoded_path}"
+        f"{owner}/{repo}/{encoded_branch}/{encoded_path}"
     )
 
     title = metadata.get("title")
@@ -388,6 +364,11 @@ def build_document(repository, repository_root, path):
 
     if not isinstance(external_links, list):
         external_links = []
+
+    external_links = [
+        item for item in external_links
+        if isinstance(item, (str, dict))
+    ]
 
     verification_status = metadata.get(
         "verificationStatus", "NOT_RECORDED"
@@ -409,8 +390,15 @@ def build_document(repository, repository_root, path):
         "sha256": sha256_file(path),
         "repository": repository["name"],
         "repositoryUrl": repository_url,
-        "sourceUrl": source_url,
-        "downloadUrl": download_url,
+
+        # Compatibilità con il viewer esistente:
+        # sourceUrl è direttamente leggibile via fetch().
+        "sourceUrl": raw_url,
+        "downloadUrl": raw_url,
+
+        # Link alla pagina GitHub per la consultazione umana.
+        "sourcePageUrl": source_page_url,
+
         "verification": {
             "status": verification_status,
             "report": metadata.get("verificationReport"),
@@ -436,9 +424,7 @@ def write_catalog(repository_roots):
         for path in files:
             try:
                 document = build_document(
-                    repository,
-                    repository_root,
-                    path,
+                    repository, repository_root, path
                 )
                 documents.append(document)
 
@@ -480,14 +466,26 @@ def write_catalog(repository_roots):
             for category, (label, document_type)
             in CATEGORIES.items()
         ],
+
+        # Stringhe, compatibili con sources.join(" · ")
+        # già presente nel tuo JavaScript.
         "sources": [
+            repository["name"]
+            for repository, _, _ in repository_roots
+        ],
+
+        # Metadati dettagliati conservati separatamente.
+        "sourceRepositories": [
             {
                 "name": repository["name"],
+                "owner": repository["owner"],
+                "repo": repository["repo"],
                 "url": repository["url"].removesuffix(".git"),
                 "branch": repository["branch"],
             }
             for repository, _, _ in repository_roots
         ],
+
         "documents": documents,
     }
 
@@ -516,14 +514,18 @@ def write_catalog(repository_roots):
             stream.flush()
             os.fsync(stream.fileno())
 
-        # Verifica il JSON prima di sostituire il catalogo.
+        # Verifica il file temporaneo prima della sostituzione.
         with temp_path.open("r", encoding="utf-8") as stream:
             checked = json.load(stream)
 
         if checked["count"] != len(checked["documents"]):
-            raise RuntimeError(
-                "Conteggio catalogo non coerente."
-            )
+            raise RuntimeError("Conteggio catalogo non coerente.")
+
+        if not all(
+            isinstance(source, str)
+            for source in checked["sources"]
+        ):
+            raise RuntimeError("Formato sources non valido.")
 
         os.replace(temp_path, OUTPUT)
         temp_path = None
