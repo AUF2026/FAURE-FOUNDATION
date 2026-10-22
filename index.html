@@ -336,21 +336,31 @@ if (authorRegistry) {
    Apre i documenti nel lettore incorporato, non in GitHub.
    ========================================================= */
 
-async function loadArchiveDocuments() {
-  const containers = document.querySelectorAll(
-    ".archive-grid, .archive-links"
-  );
+/* ============================================================
+   FAURE FOUNDATION — ARCHIVE FILE DISCOVERY (VERSIONE CORRETTA)
+   ============================================================ */
 
+async function loadArchiveDocuments() {
+  const containers = document.querySelectorAll(".archive-grid, .archive-links");
   if (!containers.length) return;
 
-  const API =
+  // REPO 1 — FAURE-FOUNDATION
+  const API_FAURE =
+    "https://api.github.com/repos/AUF2026/FAURE-FOUNDATION/git/trees/main?recursive=1";
+
+  // REPO 2 — AUF2026.github.io
+  const API_ROOT =
     "https://api.github.com/repos/AUF2026/AUF2026.github.io/git/trees/main?recursive=1";
 
-  const RAW =
+  // RAW (solo per download, NON per iframe)
+  const RAW_FAURE =
+    "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/";
+
+  const RAW_ROOT =
     "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/";
 
-  try {
-    const response = await fetch(API, {
+  async function fetchTree(api) {
+    const response = await fetch(api, {
       headers: { Accept: "application/vnd.github+json" }
     });
 
@@ -359,24 +369,52 @@ async function loadArchiveDocuments() {
     }
 
     const data = await response.json();
-
     if (data.truncated) {
-      throw new Error(
-        "Indice GitHub incompleto: occorre paginare l'archivio."
-      );
+      throw new Error("Indice GitHub incompleto: occorre paginare l'archivio.");
     }
 
-    const files = data.tree
-      .filter(item =>
-        item.type === "blob" &&
-        item.path.startsWith("docs/")
-      )
-      .map(item => ({
-        name: item.path.split("/").pop(),
-        path: item.path,
-        url: RAW + item.path.split("/").map(encodeURIComponent).join("/")
-      }))
-      .sort((a, b) => a.path.localeCompare(b.path));
+    return data.tree;
+  }
+
+  // Carica entrambe le repo
+  const [treeFaure, treeRoot] = await Promise.all([
+    fetchTree(API_FAURE),
+    fetchTree(API_ROOT)
+  ]);
+
+  // Filtra i PDF
+  const filesFaure = treeFaure
+    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
+    .map(item => ({
+      name: item.path.split("/").pop(),
+      path: item.path,
+      // URL RAW (solo per download)
+      raw: RAW_FAURE + item.path.split("/").map(encodeURIComponent).join("/"),
+      // URL locale (per iframe)
+      local: `${location.origin}/FAURE-FOUNDATION/${item.path}`
+    }));
+
+  const filesRoot = treeRoot
+    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
+    .map(item => ({
+      name: item.path.split("/").pop(),
+      path: item.path,
+      raw: RAW_ROOT + item.path.split("/").map(encodeURIComponent).join("/"),
+      local: `${location.origin}/${item.path}`
+    }));
+
+  // Unisci i risultati
+  const files = [...filesFaure, ...filesRoot].sort((a, b) =>
+    a.path.localeCompare(b.path)
+  );
+
+  console.log("Documenti trovati:", files);
+
+  // Ora puoi popolare il tuo archivio
+  // Esempio:
+  // files.forEach(file => { ... });
+}
+
 
     // Crea un unico lettore interno condiviso.
     let reader = document.getElementById("faureDocumentReader");
