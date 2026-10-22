@@ -309,17 +309,36 @@ if (authorRegistry) {
 }
 
   /*
- * =========================================================
- * ARCHIVE CONTAINERS
- * =========================================================
- */
+   * =========================================================
+   * ARCHIVE CONTAINERS
+   * =========================================================
+   *
+   * Documents can be rendered inside:
+   *
+   *   .archive-grid
+   *
+   * or:
+   *
+   *   .archive-links
+   *
+   */
 
-const archiveContainers =
-  document.querySelectorAll(".archive-grid, .archive-links");
+  const archiveContainers =
+    document.querySelectorAll(
+      ".archive-grid, .archive-links"
+    );
 
+
+  
 /* =========================================================
    FAURE FOUNDATION — ARCHIVIO MULTIFORMATO
+   Elenca tutti i file in docs/, anche nelle sottocartelle.
+   Apre i documenti nel lettore incorporato, non in GitHub.
    ========================================================= */
+
+/* ============================================================
+   FAURE FOUNDATION — ARCHIVE FILE DISCOVERY (VERSIONE CORRETTA)
+   ============================================================ */
 
 async function loadArchiveDocuments() {
   const containers = document.querySelectorAll(".archive-grid, .archive-links");
@@ -333,7 +352,7 @@ async function loadArchiveDocuments() {
   const API_ROOT =
     "https://api.github.com/repos/AUF2026/AUF2026.github.io/git/trees/main?recursive=1";
 
-  // RAW (solo per download)
+  // RAW (solo per download, NON per iframe)
   const RAW_FAURE =
     "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/";
 
@@ -345,7 +364,9 @@ async function loadArchiveDocuments() {
       headers: { Accept: "application/vnd.github+json" }
     });
 
-    if (!response.ok) throw new Error("GitHub API: HTTP " + response.status);
+    if (!response.ok) {
+      throw new Error("GitHub API: HTTP " + response.status);
+    }
 
     const data = await response.json();
     if (data.truncated) {
@@ -355,215 +376,224 @@ async function loadArchiveDocuments() {
     return data.tree;
   }
 
+  // Carica entrambe le repo
   const [treeFaure, treeRoot] = await Promise.all([
     fetchTree(API_FAURE),
     fetchTree(API_ROOT)
   ]);
 
-  // TUTTI i file (non solo docs/)
-  function mapFiles(tree, rawBase, localBase) {
-    return tree
-      .filter(item => item.type === "blob")
-      .map(item => ({
-        name: item.path.split("/").pop(),
-        path: item.path,
-        raw: rawBase + item.path.split("/").map(encodeURIComponent).join("/"),
-        local: `${location.origin}${localBase}${item.path}`
-      }));
-  }
+  // Filtra i PDF
+  const filesFaure = treeFaure
+    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
+    .map(item => ({
+      name: item.path.split("/").pop(),
+      path: item.path,
+      // URL RAW (solo per download)
+      raw: RAW_FAURE + item.path.split("/").map(encodeURIComponent).join("/"),
+      // URL locale (per iframe)
+      local: `${location.origin}/FAURE-FOUNDATION/${item.path}`
+    }));
 
-  const filesFaure = mapFiles(treeFaure, RAW_FAURE, "/FAURE-FOUNDATION/");
-  const filesRoot = mapFiles(treeRoot, RAW_ROOT, "/");
+  const filesRoot = treeRoot
+    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
+    .map(item => ({
+      name: item.path.split("/").pop(),
+      path: item.path,
+      raw: RAW_ROOT + item.path.split("/").map(encodeURIComponent).join("/"),
+      local: `${location.origin}/${item.path}`
+    }));
 
+  // Unisci i risultati
   const files = [...filesFaure, ...filesRoot].sort((a, b) =>
     a.path.localeCompare(b.path)
   );
 
-  window.FAURE_FILES = files;
+  console.log("Documenti trovati:", files);
 
-  console.info("FAURE archive:", files.length, "file indicizzati.");
-
-  populateArchiveUI(containers, files);
+  // Ora puoi popolare il tuo archivio
+  // Esempio:
+  // files.forEach(file => { ... });
 }
 
-/* =========================================================
-   LETTORE DOCUMENTALE
-   ========================================================= */
 
-function createFaureReader() {
-  let reader = document.getElementById("faureDocumentReader");
+    // Crea un unico lettore interno condiviso.
+    let reader = document.getElementById("faureDocumentReader");
 
-  if (!reader) {
-    reader = document.createElement("section");
-    reader.id = "faureDocumentReader";
-    reader.style.cssText =
-      "display:none;margin:24px 0;padding:16px;" +
-      "border:1px solid var(--line,#ccc);background:var(--surface);";
+    if (!reader) {
+      reader = document.createElement("section");
+      reader.id = "faureDocumentReader";
+      reader.style.cssText =
+        "display:none;margin:24px 0;padding:16px;" +
+        "border:1px solid var(--line,#ccc);";
 
-    const title = document.createElement("h3");
-    title.id = "faureReaderTitle";
+      const title = document.createElement("h3");
+      title.id = "faureReaderTitle";
+      title.textContent = "Lettore documentale";
 
-    const close = document.createElement("button");
-    close.textContent = "Chiudi documento";
-    close.style.cssText = "margin:8px 0;padding:8px 12px;";
-    close.onclick = () => {
-      reader.style.display = "none";
-      reader.querySelector("iframe").src = "about:blank";
-    };
-
-    const frame = document.createElement("iframe");
-    frame.id = "faureReaderFrame";
-    frame.style.cssText =
-      "display:block;width:100%;height:75vh;min-height:500px;" +
-      "border:1px solid var(--line,#ccc);background:white;";
-
-    reader.append(title, close, frame);
-
-    const first = document.querySelector(".archive-grid, .archive-links");
-    const section = first.closest("section, .archive") || first.parentElement;
-    section.appendChild(reader);
-  }
-
-  return reader;
-}
-
-const reader = createFaureReader();
-const frame = reader.querySelector("iframe");
-const title = reader.querySelector("#faureReaderTitle");
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
-  })[c]);
-}
-
-function openDocument(file) {
-  const ext = file.name.split(".").pop().toLowerCase();
-  title.textContent = file.path;
-  reader.style.display = "block";
-
-  // PDF → PDF.js
-  if (ext === "pdf") {
-    frame.src =
-      "https://mozilla.github.io/pdf.js/web/viewer.html?file=" +
-      encodeURIComponent(file.local);
-    reader.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
-
-  // Immagini / audio / video
-  const direct = [
-    "png", "jpg", "jpeg", "gif", "webp", "svg", "avif",
-    "mp3", "wav", "ogg", "mp4", "webm", "ogv"
-  ];
-
-  if (direct.includes(ext)) {
-    frame.src = file.local;
-    reader.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
-
-  // HTML
-  if (["html", "htm"].includes(ext)) {
-    frame.setAttribute("sandbox", "allow-same-origin");
-    frame.src = file.local;
-    reader.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
-
-  // File testuali
-  const textExt = [
-    "md", "markdown", "txt", "csv", "json", "xml",
-    "yaml", "yml", "log", "js", "css", "py",
-    "tex", "bib", "rst"
-  ];
-
-  if (textExt.includes(ext)) {
-    fetch(file.local)
-      .then(r => r.text())
-      .then(text => {
-        const body =
-          ext === "md" || ext === "markdown"
-            ? esc(text)
-                .replace(/^### (.*)$/gm, "<h3>$1</h3>")
-                .replace(/^## (.*)$/gm, "<h2>$1</h2>")
-                .replace(/^# (.*)$/gm, "<h1>$1</h1>")
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                .replace(/\n/g, "<br>")
-            : "<pre>" + esc(text) + "</pre>";
-
-        frame.srcdoc =
-          "<!doctype html><html><body style='font:16px system-ui;padding:24px'>" +
-          body +
-          "</body></html>";
-      })
-      .catch(err => {
-        frame.srcdoc =
-          "<p>Errore: " + esc(err.message) + "</p>" +
-          "<p><a href='" + esc(file.raw) + "'>Scarica il file</a></p>";
+      const close = document.createElement("button");
+      close.type = "button";
+      close.textContent = "Chiudi documento";
+      close.style.cssText = "margin:8px 0;padding:8px 12px;";
+      close.addEventListener("click", () => {
+        reader.style.display = "none";
+        const frame = reader.querySelector("iframe");
+        if (frame) frame.src = "about:blank";
       });
 
-    reader.scrollIntoView({ behavior: "smooth" });
-    return;
-  }
+      const frame = document.createElement("iframe");
+      frame.id = "faureReaderFrame";
+      frame.title = "Visualizzatore documentale FAURE FOUNDATION";
+      frame.loading = "lazy";
+      frame.style.cssText =
+        "display:block;width:100%;height:75vh;" +
+        "min-height:500px;border:1px solid var(--line,#ccc);" +
+        "background:white;";
 
-  // Formati non visualizzabili
-  frame.srcdoc =
-    "<!doctype html><html><body style='font:16px system-ui;padding:24px'>" +
-    "<h2>File disponibile</h2>" +
-    "<p>Formato: ." + esc(ext) + "</p>" +
-    "<p><a download href='" + esc(file.raw) + "'>Scarica " +
-    esc(file.name) + "</a></p>" +
-    "</body></html>";
+      reader.append(title, close, frame);
 
-  reader.scrollIntoView({ behavior: "smooth" });
-}
-
-/* =========================================================
-   POPOLAMENTO ARCHIVIO
-   ========================================================= */
-
-function populateArchiveUI(containers, files) {
-  containers.forEach(container => {
-    container.replaceChildren();
-
-    if (!files.length) {
-      container.textContent = "Nessun file trovato.";
-      return;
+      const first = containers[0];
+      const section = first.closest("section, .archive") ||
+        first.parentElement;
+      section.appendChild(reader);
     }
 
-    files.forEach(file => {
-      const link = document.createElement("a");
-      link.className = "archive-link";
-      link.href = file.local;
-      link.dataset.file = file.path;
+    const frame = reader.querySelector("iframe");
+    const title = reader.querySelector("#faureReaderTitle");
 
-      const strong = document.createElement("strong");
-      strong.textContent = file.name;
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[c]);
+    }
 
-      const info = document.createElement("span");
-      info.textContent = file.path;
+    function openDocument(file) {
+      const ext = file.name.split(".").pop().toLowerCase();
+      title.textContent = file.path;
+      reader.style.display = "block";
 
-      link.append(strong, info);
+      // Il PDF e i formati multimediali compatibili
+      // vengono aperti direttamente nel lettore interno.
+      const direct = [
+        "pdf", "png", "jpg", "jpeg", "gif", "webp",
+        "svg", "avif", "mp3", "wav", "ogg", "mp4",
+        "webm", "ogv"
+      ];
 
-      link.addEventListener("click", event => {
-        event.preventDefault();
-        openDocument(file);
+      if (direct.includes(ext)) {
+        frame.removeAttribute("srcdoc");
+        frame.src = file.url;
+      } else if (ext === "html" || ext === "htm") {
+        frame.removeAttribute("srcdoc");
+        frame.src = file.url;
+      } else if ([
+        "md", "markdown", "txt", "csv", "json", "xml",
+        "yaml", "yml", "log", "js", "css", "py",
+        "tex", "bib", "rst"
+      ].includes(ext)) {
+        frame.src = "about:blank";
+
+        fetch(file.url)
+          .then(r => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.text();
+          })
+          .then(text => {
+            // Markdown mostrato come testo leggibile e sicuro.
+            // Nessuna esecuzione del contenuto del documento.
+            const body = ext === "md" || ext === "markdown"
+              ? esc(text)
+                  .replace(/^### (.*)$/gm, "<h3>$1</h3>")
+                  .replace(/^## (.*)$/gm, "<h2>$1</h2>")
+                  .replace(/^# (.*)$/gm, "<h1>$1</h1>")
+                  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                  .replace(/\n/g, "<br>")
+              : esc(text);
+
+            frame.srcdoc =
+              "<!doctype html><html><head><meta charset='utf-8'>" +
+              "<meta name='viewport' content='width=device-width'>" +
+              "<style>body{font:16px/1.65 system-ui,sans-serif;" +
+              "padding:24px;overflow-wrap:anywhere}" +
+              "pre{white-space:pre-wrap}</style></head><body>" +
+              (ext === "md" || ext === "markdown"
+                ? body : "<pre>" + body + "</pre>") +
+              "</body></html>";
+          })
+          .catch(err => {
+            frame.srcdoc =
+              "<p>Impossibile leggere il documento: " +
+              esc(err.message) + "</p><p><a href='" +
+              esc(file.url) + "'>Apri o scarica il file</a></p>";
+          });
+      } else {
+        // Formati non nativamente visualizzabili:
+        // rimangono indicizzati e offrono il download.
+        frame.srcdoc =
+          "<!doctype html><html><body style='font:16px system-ui;padding:24px'>" +
+          "<h2>File disponibile</h2><p>Formato: ." + esc(ext) +
+          "</p><p>Questo formato richiede un visualizzatore dedicato.</p>" +
+          "<p><a download href='" + esc(file.url) +
+          "'>Scarica " + esc(file.name) + "</a></p></body></html>";
+      }
+
+      reader.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    containers.forEach(container => {
+      container.replaceChildren();
+
+      if (!files.length) {
+        container.textContent = "Nessun file trovato nella cartella docs/.";
+        return;
+      }
+
+      files.forEach(file => {
+        const link = document.createElement("a");
+        link.className = "archive-link";
+        link.href = file.url;
+        link.setAttribute("data-file", file.path);
+
+        const strong = document.createElement("strong");
+        strong.textContent = file.name;
+
+        const info = document.createElement("span");
+        info.textContent = file.path;
+
+        link.append(strong, info);
+
+        link.addEventListener("click", event => {
+          event.preventDefault();
+          openDocument(file);
+        });
+
+        container.appendChild(link);
       });
-
-      container.appendChild(link);
     });
-  });
+
+    console.info("FAURE archive: " + files.length + " file indicizzati.");
+
+  } catch (error) {
+    console.error("Errore archivio FAURE:", error);
+
+    containers.forEach(container => {
+      const message = document.createElement("p");
+      message.className = "archive-error";
+      message.textContent =
+        "Errore nel caricamento dell'archivio: " + error.message;
+      container.replaceChildren(message);
+    });
+  }
 }
 
-/*
- * =========================================================
- * INITIALIZE
- * =========================================================
- */
+   /*
+   * =========================================================
+   * INITIALIZE
+   * =========================================================
+   */
 
-loadArchiveDocuments();
+  loadArchiveDocuments();
+
 
   /*
    * =========================================================
@@ -2427,6 +2457,71 @@ select:focus-visible {
 
 
       
+<!-- ARCHIVIO DOCUMENTALE -->
+
+<section class="archive section-pad" id="archive">
+
+  <div class="section-kicker">
+    <span>02 — REGISTRO DOCUMENTALE</span>
+    <span>ACCESSO DIRETTO AI DOCUMENTI</span>
+  </div>
+
+  <div class="archive-heading">
+    <div>
+      <p class="eyebrow">DOCUMENTAZIONE PRIMARIA</p>
+      <h2>
+        Il lavoro.<br>
+        <span>Non la reputazione.</span>
+      </h2>
+    </div>
+
+    <p class="archive-intro">
+      Un archivio organizzato per tipologia, provenienza e verificabilità.
+      Ogni voce rimanda al file sorgente nella repository di origine.
+      Il catalogo aggrega i documenti della FAURE FOUNDATION e del sito AUF2026.
+    </p>
+  </div>
+
+  <!-- RICERCA E FILTRI -->
+
+  <div class="archive-controls">
+
+    <label class="search-box" for="paperSearch">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        id="paperSearch"
+        placeholder="Cerca titolo, file, codice o repository..."
+        aria-label="Cerca nei documenti"
+        autocomplete="off">
+    </label>
+
+    <div class="archive-filter">
+      <label class="filter-label" for="paperFilter">
+        TIPOLOGIA DOCUMENTALE
+      </label>
+
+      <select id="paperFilter">
+        <option value="all">Tutte le tipologie</option>
+        <option value="certifications">Certificazioni</option>
+        <option value="refutations">Confutazioni</option>
+        <option value="validations">Validazioni</option>
+        <option value="manuscripts">Manoscritti</option>
+        <option value="theorems">Teoremi</option>
+        <option value="proofs">Dimostrazioni</option>
+        <option value="data">Dati e verifiche</option>
+        <option value="protocols">Protocolli</option>
+        <option value="bibliography">Bibliografia</option>
+        <option value="datasets">Dataset</option>
+        <option value="code">Codice sorgente</option>
+        <option value="docs">Documentazione</option>
+        <option value="pages">Pagine web</option>
+      </select>
+    </div>
+
+  </div>
+
+  
 <div id="archive-pdf-viewer" hidden>
   <div class="archive-reader-toolbar">
     <button id="archive-pdf-back" type="button">
@@ -2435,22 +2530,58 @@ select:focus-visible {
     <span id="archive-pdf-title">Document reader</span>
   </div>
 
-  <section id="faureDocumentReader" style="display:none;margin:24px 0;padding:16px;border:1px solid #ccc;background:white;">
-  <h3 id="faureReaderTitle">Documento</h3>
-
-  <button type="button" id="faureReaderClose" style="margin:8px 0;padding:8px 12px;">
-    Chiudi documento
-  </button>
-
   <iframe
-    id="faureReaderFrame"
-    title="Visualizzatore documentale FAURE FOUNDATION"
+    id="archive-pdf-frame"
+    title="PDF document reader"
+    style="width:100%;height:80vh;border:0;"
     loading="lazy"
-    style="display:block;width:100%;height:75vh;min-height:500px;border:1px solid #ccc;background:white;">
+    allowfullscreen>
   </iframe>
+</div>
+
+  <!-- STATO DEL CATALOGO -->
+
+  <div class="archive-overview">
+    <p id="catalogStatus" role="status" aria-live="polite">
+      Caricamento del catalogo...
+    </p>
+
+    <p id="archiveSource"></p>
+  </div>
+
+  <!-- CATEGORIE E DOCUMENTI GENERATI DAL JSON -->
+
+  <div
+    class="archive-list"
+    id="paperList"
+    aria-live="polite"
+    aria-busy="true">
+
+    <p class="search-empty">Caricamento del catalogo...</p>
+
+  </div>
+
+  <!-- NESSUN RISULTATO: UN SOLO ELEMENTO -->
+
+  <p class="search-empty" id="searchEmpty" hidden>
+    Nessun documento corrisponde ai criteri selezionati.
+  </p>
+
+  <!-- NOTA DI INTEGRITÀ -->
+
+  <div class="archive-note">
+    <span class="note-symbol" aria-hidden="true">!</span>
+    <p>
+      La presenza nel registro documenta l'indicizzazione del file,
+      non costituisce da sola una certificazione scientifica.
+      Le informazioni di verifica sono riportate separatamente
+      quando disponibili.
+    </p>
+  </div>
+
 </section>
 
-</div>
+
 
       <!-- STANDARD DI PUBBLICAZIONE -->
 
@@ -2952,6 +3083,836 @@ if (themeToggle) {
 }
 
 </script>
-  
+<script>
+
+/* ============================================================
+   FAURE FOUNDATION · REPO LOGIC
+   Catalogo ricorsivo multiformato + viewer integrato
+   ============================================================ */
+
+(() => {
+  "use strict";
+
+  const REPO = "AUF2026/FAURE-FOUNDATION";
+  const BRANCH = "main";
+  const API =
+    `https://api.github.com/repos/${REPO}/contents`;
+  const RAW =
+    `https://raw.githubusercontent.com/${REPO}/${BRANCH}/`;
+
+  const PDFJS =
+    "https://mozilla.github.io/pdf.js/web/viewer.html?file=";
+
+  const SECTIONS = [
+    {
+      name: "documents/certifications",
+      label: "Certifications",
+      desc: "Certificazioni e documenti di attestazione."
+    },
+    {
+      name: "documents/manuscripts",
+      label: "Manuscripts",
+      desc: "Manoscritti e documenti scientifici."
+    },
+    {
+      name: "documents/proofs",
+      label: "Proofs",
+      desc: "Dimostrazioni formali e verifiche."
+    },
+    {
+      name: "documents/protocols",
+      label: "Protocols",
+      desc: "Protocolli e procedure."
+    },
+    {
+      name: "documents/refutations",
+      label: "Refutations",
+      desc: "Confutazioni e analisi critiche."
+    },
+    {
+      name: "documents/theorems",
+      label: "Theorems",
+      desc: "Teoremi e risultati matematici."
+    },
+    {
+      name: "documents/validations",
+      label: "Validations",
+      desc: "Validazioni, test e verifiche."
+    },
+    {
+      name: "documents/data",
+      label: "Data",
+      desc: "Indice JSON e dati strutturati."
+    }
+  ];
+
+  const sectionList = document.getElementById("sectionList");
+  const fileList = document.getElementById("fileList");
+  const viewerBody = document.getElementById("viewerBody");
+  const viewerTitle = document.getElementById("viewerTitle");
+  const sectionDesc = document.getElementById("sectionDesc");
+  const sectionDescription =
+    document.getElementById("sectionDescription");
+  const titleAUF = document.getElementById("titleAUF");
+  const heroAUF = document.getElementById("heroAUF");
+  const landingAUF = document.getElementById("landingAUF");
+
+  if (!sectionList || !fileList || !viewerBody || !viewerTitle) {
+    console.error(
+      "FAURE REPO LOGIC: mancano sectionList, fileList, " +
+      "viewerBody o viewerTitle. Verifica gli ID HTML."
+    );
+    return;
+  }
+
+  const IMAGE_EXT = new Set([
+    "png", "jpg", "jpeg", "gif", "webp", "svg",
+    "avif", "bmp", "ico", "apng"
+  ]);
+
+  const AUDIO_EXT = new Set([
+    "mp3", "wav", "ogg", "oga", "m4a", "aac", "flac"
+  ]);
+
+  const VIDEO_EXT = new Set([
+    "mp4", "webm", "ogv", "mov", "m4v"
+  ]);
+
+  const TEXT_EXT = new Set([
+    "txt", "csv", "tsv", "json", "xml", "yaml", "yml",
+    "log", "md", "markdown", "rst", "tex", "bib",
+    "ini", "toml", "conf", "cfg", "properties",
+    "js", "mjs", "cjs", "ts", "jsx", "tsx",
+    "css", "scss", "html", "htm", "xhtml",
+    "py", "r", "rb", "php", "java", "c", "h",
+    "cpp", "hpp", "cs", "go", "rs", "swift",
+    "kt", "sql", "sh", "bash", "bat", "ps1",
+    "diff", "patch", "makefile", "dockerfile",
+    "graphql", "gql", "ipynb", "srt", "vtt"
+  ]);
+
+  let requestSequence = 0;
+  let currentFiles = [];
+  let activeObjectURL = null;
+
+  function colorFor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) {
+      h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    }
+    return `hsl(${h % 360} 60% 55%)`;
+  }
+
+  function setAccent(name) {
+    const color = colorFor(name);
+
+    document.documentElement.style.setProperty(
+      "--accent",
+      color
+    );
+
+    [titleAUF, heroAUF, landingAUF].forEach(element => {
+      if (element) element.style.color = color;
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+  }
+
+  function getExtension(name) {
+    const filename = String(name || "").split(/[?#]/)[0];
+    const dot = filename.lastIndexOf(".");
+
+    return dot >= 0
+      ? filename.slice(dot + 1).toLowerCase()
+      : "";
+  }
+
+  function makeRawURL(path) {
+    return RAW + path
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+  }
+
+  function releaseObjectURL() {
+    if (activeObjectURL) {
+      URL.revokeObjectURL(activeObjectURL);
+      activeObjectURL = null;
+    }
+  }
+
+  function clearViewer() {
+    releaseObjectURL();
+    viewerBody.replaceChildren();
+  }
+
+  function showMessage(message) {
+    clearViewer();
+
+    const p = document.createElement("p");
+    p.textContent = message;
+    viewerBody.appendChild(p);
+  }
+
+  async function fetchJSON(url) {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${url}`);
+    }
+
+    return response.json();
+  }
+
+  /*
+   * Recupera tutti i file della sezione, comprese le
+   * sottocartelle. Nessun filtro per estensione.
+   */
+  async function collectFiles(path, visited = new Set()) {
+    if (visited.has(path)) return [];
+    visited.add(path);
+
+    const entries = await fetchJSON(
+      `${API}/${path.split("/")
+        .map(encodeURIComponent).join("/")}?ref=${BRANCH}`
+    );
+
+    if (!Array.isArray(entries)) {
+      throw new Error(`La cartella ${path} non restituisce un elenco.`);
+    }
+
+    const results = [];
+
+    for (const entry of entries) {
+      if (entry.type === "file") {
+        results.push({
+          name: entry.name,
+          path: entry.path,
+          size: entry.size,
+          sha: entry.sha,
+          type: "file",
+          url: makeRawURL(entry.path),
+          download_url: entry.download_url || makeRawURL(entry.path)
+        });
+      } else if (entry.type === "dir") {
+        const nested = await collectFiles(entry.path, visited);
+        results.push(...nested);
+      }
+      // Le voci non-file e non-directory non sono documenti.
+    }
+
+    return results;
+  }
+
+  function renderSectionMenu() {
+    sectionList.replaceChildren();
+
+    SECTIONS.forEach(section => {
+      const li = document.createElement("li");
+      li.className = "section-item";
+      li.textContent = section.label;
+      li.dataset.section = section.name;
+      li.tabIndex = 0;
+      li.setAttribute("role", "button");
+
+      li.addEventListener("click", () => {
+        loadSection(section, li);
+      });
+
+      li.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          loadSection(section, li);
+        }
+      });
+
+      sectionList.appendChild(li);
+    });
+  }
+
+  function renderFileList(files) {
+    fileList.replaceChildren();
+
+    if (!files.length) {
+      const empty = document.createElement("li");
+      empty.className = "file-empty";
+      empty.textContent = "Nessun file presente in questa sezione.";
+      fileList.appendChild(empty);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    files.forEach(file => {
+      const item = document.createElement("li");
+      item.className = "file-item";
+      item.dataset.path = file.path;
+      item.tabIndex = 0;
+      item.setAttribute("role", "button");
+
+      const name = document.createElement("span");
+      name.className = "file-name";
+      name.textContent = file.name;
+
+      const meta = document.createElement("small");
+      meta.className = "file-meta";
+
+      const ext = getExtension(file.name);
+      meta.textContent =
+        (ext ? "." + ext : "File senza estensione") +
+        (Number.isFinite(file.size)
+          ? ` · ${formatBytes(file.size)}`
+          : "");
+
+      item.append(name, meta);
+
+      const open = () => loadFile(file, item);
+
+      item.addEventListener("click", open);
+      item.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
+
+      fragment.appendChild(item);
+    });
+
+    fileList.appendChild(fragment);
+  }
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  async function loadSection(section, element) {
+    const sequence = ++requestSequence;
+
+    document.querySelectorAll(".section-item").forEach(item => {
+      item.classList.remove("active");
+      item.setAttribute("aria-current", "false");
+    });
+
+    element.classList.add("active");
+    element.setAttribute("aria-current", "true");
+
+    setAccent(section.label);
+
+    if (sectionDesc) sectionDesc.textContent = section.label;
+    if (sectionDescription) {
+      sectionDescription.textContent = section.desc;
+    }
+
+    fileList.replaceChildren();
+
+    const loading = document.createElement("li");
+    loading.className = "file-loading";
+    loading.textContent = "Caricamento di tutti i file…";
+    fileList.appendChild(loading);
+
+    viewerTitle.textContent = section.label;
+    showMessage("Seleziona un documento dal catalogo.");
+
+    try {
+      const files = await collectFiles(section.name);
+
+      if (sequence !== requestSequence) return;
+
+      files.sort((a, b) => a.path.localeCompare(b.path));
+
+      currentFiles = files;
+      renderFileList(files);
+
+      if (sectionDesc) {
+        sectionDesc.textContent =
+          `${section.label} · ${files.length} file`;
+      }
+    } catch (error) {
+      if (sequence !== requestSequence) return;
+
+      console.error("FAURE Archive: errore sezione.", error);
+      currentFiles = [];
+      fileList.replaceChildren();
+
+      const errorItem = document.createElement("li");
+      errorItem.className = "file-error";
+      errorItem.textContent =
+        `Impossibile caricare ${section.label}: ${error.message}`;
+      fileList.appendChild(errorItem);
+
+      showMessage(
+        "Errore nel caricamento. Verifica la connessione, " +
+        "la repository, il branch e il limite delle API GitHub."
+      );
+    }
+  }
+
+  function createFrame(titleText) {
+    const iframe = document.createElement("iframe");
+    iframe.title = titleText;
+    iframe.style.cssText =
+      "display:block;width:100%;height:75vh;min-height:480px;" +
+      "border:0;background:#fff;";
+    viewerBody.appendChild(iframe);
+    return iframe;
+  }
+
+  function renderText(text, extension) {
+    clearViewer();
+
+    if (
+      (extension === "md" || extension === "markdown") &&
+      window.marked &&
+      typeof window.marked.parse === "function"
+    ) {
+      const container = document.createElement("div");
+      container.className = "markdown-document";
+
+      const html = window.marked.parse(text);
+
+      // Se DOMPurify è disponibile, pulisce l'HTML Markdown.
+      // Altrimenti mostra testo sicuro anziché HTML non sanificato.
+      if (window.DOMPurify &&
+          typeof window.DOMPurify.sanitize === "function") {
+        container.innerHTML = window.DOMPurify.sanitize(html);
+      } else {
+        const pre = document.createElement("pre");
+        pre.textContent = text;
+        container.appendChild(pre);
+      }
+
+      viewerBody.appendChild(container);
+
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise([container]).catch(console.error);
+      }
+
+      return;
+    }
+
+    const pre = document.createElement("pre");
+    pre.className = "document-text";
+    pre.textContent = text;
+    pre.style.cssText =
+      "white-space:pre-wrap;overflow-wrap:anywhere;" +
+      "padding:1rem;max-width:100%;";
+
+    viewerBody.appendChild(pre);
+  }
+
+  async function loadFile(file, element) {
+    document.querySelectorAll(".file-item").forEach(item => {
+      item.classList.remove("active");
+    });
+
+    if (element) element.classList.add("active");
+
+    viewerTitle.textContent = file.path || file.name;
+
+    const ext = getExtension(file.name);
+    const url = file.download_url || file.url;
+
+    clearViewer();
+
+    if (!url) {
+      showMessage("Il file non contiene un URL valido.");
+      return;
+    }
+
+    /*
+     * PDF: il viewer PDF.js è incorporato nell'area documentale.
+     */
+    if (ext === "pdf") {
+      const iframe = createFrame(file.name);
+      iframe.src = PDFJS + encodeURIComponent(url);
+      return;
+    }
+
+    /*
+     * HTML: usa un iframe sandbox per isolare il documento.
+     */
+    if (ext === "html" || ext === "htm" || ext === "xhtml") {
+      const iframe = createFrame(file.name);
+      iframe.setAttribute("sandbox", "allow-same-origin");
+      iframe.src = url;
+      return;
+    }
+
+    /*
+     * Immagini: visualizzazione interna.
+     */
+    if (IMAGE_EXT.has(ext)) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = file.name;
+      img.loading = "lazy";
+      img.style.cssText =
+        "display:block;max-width:100%;max-height:80vh;margin:auto;";
+      img.onerror = () => {
+        showMessage("Impossibile caricare l'immagine. Verifica l'URL.");
+      };
+      viewerBody.appendChild(img);
+      return;
+    }
+
+    /*
+     * Audio e video: player integrato.
+     */
+    if (AUDIO_EXT.has(ext) || VIDEO_EXT.has(ext)) {
+      const media = document.createElement(
+        AUDIO_EXT.has(ext) ? "audio" : "video"
+      );
+
+      media.controls = true;
+      media.preload = "metadata";
+      media.src = url;
+      media.style.cssText = "display:block;max-width:100%;width:100%;";
+
+      viewerBody.appendChild(media);
+      return;
+    }
+
+    /*
+     * Tutti i formati testuali: lettura del file sorgente.
+     */
+    if (TEXT_EXT.has(ext)) {
+      const loading = document.createElement("p");
+      loading.textContent = "Caricamento documento…";
+      viewerBody.appendChild(loading);
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const text = await response.text();
+
+        // Evita che una selezione più recente venga sovrascritta.
+        if (viewerTitle.textContent !== (file.path || file.name)) return;
+
+        renderText(text, ext);
+      } catch (error) {
+        console.error("FAURE Archive: errore file testuale.", error);
+        showMessage(
+          `Impossibile leggere ${file.name}: ${error.message}. ` +
+          "Potrebbe essere un problema di rete o CORS."
+        );
+      }
+
+      return;
+    }
+
+    /*
+     * Formati binari non supportati: restano nel catalogo
+     * e offrono un download diretto.
+     */
+    const message = document.createElement("p");
+    message.textContent =
+      `Il file .${ext || "senza estensione"} è catalogato, ` +
+      "ma questo formato richiede un visualizzatore dedicato.";
+
+    const download = document.createElement("a");
+    download.href = url;
+    download.download = file.name;
+    download.rel = "noopener";
+    download.textContent = `Scarica ${file.name}`;
+
+    viewerBody.append(message, download);
+  }
+
+  // Esposizione utile per gli altri script della pagina.
+  window.FAUREArchive = {
+    loadSection,
+    loadFile,
+    collectFiles,
+    sections: SECTIONS
+  };
+
+  renderSectionMenu();
+
+  // Carica la prima sezione automaticamente.
+  if (SECTIONS.length) {
+    const firstItem = sectionList.querySelector(".section-item");
+    if (firstItem) loadSection(SECTIONS[0], firstItem);
+  }
+})();
+
+</script>
+
+
+
+<script>
+/* ============================================================
+   FAURE FOUNDATION — DOCUMENT VIEWER
+   Apertura diretta dei documenti nel viewer della pagina
+   ============================================================ */
+
+(() => {
+  "use strict";
+
+  const viewer = document.getElementById("archive-pdf-viewer");
+  const frame = document.getElementById("archive-pdf-frame");
+  const title = document.getElementById("archive-pdf-title");
+  const back = document.getElementById("archive-pdf-back");
+
+  if (!viewer || !frame || !title) {
+    console.error("Viewer archivio: elementi HTML mancanti.");
+    return;
+  }
+
+  const PDFJS =
+    "https://mozilla.github.io/pdf.js/web/viewer.html?file=";
+
+  let openSequence = 0;
+
+  function getDirectURL(doc) {
+    const candidates = [
+      doc?.sourceUrl,
+      doc?.download_url,
+      doc?.downloadUrl,
+      doc?.raw_url,
+      doc?.rawUrl,
+      doc?.file_url,
+      doc?.fileUrl,
+      doc?.url,
+      doc?.href
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate !== "string" || !candidate.trim()) {
+        continue;
+      }
+
+      try {
+        const url = new URL(candidate, window.location.href);
+
+        if (url.protocol !== "https:" && url.protocol !== "http:") {
+          continue;
+        }
+
+        // Trasforma i link GitHub /blob/ in URL del file raw.
+        const match = url.pathname.match(
+          /^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/
+        );
+
+        if (url.hostname === "github.com" && match) {
+          const [, owner, repo, branch, path] = match;
+
+          return (
+            "https://raw.githubusercontent.com/" +
+            owner + "/" + repo + "/" + branch + "/" + path +
+            url.search
+          );
+        }
+
+        // Non usare la pagina HTML della repository come documento.
+        if (
+          url.hostname === "github.com" &&
+          /\/(tree|blob)\//.test(url.pathname)
+        ) {
+          continue;
+        }
+
+        return url.href;
+      } catch (error) {
+        console.warn("URL documento non valido:", candidate);
+      }
+    }
+
+    return null;
+  }
+
+  function getExtension(name, url) {
+    const value = String(name || url || "")
+      .split(/[?#]/)[0];
+
+    const filename = value.split("/").pop() || "";
+    const dot = filename.lastIndexOf(".");
+
+    return dot >= 0
+      ? filename.slice(dot + 1).toLowerCase()
+      : "";
+  }
+
+  function showViewer() {
+    viewer.hidden = false;
+    viewer.style.display = "block";
+
+    viewer.scrollIntoView({
+      behavior: "auto",
+      block: "start"
+    });
+  }
+
+  function showError(message, url) {
+    const content = document.createElement("div");
+    content.style.cssText =
+      "padding:24px;font:16px/1.6 system-ui,sans-serif;" +
+      "overflow-wrap:anywhere;";
+
+    const paragraph = document.createElement("p");
+    paragraph.textContent = message;
+    content.appendChild(paragraph);
+
+    if (url) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Apri o scarica il documento";
+      content.appendChild(link);
+    }
+
+    frame.removeAttribute("src");
+    frame.srcdoc = "";
+    frame.replaceWith(frame.cloneNode(false));
+
+    const replacement = viewer.querySelector("#archive-pdf-frame");
+    if (replacement) {
+      replacement.title = "Lettore documenti";
+      replacement.style.cssText =
+        "width:100%;height:80vh;border:0;";
+      replacement.srcdoc =
+        "<!doctype html><html><body style=" +
+        "'font:16px/1.6 system-ui;padding:24px'>" +
+        "<p>" + message.replace(/[&<>"]/g, c => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+        })[c]) + "</p>" +
+        (url
+          ? "<p><a target='_blank' rel='noopener noreferrer' href='" +
+            url.replace(/&/g, "&amp;").replace(/'/g, "&#39;") +
+            "'>Apri o scarica il documento</a></p>"
+          : "") +
+        "</body></html>";
+    }
+  }
+
+  function openArchiveDocument(doc) {
+    const sequence = ++openSequence;
+    const url = getDirectURL(doc);
+
+    title.textContent =
+      doc.title || doc.name || doc.filename || "Documento";
+
+    showViewer();
+
+    if (!url) {
+      showError("Il catalogo non contiene un URL diretto valido.", null);
+      return;
+    }
+
+    const name = doc.filename || doc.name || doc.title || url;
+    const ext = getExtension(name, url);
+
+    // Ripristina il frame originale se un errore lo aveva sostituito.
+    let currentFrame = viewer.querySelector("#archive-pdf-frame");
+
+    if (!currentFrame) {
+      currentFrame = document.createElement("iframe");
+      currentFrame.id = "archive-pdf-frame";
+      currentFrame.title = "PDF document reader";
+      currentFrame.style.cssText =
+        "width:100%;height:80vh;border:0;";
+      viewer.appendChild(currentFrame);
+    }
+
+    currentFrame.removeAttribute("srcdoc");
+
+    if (ext === "pdf") {
+      currentFrame.src = PDFJS + encodeURIComponent(url);
+      return;
+    }
+
+    // HTML: incorpora il documento senza eseguire script arbitrari.
+    if (["html", "htm", "xhtml"].includes(ext)) {
+      currentFrame.setAttribute("sandbox", "allow-same-origin");
+      currentFrame.src = url;
+      return;
+    }
+
+    // Altri formati: apertura nel frame quando il server lo consente.
+    currentFrame.removeAttribute("sandbox");
+    currentFrame.src = url;
+
+    currentFrame.onerror = () => {
+      if (sequence === openSequence) {
+        console.warn("Il browser non può incorporare il file:", url);
+      }
+    };
+  }
+
+  function closeViewer() {
+    ++openSequence;
+    viewer.hidden = true;
+
+    const currentFrame = viewer.querySelector("#archive-pdf-frame");
+    if (currentFrame) {
+      currentFrame.removeAttribute("srcdoc");
+      currentFrame.src = "about:blank";
+    }
+  }
+
+  if (back) {
+    back.addEventListener("click", closeViewer);
+  }
+
+  /*
+   * Il catalogo attuale genera direttamente gli elementi .paper-row.
+   * Il clic viene intercettato qui: il link non naviga alla repository.
+   */
+  document.addEventListener("click", event => {
+    const row = event.target.closest("#paperList .paper-row");
+
+    if (!row) return;
+
+    // Se il clic è su un elemento interattivo annidato, non interferire.
+    if (event.target.closest("button, input, select")) return;
+
+    const url =
+      row.dataset.sourceUrl ||
+      row.dataset.downloadUrl ||
+      row.dataset.fileUrl ||
+      row.getAttribute("href");
+
+    if (!url || url === "#" || url.startsWith("javascript:")) {
+      return;
+    }
+
+    event.preventDefault();
+
+    openArchiveDocument({
+      title: row.querySelector("strong")?.textContent ||
+        row.textContent.trim(),
+      name: row.dataset.filename ||
+        row.dataset.file ||
+        row.querySelector("strong")?.textContent,
+      sourceUrl: url
+    });
+  });
+
+  window.openArchiveDocument = openArchiveDocument;
+  window.openArchivePdf = openArchiveDocument;
+})();
+</script>
+
 </body>
 </html>
