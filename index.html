@@ -4810,15 +4810,20 @@ select:focus-visible {
   
     
 /* =======================================================
-   REPOSITORY INDEX — 5. APERTURA FILE NEL VISUALIZZATORE
-   HTML → pagina renderizzata in nuova scheda
-   Altri file → visualizzatore FAUREViewer
+   REPOSITORY INDEX — 5. APERTURA FILE
+   HTML: pagina renderizzata in nuova scheda
+   Altri formati: FAUREViewer
    ======================================================= */
 
 function openEntry(entry) {
+  const status = $("#repoExplorerStatus");
+
+  function report(message) {
+    if (status) status.textContent = message;
+  }
+
   if (!entry || !entry.raw) {
-    const status = $("#repoExplorerStatus");
-    if (status) status.textContent = "URL del documento non disponibile.";
+    report("URL del documento non disponibile.");
     return;
   }
 
@@ -4826,76 +4831,104 @@ function openEntry(entry) {
     .replace(/^\./, "")
     .toLowerCase();
 
-  // HTML: apri la pagina renderizzata, non il codice sorgente.
   if (ext === "html" || ext === "htm") {
-    let pageUrl;
+    let raw;
 
     try {
-      const rawUrl = new URL(entry.raw);
-
-      // GitHub raw → GitHub Pages, quando il file appartiene
-      // alla repository pubblicata come sito.
-      const match = rawUrl.pathname.match(
-        /^\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/
-      );
-
-      if (
-        rawUrl.hostname === "raw.githubusercontent.com" &&
-        match &&
-        match[1].toLowerCase() === "auf2026" &&
-        match[2].toLowerCase() === "auf2026.github.io"
-      ) {
-        const branch = match[3];
-        const filePath = match[4];
-
-        pageUrl =
-          "https://auf2026.github.io/" +
-          filePath.split("/").map(encodeURIComponent).join("/");
-      } else {
-        // Fallback: visualizza l'HTML pubblicamente tramite preview.
-        const sourceUrl = entry.raw.replace(
-          /^https:\/\/raw\.githubusercontent\.com\//,
-          "https://github.com/"
-        ).replace(
-          /^https:\/\/github\.com\/([^/]+\/[^/]+)\/([^/]+)\/(.+)$/,
-          "https://github.com/$1/blob/$2/$3"
-        );
-
-        pageUrl =
-          "https://htmlpreview.github.io/?" +
-          encodeURIComponent(sourceUrl);
-      }
-    } catch (error) {
-      console.error("URL HTML non valido:", error);
+      raw = new URL(entry.raw);
+    } catch {
+      report("URL HTML non valido.");
       return;
     }
 
-    const opened = window.open(pageUrl, "_blank", "noopener,noreferrer");
+    const owner = String(entry.owner || "").toLowerCase();
+    const repo = String(entry.repo || "").toLowerCase();
+    const branch = String(entry.branch || "main");
+    const path = String(entry.path || entry.name || "")
+      .replace(/^\/+/, "");
+
+    let candidates = [];
+
+    // Repository del sito AUF2026: prova l'URL pubblicato.
+    if (
+      owner === "auf2026" &&
+      repo === "auf2026.github.io" &&
+      path
+    ) {
+      candidates.push(
+        "https://auf2026.github.io/" +
+        path.split("/").map(encodeURIComponent).join("/")
+      );
+    }
+
+    // GitHub Pages di una repository con sito configurato
+    // al percorso /docs.
+    if (owner && repo && path) {
+      candidates.push(
+        `https://${owner}.github.io/${repo}/` +
+        path.split("/").map(encodeURIComponent).join("/")
+      );
+    }
+
+    // Anteprima HTML del sorgente GitHub.
+    let previewSource = entry.raw;
+
+    if (raw.hostname === "raw.githubusercontent.com") {
+      const parts = raw.pathname.split("/").filter(Boolean);
+
+      if (parts.length >= 4) {
+        const [rawOwner, rawRepo, rawBranch, ...rawPath] = parts;
+
+        previewSource =
+          `https://github.com/${rawOwner}/${rawRepo}/blob/` +
+          `${rawBranch}/${rawPath.join("/")}`;
+      }
+    }
+
+    candidates.push(
+      "https://htmlpreview.github.io/?" +
+      encodeURIComponent(previewSource)
+    );
+
+    // Elimina URL duplicate.
+    candidates = [...new Set(candidates)];
+
+    // Preferisci la pagina pubblicata solo quando sappiamo
+    // che il repository è il sito principale AUF2026.
+    const target = candidates[0];
+
+    const opened = window.open(
+      target,
+      "_blank",
+      "noopener,noreferrer"
+    );
 
     if (!opened) {
-      const status = $("#repoExplorerStatus");
-      if (status) {
-        status.textContent =
-          "Nuova scheda bloccata dal browser. " +
-          "Consenti i popup per aprire la pagina HTML.";
-      }
+      report(
+        "Popup bloccato. Consenti le nuove schede e riprova."
+      );
+      return;
+    }
+
+    // Se il file non appartiene al sito principale,
+    // mostra anche il link alternativo per l'anteprima.
+    if (
+      !(owner === "auf2026" && repo === "auf2026.github.io")
+    ) {
+      report(
+        "HTML aperto in una nuova scheda. " +
+        "Se la pagina non è pubblicata, usa l'anteprima HTML."
+      );
     }
 
     return;
   }
 
-  // PDF, Markdown e altri formati: mantieni il visualizzatore esistente.
+  // Gli altri formati restano nel visualizzatore.
   const viewer = window.FAUREViewer;
 
   if (!viewer || typeof viewer.openUrl !== "function") {
-    const status = $("#repoExplorerStatus");
-
-    if (status) {
-      status.textContent =
-        "Visualizzatore non disponibile. " +
-        "Verifica che il modulo FAUREViewer sia caricato.";
-    }
-
+    report("FAUREViewer non disponibile.");
     return;
   }
 
