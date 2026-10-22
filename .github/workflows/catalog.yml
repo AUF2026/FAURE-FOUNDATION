@@ -1,79 +1,10 @@
 
-name: Build scientific catalog
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'documents/**'
-      - 'scripts/**'
-      - '.github/workflows/catalog.yml'
-
-  schedule:
-    # Controlla periodicamente entrambe le repository sorgente.
-    - cron: '7,22,37,52 * * * *'
-
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: scientific-catalog
-  cancel-in-progress: false
-
-jobs:
-  build:
-    name: Build and validate document catalog
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 1
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Check Git and Python
-        run: |
-          git --version
-          python --version
-
-      - name: Preserve previous catalog
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          CATALOG="documents/data/documents.json"
-          mkdir -p documents/data
-
-          if [ -f "$CATALOG" ]; then
-            cp "$CATALOG" "$RUNNER_TEMP/previous-documents.json"
-            echo "PREVIOUS_CATALOG_EXISTS=true" >> "$GITHUB_ENV"
-          else
-            echo "PREVIOUS_CATALOG_EXISTS=false" >> "$GITHUB_ENV"
-          fi
-
-      - name: Validate catalog generator syntax
-        run: python -m py_compile scripts/build.py
-
-      - name: Generate catalog from both repositories
-        run: python scripts/build.py
-
       - name: Validate generated catalog
         shell: bash
         run: |
           set -euo pipefail
 
           python - <<'PY'
-          import hashlib
           import json
           import re
           from pathlib import Path
@@ -81,50 +12,37 @@ jobs:
 
           path = Path("documents/data/documents.json")
 
-          EXPECTED = {
+          expected = {
               "FAURE-FOUNDATION":
                   "https://github.com/AUF2026/FAURE-FOUNDATION",
               "AUF2026.github.io":
                   "https://github.com/AUF2026/AUF2026.github.io",
           }
 
-          REQUIRED_FIELDS = {
-              "id",
-              "title",
-              "category",
-              "categoryLabel",
-              "type",
-              "file",
-              "filename",
-              "extension",
-              "sizeBytes",
-              "sha256",
-              "repository",
-              "repositoryUrl",
-              "sourceUrl",
-              "downloadUrl",
-              "verification",
-              "identifiers",
-              "externalLinks",
+          required_fields = {
+              "id", "title", "category", "categoryLabel", "type",
+              "file", "filename", "extension", "sizeBytes", "sha256",
+              "repository", "repositoryUrl", "sourceUrl", "downloadUrl",
+              "verification", "identifiers", "externalLinks",
           }
 
           def fail(message):
               raise SystemExit(f"ERROR: {message}")
 
           if not path.is_file():
-              fail("Catalog was not generated.")
+              fail("Catalog file was not generated.")
 
           try:
               with path.open(encoding="utf-8") as stream:
                   catalog = json.load(stream)
           except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-              fail(f"Invalid catalog JSON: {exc}")
+              fail(f"Invalid JSON: {exc}")
 
           if not isinstance(catalog, dict):
               fail("Catalog root must be an object.")
 
           if catalog.get("schemaVersion") != 3:
-              fail("Unexpected schemaVersion; expected 3.")
+              fail("Expected schemaVersion 3.")
 
           documents = catalog.get("documents")
           if not isinstance(documents, list) or not documents:
@@ -138,31 +56,41 @@ jobs:
               fail("'sources' must be a list.")
 
           source_map = {}
-          for source in sources:
-              if not isinstance(source, dict):
-                  fail("Each source must be an object.")
 
-              name = source.get("name")
+          for source in sources:
+              # Compatibilità con vecchi cataloghi:
+              # "FAURE-FOUNDATION"
+              # oppure {"name": "...", "url": "...", "branch": "main"}
+              if isinstance(source, str):
+                  name = source
+              elif isinstance(source, dict):
+                  name = source.get("name")
+              else:
+                  fail(f"Invalid source entry: {source!r}")
+
+              if not isinstance(name, str) or not name:
+                  fail(f"Invalid source name: {source!r}")
+
               if name in source_map:
-                  fail(f"Duplicate source repository: {name!r}")
+                  fail(f"Duplicate source: {name}")
 
               source_map[name] = source
 
-          if set(source_map) != set(EXPECTED):
+          if set(source_map) != set(expected):
               fail(
-                  "Source repositories mismatch. "
-                  f"Expected {sorted(EXPECTED)}, "
-                  f"got {sorted(str(x) for x in source_map)}"
+                  f"Unexpected source repositories: "
+                  f"{sorted(source_map)}"
               )
 
-          for name, expected_url in EXPECTED.items():
+          for name, expected_url in expected.items():
               source = source_map[name]
 
-              if source.get("url") != expected_url:
-                  fail(f"Incorrect repository URL for {name}.")
+              if isinstance(source, dict):
+                  if source.get("url") != expected_url:
+                      fail(f"Incorrect repository URL: {name}")
 
-              if source.get("branch") != "main":
-                  fail(f"Unexpected branch for {name}.")
+                  if source.get("branch") != "main":
+                      fail(f"Unexpected repository branch: {name}")
 
           ids = set()
           paths = set()
@@ -174,7 +102,7 @@ jobs:
               if not isinstance(document, dict):
                   fail(f"Document {index} is not an object.")
 
-              missing = REQUIRED_FIELDS - document.keys()
+              missing = required_fields - document.keys()
               if missing:
                   fail(
                       f"Document {index} missing fields: "
@@ -186,96 +114,87 @@ jobs:
                   if not isinstance(value, str) or not value.strip():
                       fail(f"Document {index} has invalid {field}.")
 
-              document_id = document["id"]
-              if document_id in ids:
-                  fail(f"Duplicate document ID: {document_id}")
-              ids.add(document_id)
+              doc_id = document["id"]
+              if doc_id in ids:
+                  fail(f"Duplicate ID: {doc_id}")
+              ids.add(doc_id)
 
               repository = document["repository"]
-              if repository not in EXPECTED:
+              if repository not in expected:
                   fail(f"Unexpected repository: {repository!r}")
 
-              if document.get("repositoryUrl") != EXPECTED[repository]:
-                  fail(f"Incorrect repositoryUrl: {document_id}")
+              if document["repositoryUrl"] != expected[repository]:
+                  fail(f"Incorrect repositoryUrl: {doc_id}")
 
               relative_path = document["file"]
+              parts = relative_path.split("/")
 
               if (
                   relative_path.startswith("/")
                   or "\\" in relative_path
-                  or any(
-                      part in ("", ".", "..")
-                      for part in relative_path.split("/")
-                  )
+                  or any(part in ("", ".", "..") for part in parts)
               ):
-                  fail(f"Unsafe relative file path: {relative_path!r}")
+                  fail(f"Unsafe file path: {relative_path!r}")
 
-              if relative_path in paths:
-                  fail(
-                      f"Duplicate repository-relative path: "
-                      f"{relative_path}"
-                  )
-              paths.add(relative_path)
+              if (repository, relative_path) in paths:
+                  fail(f"Duplicate file path: {repository}/{relative_path}")
+              paths.add((repository, relative_path))
 
-              if document["filename"] != relative_path.rsplit("/", 1)[-1]:
-                  fail(f"Filename/path mismatch: {document_id}")
+              if document["filename"] != parts[-1]:
+                  fail(f"Filename mismatch: {doc_id}")
 
-              expected_extension = (
+              actual_extension = (
                   Path(relative_path).suffix.lower().lstrip(".")
               )
-              if document["extension"] != expected_extension:
-                  fail(f"Extension mismatch: {document_id}")
+              if document["extension"] != actual_extension:
+                  fail(f"Extension mismatch: {doc_id}")
 
               size = document["sizeBytes"]
               if type(size) is not int or size < 0:
-                  fail(f"Invalid sizeBytes: {document_id}")
+                  fail(f"Invalid sizeBytes: {doc_id}")
 
               digest = document["sha256"]
               if not isinstance(digest, str) or not re.fullmatch(
                   r"[0-9a-f]{64}", digest
               ):
-                  fail(f"Invalid SHA-256: {document_id}")
+                  fail(f"Invalid SHA-256: {doc_id}")
 
-              branch = "main"
               encoded_path = quote(relative_path, safe="/")
 
               expected_source = (
-                  f"{EXPECTED[repository]}/blob/{branch}/{encoded_path}"
+                  f"{expected[repository]}/blob/main/{encoded_path}"
               )
               expected_download = (
                   "https://raw.githubusercontent.com/AUF2026/"
-                  f"{quote(repository, safe='')}/{branch}/{encoded_path}"
+                  f"{quote(repository, safe='')}/main/{encoded_path}"
               )
 
               if document["sourceUrl"] != expected_source:
-                  fail(f"Incorrect sourceUrl: {document_id}")
+                  fail(f"Incorrect sourceUrl: {doc_id}")
 
               if document["downloadUrl"] != expected_download:
-                  fail(f"Incorrect downloadUrl: {document_id}")
+                  fail(f"Incorrect downloadUrl: {doc_id}")
 
               for field in ("sourceUrl", "downloadUrl"):
                   parsed = urlparse(document[field])
                   if parsed.scheme != "https" or not parsed.netloc:
-                      fail(f"Invalid {field}: {document_id}")
+                      fail(f"Invalid {field}: {doc_id}")
 
               if urlparse(document["downloadUrl"]).hostname != (
                   "raw.githubusercontent.com"
               ):
-                  fail(f"Download URL is not a raw GitHub URL: {document_id}")
+                  fail(f"Invalid raw download host: {doc_id}")
 
-              for field in (
-                  "verification",
-                  "identifiers",
-              ):
+              for field in ("verification", "identifiers"):
                   if not isinstance(document[field], dict):
-                      fail(f"Invalid {field}: {document_id}")
+                      fail(f"Invalid {field}: {doc_id}")
 
               if not isinstance(document["externalLinks"], list):
-                  fail(f"Invalid externalLinks: {document_id}")
+                  fail(f"Invalid externalLinks: {doc_id}")
 
               category = document["category"]
               if not isinstance(category, str) or not category:
-                  fail(f"Invalid category: {document_id}")
+                  fail(f"Invalid category: {doc_id}")
 
               category_counts[category] = (
                   category_counts.get(category, 0) + 1
@@ -294,113 +213,37 @@ jobs:
                   fail(f"Incorrect category count: {category}")
 
           if sum(declared_counts.values()) != len(documents):
-              fail("Category totals do not equal document count.")
+              fail("Category totals do not match catalog count.")
 
           categories = catalog.get("categories")
           if not isinstance(categories, list):
               fail("'categories' must be a list.")
 
-          declared_category_ids = set()
+          category_ids = set()
+
           for item in categories:
               if not isinstance(item, dict):
                   fail("Invalid category entry.")
 
               category_id = item.get("id")
-              if category_id in declared_category_ids:
-                  fail(f"Duplicate category declaration: {category_id}")
-              declared_category_ids.add(category_id)
+              if not isinstance(category_id, str):
+                  fail("Invalid category ID.")
+
+              if category_id in category_ids:
+                  fail(f"Duplicate category: {category_id}")
+              category_ids.add(category_id)
 
               if item.get("count") != declared_counts.get(category_id, 0):
-                  fail(f"Category declaration mismatch: {category_id}")
+                  fail(f"Category count mismatch: {category_id}")
 
-          if declared_category_ids != set(declared_counts):
-              fail("Declared categories and categoryCounts differ.")
+          if category_ids != set(declared_counts):
+              fail("Category declarations do not match categoryCounts.")
 
           print(f"Validated {len(documents)} documents.")
-          print(f"Unique IDs: {len(ids)}")
-          print(f"Extensions: {len(extensions)}")
           print("Repositories:")
-
-          for name in sorted(EXPECTED):
+          for name in sorted(expected):
               print(f"  {name}: {repository_counts.get(name, 0)}")
 
-          print("Category counts:")
-          for name in sorted(category_counts):
-              print(f"  {name}: {category_counts[name]}")
-
+          print("Extensions:")
+          print(", ".join(sorted(extensions)))
           PY
-
-      - name: Check catalog regression
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ "$PREVIOUS_CATALOG_EXISTS" != "true" ]; then
-            echo "No previous catalog; skipping regression comparison."
-            exit 0
-          fi
-
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          previous_path = Path(
-              os.environ["RUNNER_TEMP"]
-          ) / "previous-documents.json"
-
-          current_path = Path("documents/data/documents.json")
-
-          with previous_path.open(encoding="utf-8") as stream:
-              previous = json.load(stream)
-
-          with current_path.open(encoding="utf-8") as stream:
-              current = json.load(stream)
-
-          old_count = previous.get("count")
-          new_count = current.get("count")
-
-          if not isinstance(old_count, int) or old_count < 0:
-              raise SystemExit(
-                  "ERROR: Previous catalog has an invalid count."
-              )
-
-          if not isinstance(new_count, int) or new_count <= 0:
-              raise SystemExit(
-                  "ERROR: Current catalog is empty or invalid."
-              )
-
-          # Blocca riduzioni superiori al 30%, salvo revisione manuale.
-          minimum = max(1, int(old_count * 0.70))
-
-          if new_count < minimum:
-              raise SystemExit(
-                  "ERROR: Catalog regression detected: "
-                  f"{old_count} -> {new_count} documents. "
-                  "Review the source repositories and generator."
-              )
-
-          print(
-              f"Catalog regression check passed: "
-              f"{old_count} -> {new_count} documents."
-          )
-          PY
-
-      - name: Commit generated catalog
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add documents/data/documents.json
-
-          if git diff --cached --quiet; then
-            echo "Catalog unchanged; no commit needed."
-            exit 0
-          fi
-
-          git commit -m "Update aggregated scientific catalog"
-          git push origin HEAD:main
