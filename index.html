@@ -2427,71 +2427,6 @@ select:focus-visible {
 
 
       
-<!-- ARCHIVIO DOCUMENTALE -->
-
-<section class="archive section-pad" id="archive">
-
-  <div class="section-kicker">
-    <span>02 — REGISTRO DOCUMENTALE</span>
-    <span>ACCESSO DIRETTO AI DOCUMENTI</span>
-  </div>
-
-  <div class="archive-heading">
-    <div>
-      <p class="eyebrow">DOCUMENTAZIONE PRIMARIA</p>
-      <h2>
-        Il lavoro.<br>
-        <span>Non la reputazione.</span>
-      </h2>
-    </div>
-
-    <p class="archive-intro">
-      Un archivio organizzato per tipologia, provenienza e verificabilità.
-      Ogni voce rimanda al file sorgente nella repository di origine.
-      Il catalogo aggrega i documenti della FAURE FOUNDATION e del sito AUF2026.
-    </p>
-  </div>
-
-  <!-- RICERCA E FILTRI -->
-
-  <div class="archive-controls">
-
-    <label class="search-box" for="paperSearch">
-      <span aria-hidden="true">⌕</span>
-      <input
-        type="search"
-        id="paperSearch"
-        placeholder="Cerca titolo, file, codice o repository..."
-        aria-label="Cerca nei documenti"
-        autocomplete="off">
-    </label>
-
-    <div class="archive-filter">
-      <label class="filter-label" for="paperFilter">
-        TIPOLOGIA DOCUMENTALE
-      </label>
-
-      <select id="paperFilter">
-        <option value="all">Tutte le tipologie</option>
-        <option value="certifications">Certificazioni</option>
-        <option value="refutations">Confutazioni</option>
-        <option value="validations">Validazioni</option>
-        <option value="manuscripts">Manoscritti</option>
-        <option value="theorems">Teoremi</option>
-        <option value="proofs">Dimostrazioni</option>
-        <option value="data">Dati e verifiche</option>
-        <option value="protocols">Protocolli</option>
-        <option value="bibliography">Bibliografia</option>
-        <option value="datasets">Dataset</option>
-        <option value="code">Codice sorgente</option>
-        <option value="docs">Documentazione</option>
-        <option value="pages">Pagine web</option>
-      </select>
-    </div>
-
-  </div>
-
-  
 <div id="archive-pdf-viewer" hidden>
   <div class="archive-reader-toolbar">
     <button id="archive-pdf-back" type="button">
@@ -2508,50 +2443,6 @@ select:focus-visible {
     allowfullscreen>
   </iframe>
 </div>
-
-  <!-- STATO DEL CATALOGO -->
-
-  <div class="archive-overview">
-    <p id="catalogStatus" role="status" aria-live="polite">
-      Caricamento del catalogo...
-    </p>
-
-    <p id="archiveSource"></p>
-  </div>
-
-  <!-- CATEGORIE E DOCUMENTI GENERATI DAL JSON -->
-
-  <div
-    class="archive-list"
-    id="paperList"
-    aria-live="polite"
-    aria-busy="true">
-
-    <p class="search-empty">Caricamento del catalogo...</p>
-
-  </div>
-
-  <!-- NESSUN RISULTATO: UN SOLO ELEMENTO -->
-
-  <p class="search-empty" id="searchEmpty" hidden>
-    Nessun documento corrisponde ai criteri selezionati.
-  </p>
-
-  <!-- NOTA DI INTEGRITÀ -->
-
-  <div class="archive-note">
-    <span class="note-symbol" aria-hidden="true">!</span>
-    <p>
-      La presenza nel registro documenta l'indicizzazione del file,
-      non costituisce da sola una certificazione scientifica.
-      Le informazioni di verifica sono riportate separatamente
-      quando disponibili.
-    </p>
-  </div>
-
-</section>
-
-
 
       <!-- STANDARD DI PUBBLICAZIONE -->
 
