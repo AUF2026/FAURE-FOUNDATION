@@ -579,27 +579,27 @@ function openDocument(file) {
     }
 
     files.forEach(file => {
-      const link = document.createElement("a");
-      link.className = "archive-link";
-      link.href = file.local;
-      link.dataset.file = file.path;
+  const link = document.createElement("a");
+  link.className = "archive-link";
+  link.href = file.local; // URL apribile nell’iframe
+  link.dataset.file = file.path;
 
-      const strong = document.createElement("strong");
-      strong.textContent = file.name;
+  const strong = document.createElement("strong");
+  strong.textContent = file.name;
 
-      const info = document.createElement("span");
-      info.textContent = file.path;
+  const info = document.createElement("span");
+  info.textContent = file.path; // NON file !!
 
-      link.append(strong, info);
+  link.append(strong, info);
 
-      link.onclick = e => {
-        e.preventDefault();
-        openDocument(file);
-      };
-
-      container.appendChild(link);
-    });
+  link.addEventListener("click", event => {
+    event.preventDefault();
+    openDocument(file);
   });
+
+  container.appendChild(link);
+});
+});
 }
 
 
