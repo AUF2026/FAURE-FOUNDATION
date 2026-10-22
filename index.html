@@ -309,36 +309,17 @@ if (authorRegistry) {
 }
 
   /*
-   * =========================================================
-   * ARCHIVE CONTAINERS
-   * =========================================================
-   *
-   * Documents can be rendered inside:
-   *
-   *   .archive-grid
-   *
-   * or:
-   *
-   *   .archive-links
-   *
-   */
+ * =========================================================
+ * ARCHIVE CONTAINERS
+ * =========================================================
+ */
 
-  const archiveContainers =
-    document.querySelectorAll(
-      ".archive-grid, .archive-links"
-    );
+const archiveContainers =
+  document.querySelectorAll(".archive-grid, .archive-links");
 
-
-  
 /* =========================================================
    FAURE FOUNDATION — ARCHIVIO MULTIFORMATO
-   Elenca tutti i file in docs/, anche nelle sottocartelle.
-   Apre i documenti nel lettore incorporato, non in GitHub.
    ========================================================= */
-
-/* ============================================================
-   FAURE FOUNDATION — ARCHIVE FILE DISCOVERY (VERSIONE FINALE)
-   ============================================================ */
 
 async function loadArchiveDocuments() {
   const containers = document.querySelectorAll(".archive-grid, .archive-links");
@@ -379,6 +360,7 @@ async function loadArchiveDocuments() {
     fetchTree(API_ROOT)
   ]);
 
+  // TUTTI i file (non solo docs/)
   function mapFiles(tree, rawBase, localBase) {
     return tree
       .filter(item => item.type === "blob")
@@ -397,49 +379,18 @@ async function loadArchiveDocuments() {
     a.path.localeCompare(b.path)
   );
 
-  window.FAURE_FILES = files; // esportiamo per il lettore
+  window.FAURE_FILES = files;
 
   console.info("FAURE archive:", files.length, "file indicizzati.");
 
   populateArchiveUI(containers, files);
 }
 
+/* =========================================================
+   LETTORE DOCUMENTALE
+   ========================================================= */
 
-  // Filtra i PDF
-  const filesFaure = treeFaure
-    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
-    .map(item => ({
-      name: item.path.split("/").pop(),
-      path: item.path,
-      // URL RAW (solo per download)
-      raw: RAW_FAURE + item.path.split("/").map(encodeURIComponent).join("/"),
-      // URL locale (per iframe)
-      local: `${location.origin}/FAURE-FOUNDATION/${item.path}`
-    }));
-
-  const filesRoot = treeRoot
-    .filter(item => item.type === "blob" && item.path.startsWith("docs/"))
-    .map(item => ({
-      name: item.path.split("/").pop(),
-      path: item.path,
-      raw: RAW_ROOT + item.path.split("/").map(encodeURIComponent).join("/"),
-      local: `${location.origin}/${item.path}`
-    }));
-
-  // Unisci i risultati
-  const files = [...filesFaure, ...filesRoot].sort((a, b) =>
-    a.path.localeCompare(b.path)
-  );
-
-  console.log("Documenti trovati:", files);
-
-  // Ora puoi popolare il tuo archivio
-  // Esempio:
-  // files.forEach(file => { ... });
-}
-
-
-    function createFaureReader() {
+function createFaureReader() {
   let reader = document.getElementById("faureDocumentReader");
 
   if (!reader) {
@@ -569,7 +520,11 @@ function openDocument(file) {
   reader.scrollIntoView({ behavior: "smooth" });
 }
 
-    function populateArchiveUI(containers, files) {
+/* =========================================================
+   POPOLAMENTO ARCHIVIO
+   ========================================================= */
+
+function populateArchiveUI(containers, files) {
   containers.forEach(container => {
     container.replaceChildren();
 
@@ -579,38 +534,36 @@ function openDocument(file) {
     }
 
     files.forEach(file => {
-  const link = document.createElement("a");
-  link.className = "archive-link";
-  link.href = file.local; // URL apribile nell’iframe
-  link.dataset.file = file.path;
+      const link = document.createElement("a");
+      link.className = "archive-link";
+      link.href = file.local;
+      link.dataset.file = file.path;
 
-  const strong = document.createElement("strong");
-  strong.textContent = file.name;
+      const strong = document.createElement("strong");
+      strong.textContent = file.name;
 
-  const info = document.createElement("span");
-  info.textContent = file.path; // NON file !!
+      const info = document.createElement("span");
+      info.textContent = file.path;
 
-  link.append(strong, info);
+      link.append(strong, info);
 
-  link.addEventListener("click", event => {
-    event.preventDefault();
-    openDocument(file);
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        openDocument(file);
+      });
+
+      container.appendChild(link);
+    });
   });
-
-  container.appendChild(link);
-});
-});
 }
 
+/*
+ * =========================================================
+ * INITIALIZE
+ * =========================================================
+ */
 
-   /*
-   * =========================================================
-   * INITIALIZE
-   * =========================================================
-   */
-
-  loadArchiveDocuments();
-
+loadArchiveDocuments();
 
   /*
    * =========================================================
