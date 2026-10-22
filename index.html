@@ -2754,6 +2754,585 @@ select:focus-visible {
   overflow-wrap: anywhere;
 }
 
+    
+/* =======================================================
+   ARCHIVIO DOCUMENTALE — FAURE FOUNDATION
+   Stile editoriale, responsive, dark/light compatibile
+   ======================================================= */
+
+/* ---------- ARCHIVIO: INTRODUZIONE ---------- */
+
+.archive-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+  align-items: end;
+  gap: clamp(24px, 5vw, 72px);
+  margin: 38px 0 48px;
+}
+
+.archive-intro {
+  max-width: 510px;
+  margin: 0 0 8px;
+  color: var(--muted, #777);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- CONTROLLI DEL REGISTRO ---------- */
+
+.archive-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
+  align-items: end;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line, #d8d5ce);
+  background: var(--surface, transparent);
+  color: var(--text, inherit);
+  transition: border-color 160ms ease;
+}
+
+.search-box > span {
+  flex: 0 0 auto;
+  color: var(--muted, #777);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.search-box input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.search-box input::placeholder {
+  color: var(--muted, #777);
+  opacity: 0.8;
+}
+
+.search-box:focus-within {
+  outline: 2px solid var(--accent, #777);
+  outline-offset: 2px;
+}
+
+.archive-filter {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+}
+
+.archive-filter select {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 36px 0 14px;
+  border: 1px solid var(--line, #d8d5ce);
+  border-radius: 0;
+  background-color: var(--surface, transparent);
+  color: var(--text, inherit);
+  font: inherit;
+  cursor: pointer;
+}
+
+.archive-filter select:focus-visible {
+  outline: 2px solid var(--accent, #777);
+  outline-offset: 2px;
+}
+
+/* ---------- RIEPILOGO ---------- */
+
+.archive-overview {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line, #d8d5ce);
+  border-bottom: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-overview p {
+  margin: 0;
+  color: var(--muted, #777);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.archive-overview strong {
+  color: var(--text, inherit);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- ELENCO DOCUMENTI ---------- */
+
+.archive-list {
+  display: grid;
+  gap: 32px;
+  min-width: 0;
+  padding-top: 12px;
+}
+
+.archive-category {
+  min-width: 0;
+  scroll-margin-top: 24px;
+}
+
+.archive-category-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-category-heading h3 {
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.archive-category-count {
+  flex: 0 0 auto;
+  color: var(--muted, #777);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-document {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px 24px;
+  min-width: 0;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--line, #e4e1da);
+  background: transparent;
+  color: var(--text, inherit);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.archive-document:hover {
+  color: var(--accent, #9b3027);
+}
+
+.archive-document:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.archive-document-main {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.archive-document-title {
+  color: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.archive-document-meta {
+  color: var(--muted, #777);
+  font-size: 0.76rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.archive-document-type {
+  align-self: start;
+  padding: 5px 8px;
+  border: 1px solid var(--line, #d8d5ce);
+  color: var(--muted, #777);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archive-document:hover .archive-document-type {
+  border-color: currentColor;
+  color: inherit;
+}
+
+.search-empty {
+  padding: 24px 0;
+  margin: 0;
+  color: var(--muted, #777);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* ---------- AVVISO DOCUMENTALE ---------- */
+
+.archive-note {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line, #d8d5ce);
+}
+
+.archive-note .note-symbol {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--muted, #777);
+  font-size: 0.75rem;
+}
+
+.archive-note p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted, #777);
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+
+/* =======================================================
+   VISUALIZZATORE DOCUMENTALE
+   Un solo pannello, sotto il registro.
+   Nessun secondo menu di ricerca o filtro.
+   ======================================================= */
+
+.archive-reader {
+  min-width: 0;
+  margin-top: 40px;
+  color: var(--text, inherit);
+  scroll-margin-top: 24px;
+}
+
+.archive-reader[hidden],
+.archive-reader-toolbar[hidden],
+#archive-pdf-viewer[hidden] {
+  display: none !important;
+}
+
+/* Barra superiore del visualizzatore */
+
+.archive-reader-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  min-width: 0;
+  padding: 16px 0;
+  margin-bottom: 14px;
+  border-top: 1px solid var(--line, #d8d5ce);
+  border-bottom: 1px solid var(--line, #d8d5ce);
+}
+
+#archive-pdf-title {
+  min-width: 0;
+  margin: 0;
+  color: var(--text, inherit);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* Pulsanti del lettore */
+
+#archive-pdf-back,
+.archive-reader-toolbar button,
+.archive-reader-toolbar a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid var(--line, #d8d5ce);
+  border-radius: 0;
+  background: var(--surface, transparent);
+  color: var(--text, inherit);
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+#archive-pdf-back:hover,
+.archive-reader-toolbar button:hover,
+.archive-reader-toolbar a:hover {
+  border-color: var(--accent, #777);
+  background: var(--hover, rgba(128, 128, 128, 0.12));
+}
+
+#archive-pdf-back:focus-visible,
+.archive-reader-toolbar button:focus-visible,
+.archive-reader-toolbar a:focus-visible {
+  outline: 2px solid var(--accent, #777);
+  outline-offset: 3px;
+}
+
+/* Contenitore del contenuto incorporato */
+
+#archive-pdf-viewer,
+.archive-reader-body {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line, #d8d5ce);
+  background: var(--surface, transparent);
+}
+
+#archive-pdf-viewer iframe,
+.archive-reader-body iframe,
+.archive-reader-frame {
+  display: block;
+  width: 100%;
+  height: min(82vh, 1000px);
+  min-height: 560px;
+  border: 0;
+  background: var(--surface, transparent);
+  color-scheme: light;
+}
+
+/* Visualizzazione di HTML e documenti testuali */
+
+.archive-reader-content {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(18px, 4vw, 40px);
+  color: var(--text, inherit);
+  background: var(--surface, transparent);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.archive-reader-content img,
+.archive-reader-content video,
+.archive-reader-content canvas,
+.archive-reader-content svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.archive-reader-content pre {
+  max-width: 100%;
+  padding: 16px;
+  overflow: auto;
+  border: 1px solid var(--line, #d8d5ce);
+  background: var(--surface, transparent);
+  white-space: pre;
+}
+
+.archive-reader-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.archive-reader-content th,
+.archive-reader-content td {
+  padding: 8px 12px;
+  border: 1px solid var(--line, #d8d5ce);
+  text-align: left;
+}
+
+.archive-reader-content a {
+  color: var(--accent, #9b3027);
+  overflow-wrap: anywhere;
+}
+
+/* Messaggi e stati del visualizzatore */
+
+.archive-reader-status {
+  padding: 12px 0;
+  color: var(--muted, #777);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+.archive-reader-error {
+  padding: 20px;
+  border: 1px solid var(--line, #d8d5ce);
+  color: var(--text, inherit);
+  line-height: 1.7;
+}
+
+.archive-reader-error a {
+  color: var(--accent, #9b3027);
+}
+
+/* =======================================================
+   REPOSITORY DOCUMENTALI
+   Il secondo navigatore mantiene il suo CSS indipendente.
+   ======================================================= */
+
+.repository-browser,
+.repository-browser * {
+  box-sizing: border-box;
+}
+
+.repository-browser {
+  min-width: 0;
+  color: var(--text, inherit);
+}
+
+.repository-browser input,
+.repository-browser select,
+.repository-browser button {
+  font: inherit;
+}
+
+.repository-browser input,
+.repository-browser select {
+  max-width: 100%;
+  color: inherit;
+  background: var(--surface, transparent);
+  border-color: var(--line, #d8d5ce);
+}
+
+.repository-browser a {
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.repository-browser button:focus-visible,
+.repository-browser a:focus-visible,
+.repository-browser input:focus-visible,
+.repository-browser select:focus-visible {
+  outline: 2px solid var(--accent, #777);
+  outline-offset: 3px;
+}
+
+/* =======================================================
+   RESPONSIVE
+   ======================================================= */
+
+@media (max-width: 720px) {
+  .archive-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    margin: 28px 0 32px;
+  }
+
+  .archive-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .archive-document {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .archive-document-type {
+    justify-self: start;
+  }
+
+  .archive-list {
+    gap: 24px;
+  }
+
+  .archive-reader {
+    margin-top: 28px;
+  }
+
+  .archive-reader-toolbar {
+    align-items: flex-start;
+  }
+
+  #archive-pdf-viewer iframe,
+  .archive-reader-body iframe,
+  .archive-reader-frame {
+    height: 72vh;
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 420px) {
+  .archive-overview {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .archive-category-heading {
+    gap: 10px;
+  }
+
+  .archive-document {
+    padding: 16px 0;
+  }
+
+  .archive-reader-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archive-reader-toolbar > * {
+    max-width: 100%;
+    justify-self: start;
+  }
+
+  #archive-pdf-viewer iframe,
+  .archive-reader-body iframe,
+  .archive-reader-frame {
+    height: 68vh;
+    min-height: 360px;
+  }
+}
+
+/* ---------- MOVIMENTO RIDOTTO ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-document,
+  .search-box,
+  #archive-pdf-back,
+  .archive-reader-toolbar button,
+  .archive-reader-toolbar a {
+    transition: none;
+  }
+}
+
 </style>
 
 </head>
@@ -2997,48 +3576,6 @@ select:focus-visible {
 
       </div>
 
-      <!-- RICERCA E FILTRI -->
-
-      <div class="archive-controls">
-
-        <label class="search-box" for="paperSearch">
-          <span aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            id="paperSearch"
-            placeholder="Cerca titolo, file, codice o repository..."
-            aria-label="Cerca nei documenti"
-            autocomplete="off"
-          >
-        </label>
-
-        <div class="archive-filter">
-
-          <label class="filter-label" for="paperFilter">
-            TIPOLOGIA DOCUMENTALE
-          </label>
-
-          <select id="paperFilter">
-            <option value="all">Tutte le tipologie</option>
-            <option value="certifications">Certificazioni</option>
-            <option value="refutations">Confutazioni</option>
-            <option value="validations">Validazioni</option>
-            <option value="manuscripts">Manoscritti</option>
-            <option value="theorems">Teoremi</option>
-            <option value="proofs">Dimostrazioni</option>
-            <option value="data">Dati e verifiche</option>
-            <option value="protocols">Protocolli</option>
-            <option value="bibliography">Bibliografia</option>
-            <option value="datasets">Dataset</option>
-            <option value="code">Codice sorgente</option>
-            <option value="docs">Documentazione</option>
-            <option value="pages">Pagine web</option>
-          </select>
-
-        </div>
-
-      </div>
-
       <!-- LETTORE PDF -->
 
       <div id="archive-pdf-viewer" hidden>
@@ -3051,15 +3588,7 @@ select:focus-visible {
           <span id="archive-pdf-title">Document reader</span>
         </div>
 
-        <iframe
-          id="archive-pdf-frame"
-          title="PDF document reader"
-          style="width: 100%; height: 80vh; border: 0;"
-          loading="lazy"
-          allowfullscreen
-        ></iframe>
-
-      </div>
+        
 
       <!-- STATO DEL CATALOGO -->
 
@@ -5089,34 +5618,140 @@ function safeUrl(value) {
     setStatus("Caricamento immagine…");
   }
 
-  /* =======================================================
-     FAUREViewer — 8. VISUALIZZAZIONE PDF
-     ======================================================= */
+  
+/* =======================================================
+   FAUREViewer — 8. VISUALIZZAZIONE PDF CON PDF.js
+   ======================================================= */
 
-  function renderPDF(url) {
-    const body = $("#faureViewerBody");
+async function renderPDF(url) {
+  const body = document.querySelector("#faureViewerBody");
+  if (!body) return;
 
-    if (!body) return;
+  body.replaceChildren();
 
-    body.replaceChildren();
+  if (typeof url !== "string" || !url.trim()) {
+    setStatus("URL del PDF non valido.");
+    return;
+  }
 
-    const frame = create(
-      "iframe",
-      "faure-viewer-frame"
-    );
+  let pdfURL;
 
-    frame.title = "Visualizzatore PDF";
-    frame.loading = "eager";
-    frame.referrerPolicy = "no-referrer";
-    frame.src = url;
+  try {
+    pdfURL = new URL(url, window.location.href);
 
-    body.appendChild(frame);
+    if (!["http:", "https:"].includes(pdfURL.protocol)) {
+      throw new Error("Protocollo non supportato");
+    }
+
+    // GitHub /blob/ -> URL raw del file.
+    if (
+      pdfURL.hostname === "github.com" &&
+      pdfURL.pathname.includes("/blob/")
+    ) {
+      const parts = pdfURL.pathname.split("/");
+      const i = parts.indexOf("blob");
+
+      if (i >= 3 && parts[i + 1] && parts.length > i + 2) {
+        const owner = parts[1];
+        const repo = parts[2];
+        const branch = parts[i + 1];
+        const file = parts.slice(i + 2)
+          .map(encodeURIComponent)
+          .join("/");
+
+        pdfURL = new URL(
+          `https://raw.githubusercontent.com/${owner}/${repo}/` +
+          `${encodeURIComponent(branch)}/${file}`
+        );
+      }
+    }
+
+    if (!pdfURL.pathname.toLowerCase().endsWith(".pdf")) {
+      throw new Error("Il file non sembra essere un PDF");
+    }
+  } catch (error) {
+    setStatus(`PDF non valido: ${error.message}`);
+    return;
+  }
+
+  const originalURL = pdfURL.href;
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "faure-pdf-toolbar";
+
+  const openLink = document.createElement("a");
+  openLink.href = originalURL;
+  openLink.target = "_blank";
+  openLink.rel = "noopener noreferrer";
+  openLink.textContent = "Apri PDF originale ↗";
+
+  toolbar.appendChild(openLink);
+  body.appendChild(toolbar);
+
+  const viewer = document.createElement("div");
+  viewer.className = "faure-pdf-pages";
+  body.appendChild(viewer);
+
+  setStatus("Caricamento e rendering del PDF…");
+
+  try {
+    // Richiede PDF.js disponibile nella pagina oppure tramite CDN.
+    if (!window.pdfjsLib) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+        script.onload = resolve;
+        script.onerror = () =>
+          reject(new Error("Impossibile caricare PDF.js."));
+        document.head.appendChild(script);
+      });
+    }
+
+    const pdfjsLib = window.pdfjsLib;
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    const loadingTask = pdfjsLib.getDocument({
+      url: originalURL,
+      withCredentials: false
+    });
+
+    const pdf = await loadingTask.promise;
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1.35 });
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "faure-pdf-page";
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      canvas.setAttribute("aria-label", `Pagina ${pageNumber}`);
+
+      const context = canvas.getContext("2d");
+
+      viewer.appendChild(canvas);
+
+      await page.render({
+        canvasContext: context,
+        viewport
+      }).promise;
+    }
+
+    setStatus(`PDF visualizzato correttamente · ${pdf.numPages} pagine.`);
+  } catch (error) {
+    console.error("[FAUREViewer PDF]", error);
 
     setStatus(
-      "PDF incorporato. Se non viene visualizzato, " +
-      "utilizza Nuova scheda."
+      "Impossibile visualizzare il PDF. Il server potrebbe bloccare " +
+      "le richieste CORS oppure il file potrebbe non essere accessibile. " +
+      "Usa «Apri PDF originale» per verificare."
     );
   }
+}
+
   
     /* =======================================================
      FAUREViewer — 9. LETTURA DEI DOCUMENTI REMOTI
