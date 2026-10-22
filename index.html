@@ -1117,2138 +1117,7 @@ async function loadArchiveDocuments() {
   
 </script>
 <script>
-  /* =========================================================
-   FAURE FOUNDATION — CORE
-   1. Inizializzazione e tema chiaro/scuro
-   ========================================================= */
-(() => {
-  "use strict";
-
-  if (window.FAURECore) return;
-
-  const $ = (selector, scope = document) =>
-    scope.querySelector(selector);
-
-  const root = document.documentElement;
-  const THEME_KEY = "faure-foundation-theme";
-  const themeButton = $("#themeToggle");
-  const media = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  );
-
-  function readSavedTheme() {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === "light" || saved === "dark") {
-        return saved;
-      }
-    } catch (_) {}
-
-    return media.matches ? "dark" : "light";
-  }
-
-  function applyTheme(theme, persist = true) {
-    const value = theme === "dark" ? "dark" : "light";
-    const dark = value === "dark";
-
-    root.dataset.theme = value;
-    root.style.colorScheme = value;
-
-    const meta = $('meta[name="theme-color"]');
-
-    if (meta) {
-      meta.content = dark ? "#202a30" : "#f2f0e8";
-    }
-
-    if (themeButton) {
-      themeButton.replaceChildren();
-
-      const label = document.createTextNode(
-        `${dark ? "LIGHT" : "DARK"} `
-      );
-
-      const icon = document.createElement("span");
-      icon.className = "theme-icon";
-      icon.textContent = dark ? "☼" : "◐";
-      icon.setAttribute("aria-hidden", "true");
-
-      themeButton.append(label, icon);
-
-      themeButton.setAttribute(
-        "aria-label",
-        dark
-          ? "Attiva modalità chiara"
-          : "Attiva modalità scura"
-      );
-
-      themeButton.setAttribute(
-        "aria-pressed",
-        String(dark)
-      );
-    }
-
-    if (persist) {
-      try {
-        localStorage.setItem(THEME_KEY, value);
-      } catch (_) {}
-    }
-
-    document.dispatchEvent(
-      new CustomEvent("faure:themechange", {
-        detail: { theme: value }
-      })
-    );
-  }
-
-  applyTheme(readSavedTheme(), false);
-
-  themeButton?.addEventListener("click", () => {
-    applyTheme(
-      root.dataset.theme === "dark" ? "light" : "dark"
-    );
-  });
-
-  function syncSystemTheme() {
-    let saved = null;
-
-    try {
-      saved = localStorage.getItem(THEME_KEY);
-    } catch (_) {}
-
-    if (saved !== "light" && saved !== "dark") {
-      applyTheme(
-        media.matches ? "dark" : "light",
-        false
-      );
-    }
-  }
-
-  if (typeof media.addEventListener === "function") {
-    media.addEventListener("change", syncSystemTheme);
-  } else {
-    media.addListener(syncSystemTheme);
-  }
-    /* =======================================================
-     FAURE CORE — 2. MENU MOBILE
-     ======================================================= */
-
-  const menuButton = $("#menuToggle");
-  const nav = $("#mainNav");
-
-  function closeMenu() {
-    if (!nav) return;
-
-    nav.classList.remove("open");
-    menuButton?.setAttribute("aria-expanded", "false");
-  }
-
-  if (menuButton && nav) {
-    menuButton.setAttribute("aria-expanded", "false");
-
-    menuButton.addEventListener("click", () => {
-      const open = !nav.classList.contains("open");
-
-      nav.classList.toggle("open", open);
-      menuButton.setAttribute(
-        "aria-expanded",
-        String(open)
-      );
-    });
-
-    nav.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", closeMenu);
-    });
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape") closeMenu();
-    });
-
-    document.addEventListener("click", event => {
-      if (
-        event.target instanceof Node &&
-        !nav.contains(event.target) &&
-        !menuButton.contains(event.target)
-      ) {
-        closeMenu();
-      }
-    });
-  }
-
-  /* =======================================================
-     FAURE CORE — 3. NAVIGAZIONE INTERNA
-     ======================================================= */
-
-  function navigateToHash() {
-    let id;
-
-    try {
-      id = decodeURIComponent(location.hash.slice(1));
-    } catch (_) {
-      return;
-    }
-
-    if (!id) return;
-
-    const target = document.getElementById(id);
-    if (!target) return;
-
-    requestAnimationFrame(() => {
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    });
-  }
-
-  window.addEventListener("hashchange", navigateToHash);
-  window.addEventListener("load", navigateToHash);
   
-    /* =======================================================
-     FAURE CORE — 4. CATALOGO SCIENTIFICO
-     ======================================================= */
-
-  const paperList = $("#paperList");
-  const paperSearch = $("#paperSearch");
-  const paperFilter = $("#paperFilter");
-  const catalogStatus = $("#catalogStatus");
-  const archiveSource = $("#archiveSource");
-  const searchEmpty = $("#searchEmpty");
-
-  const categoryNames = {
-    certifications: "Certificazioni",
-    refutations: "Confutazioni",
-    validations: "Validazioni",
-    manuscripts: "Manoscritti",
-    theorems: "Teoremi",
-    proofs: "Dimostrazioni",
-    data: "Dati e verifiche",
-    protocols: "Protocolli",
-    bibliography: "Bibliografia",
-    datasets: "Dataset",
-    code: "Codice sorgente",
-    docs: "Documentazione",
-    pages: "Pagine web"
-  };
-
-  let catalogRequest = 0;
-
-  function setCatalogStatus(message) {
-    if (catalogStatus) {
-      catalogStatus.textContent = message;
-    }
-  }
-
-  function getDocumentExtension(doc) {
-    const supplied = String(doc.extension || "")
-      .trim()
-      .toLowerCase()
-      .replace(/^\./, "");
-
-    if (supplied) return supplied;
-
-    const filename = String(
-      doc.filename || doc.file || doc.sourceUrl || ""
-    );
-
-    const match = filename.match(
-      /\.([a-z0-9]+)(?:[?#].*)?$/i
-    );
-
-    return match ? match[1].toLowerCase() : "";
-  }
-
-  function normalizeDocumentUrl(value) {
-    try {
-      const url = new URL(value, location.href);
-
-      if (!["https:", "http:"].includes(url.protocol)) {
-        return null;
-      }
-
-      return url.href;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function createDocumentRow(doc, category, label) {
-    const sourceUrl = normalizeDocumentUrl(doc.sourceUrl);
-
-    if (!sourceUrl) return null;
-
-    const link = document.createElement("a");
-
-    link.className = "paper-row";
-    link.href = sourceUrl;
-    link.dataset.type = category;
-    link.dataset.category = category;
-
-    link.dataset.search = [
-      doc.id,
-      doc.title,
-      doc.filename,
-      doc.file,
-      doc.type,
-      label,
-      doc.repository,
-      doc.extension
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLocaleLowerCase("it");
-
-    link.addEventListener("click", event => {
-      event.preventDefault();
-
-      const viewer = window.FAUREViewer;
-
-      if (!viewer || typeof viewer.openUrl !== "function") {
-        setCatalogStatus(
-          "Visualizzatore non disponibile. Riprova tra poco."
-        );
-        return;
-      }
-
-      viewer.openUrl({
-        title: String(doc.title),
-        url: sourceUrl,
-        extension: getDocumentExtension(doc),
-        repository: String(doc.repository || ""),
-        id: String(doc.id || "")
-      });
-    });
-
-    const title = document.createElement("strong");
-    title.textContent = String(doc.title);
-
-    const meta = document.createElement("span");
-    meta.className = "paper-status";
-
-    meta.textContent = [
-      label,
-      doc.repository || "Archivio documentale",
-      getDocumentExtension(doc) || "documento"
-    ].join(" · ");
-
-    link.append(title, meta);
-
-    return link;
-  }
-    /* =======================================================
-     FAURE CORE — 5. RICERCA E FILTRI
-     ======================================================= */
-
-  function filterPapers() {
-    if (!paperList) return;
-
-    const query = (paperSearch?.value || "")
-      .trim()
-      .toLocaleLowerCase("it");
-
-    const selected = paperFilter?.value || "all";
-
-    let visible = 0;
-
-    paperList.querySelectorAll(".archive-category")
-      .forEach(section => {
-        let sectionVisible = 0;
-
-        section.querySelectorAll(".paper-row")
-          .forEach(link => {
-            const matchesQuery =
-              !query ||
-              (link.dataset.search || "").includes(query);
-
-            const matchesType =
-              selected === "all" ||
-              link.dataset.type === selected;
-
-            const show = matchesQuery && matchesType;
-
-            link.hidden = !show;
-
-            if (show) {
-              visible++;
-              sectionVisible++;
-            }
-          });
-
-        section.hidden = sectionVisible === 0;
-
-        const count = section.querySelector(
-          ".archive-category-count"
-        );
-
-        if (count) {
-          count.textContent = String(sectionVisible);
-        }
-      });
-
-    if (searchEmpty) {
-      searchEmpty.hidden = visible !== 0;
-    }
-
-    if (paperList.dataset.loaded === "true") {
-      setCatalogStatus(
-        `${visible} documenti visualizzati`
-      );
-    }
-  }
-
-  /* =======================================================
-     FAURE CORE — 6. CARICAMENTO CATALOGO
-     ======================================================= */
-
-  async function loadScientificCatalog() {
-    if (!paperList) return;
-
-    const requestId = ++catalogRequest;
-
-    paperList.setAttribute("aria-busy", "true");
-    setCatalogStatus("Caricamento catalogo scientifico…");
-
-    const candidates = [
-      new URL(
-        "./documents/data/documents.json",
-        location.href
-      ).href,
-
-      "https://raw.githubusercontent.com/AUF2026/" +
-        "FAURE-FOUNDATION/main/documents/data/documents.json"
-    ];
-
-    let catalog = null;
-    let lastError = null;
-
-    for (const url of candidates) {
-      try {
-        const response = await fetch(url, {
-          cache: "no-cache",
-          headers: {
-            Accept: "application/json"
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (!data || !Array.isArray(data.documents)) {
-          throw new Error("Formato JSON non valido.");
-        }
-
-        catalog = data;
-        break;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-
-    if (requestId !== catalogRequest) return;
-
-    if (!catalog) {
-      paperList.replaceChildren();
-      paperList.dataset.loaded = "false";
-
-      const message = document.createElement("p");
-      message.className = "search-empty";
-
-      message.textContent =
-        "Catalogo non disponibile: " +
-        (lastError?.message || "errore di rete") +
-        ".";
-
-      paperList.appendChild(message);
-      paperList.setAttribute("aria-busy", "false");
-
-      if (searchEmpty) searchEmpty.hidden = true;
-
-      setCatalogStatus(
-        "Impossibile caricare il catalogo JSON. " +
-        "Controlla il percorso del file e la connessione."
-      );
-
-      return;
-    }
-        /* =====================================================
-       FAURE CORE — 7. GENERAZIONE CATEGORIE
-       ===================================================== */
-
-    const groups = new Map();
-    const otherDocuments = [];
-
-    for (const doc of catalog.documents) {
-      if (
-        !doc ||
-        typeof doc.title !== "string" ||
-        !doc.title.trim() ||
-        typeof doc.sourceUrl !== "string"
-      ) {
-        continue;
-      }
-
-      const category = String(doc.category || "")
-        .trim()
-        .toLowerCase();
-
-      const label =
-        String(doc.categoryLabel || "").trim() ||
-        categoryNames[category] ||
-        "Altri documenti";
-
-      const link = createDocumentRow(doc, category, label);
-
-      if (!link) continue;
-
-      if (category && categoryNames[category]) {
-        if (!groups.has(category)) {
-          groups.set(category, []);
-        }
-
-        groups.get(category).push(link);
-      } else {
-        otherDocuments.push(link);
-      }
-    }
-
-    const fragment = document.createDocumentFragment();
-
-    function appendGroup(id, label, links) {
-      if (!links.length) return;
-
-      links.sort((a, b) =>
-        a.querySelector("strong").textContent.localeCompare(
-          b.querySelector("strong").textContent,
-          "it"
-        )
-      );
-
-      const section = document.createElement("section");
-      section.className = "archive-category";
-      section.dataset.category = id;
-
-      const heading = document.createElement("div");
-      heading.className = "archive-category-heading";
-
-      const h3 = document.createElement("h3");
-      h3.textContent = label;
-
-      const count = document.createElement("span");
-      count.className = "archive-category-count";
-      count.textContent = String(links.length);
-
-      heading.append(h3, count);
-
-      const list = document.createElement("div");
-      list.className = "archive-category-documents";
-
-      links.forEach(link => list.appendChild(link));
-
-      section.append(heading, list);
-      fragment.appendChild(section);
-    }
-
-    Object.entries(categoryNames).forEach(([id, label]) => {
-      appendGroup(id, label, groups.get(id) || []);
-    });
-
-    appendGroup("other", "Altri documenti", otherDocuments);
-
-    paperList.replaceChildren(fragment);
-    paperList.dataset.loaded = "true";
-    paperList.setAttribute("aria-busy", "false");
-
-    if (archiveSource) {
-      archiveSource.textContent = Array.isArray(catalog.sources)
-  ? catalog.sources
-      .map(source => {
-        if (typeof source === "string") return source;
-
-        if (source && typeof source === "object") {
-          return (
-            source.label ||
-            source.name ||
-            source.repository ||
-            source.url ||
-            ""
-          );
-        }
-
-        return "";
-      })
-      .filter(Boolean)
-      .join(" · ")
-  : "";
-    }
-
-    const total = paperList.querySelectorAll(".paper-row").length;
-
-    setCatalogStatus(`${total} documenti indicizzati`);
-
-    filterPapers();
-  }
-
-  /* =====================================================
-     FAURE CORE — 8. EVENTI E API PUBBLICA
-     ===================================================== */
-
-  paperSearch?.addEventListener("input", filterPapers);
-  paperFilter?.addEventListener("change", filterPapers);
-  
-    window.FAURECore = Object.freeze({
-    applyTheme,
-    closeMenu,
-    filterPapers,
-    loadScientificCatalog,
-    getTheme: () => root.dataset.theme || "light"
-  });
-
-  loadScientificCatalog().catch(error => {
-    console.error(
-      "FAURE FOUNDATION — Catalogo:",
-      error
-    );
-
-    setCatalogStatus(
-      "Errore durante il caricamento del catalogo."
-    );
-
-    paperList?.setAttribute("aria-busy", "false");
-  });
-
-  console.info("FAURE FOUNDATION — CORE inizializzato");
-})();
-
-/* =========================================================
-   FAURE FOUNDATION — REPOSITORY INDEX
-   PARTE 1
-   ========================================================= */
-
-(() => {
-  "use strict";
-
-  if (window.FAURERepository) return;
-
-  const SOURCES = [
-    {
-      id: "faure",
-      label: "FAURE FOUNDATION",
-      owner: "AUF2026",
-      repo: "FAURE-FOUNDATION",
-      branch: "main"
-    },
-    {
-      id: "parent",
-      label: "AUF2026 — PARENT",
-      owner: "AUF2026",
-      repo: "AUF2026.github.io",
-      branch: "main"
-    }
-  ];
-
-  const state = {
-    entries: [],
-    sourceErrors: [],
-    repo: "all",
-    folder: "",
-    query: "",
-    loading: false,
-    requestId: 0,
-    controller: null
-  };
-
-  const $ = (selector, scope = document) =>
-    scope.querySelector(selector);
-
-  const create = (tag, text, className = "") => {
-    const element = document.createElement(tag);
-
-    if (text != null) element.textContent = text;
-    if (className) element.className = className;
-
-    return element;
-  };
-
-  const pathUrl = path =>
-    path.split("/").map(encodeURIComponent).join("/");
-
-  const apiUrl = repo =>
-    `https://api.github.com/repos/${repo.owner}/${repo.repo}`;
-
-  const rawUrl = (repo, path) =>
-    `https://raw.githubusercontent.com/${repo.owner}/` +
-    `${repo.repo}/${repo.branch}/${pathUrl(path)}`;
-
-  function extension(path) {
-    const name = path.split("/").pop() || "";
-    const index = name.lastIndexOf(".");
-
-    return index > 0
-      ? name.slice(index + 1).toLowerCase()
-      : "";
-  }
-
-  function formatSize(bytes) {
-    if (!Number.isFinite(bytes) || bytes < 0) return "";
-
-    if (bytes < 1024) return `${bytes} B`;
-
-    if (bytes < 1048576) {
-      return `${(bytes / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(bytes / 1048576).toFixed(2)} MB`;
-  }
-
-  async function fetchJSON(url, signal) {
-    const response = await fetch(url, {
-      signal,
-      headers: {
-        Accept: "application/vnd.github+json"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    return response.json();
-  }
-  
-    /* =======================================================
-     REPOSITORY INDEX — 2. LETTURA ALBERO GITHUB
-     ======================================================= */
-
-  async function getTree(repo, signal) {
-    const result = await fetchJSON(
-      `${apiUrl(repo)}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`,
-      signal
-    );
-
-    if (!Array.isArray(result.tree)) {
-      throw new Error(
-        "GitHub non ha restituito un indice valido."
-      );
-    }
-
-    if (result.truncated) {
-      throw new Error(
-        "Indice troppo grande per una scansione completa. " +
-        "È necessaria una scansione per directory."
-      );
-    }
-
-    return result.tree
-      .filter(item =>
-        item.path &&
-        (item.type === "blob" || item.type === "tree")
-      )
-      .map(item => ({
-        id: `${repo.id}:${item.path}`,
-        repoId: repo.id,
-        repoLabel: repo.label,
-        owner: repo.owner,
-        repo: repo.repo,
-        branch: repo.branch,
-        path: item.path,
-        name: item.path.split("/").pop(),
-        type: item.type === "tree" ? "dir" : "file",
-        size: item.size || 0,
-        sha: item.sha || "",
-        ext: item.type === "blob" ? extension(item.path) : "",
-        raw: item.type === "blob"
-          ? rawUrl(repo, item.path)
-          : ""
-      }));
-  }
-
-  function completeDirectories(entries) {
-    const all = new Map();
-
-    entries.forEach(entry => {
-      all.set(entry.id, entry);
-    });
-
-    entries.forEach(entry => {
-      const segments = entry.path.split("/");
-
-      for (let i = 1; i < segments.length; i++) {
-        const path = segments.slice(0, i).join("/");
-        const id = `${entry.repoId}:${path}`;
-
-        if (all.has(id)) continue;
-
-        all.set(id, {
-          ...entry,
-          id,
-          path,
-          name: segments[i - 1],
-          type: "dir",
-          size: 0,
-          sha: "",
-          ext: "",
-          raw: ""
-        });
-      }
-    });
-
-    return [...all.values()].sort((a, b) => {
-      if (a.repoId !== b.repoId) {
-        return a.repoId.localeCompare(b.repoId);
-      }
-
-      if (a.type !== b.type) {
-        return a.type === "dir" ? -1 : 1;
-      }
-
-      return a.path.localeCompare(b.path, "it");
-    });
-  }
-
-  /* =======================================================
-     REPOSITORY INDEX — 3. CREAZIONE INTERFACCIA
-     ======================================================= */
-
-  function ensureExplorer() {
-    let explorer = $("#repoExplorer");
-
-    if (explorer) return explorer;
-
-    explorer = create("section", null, "repo-explorer");
-    explorer.id = "repoExplorer";
-
-    explorer.style.cssText =
-      "margin:28px 0;padding:clamp(16px,3vw,28px);" +
-      "border:1px solid var(--line);" +
-      "background:var(--surface);";
-
-    const title = create("h3", "Repository documentali");
-
-    const status = create("p", "Inizializzazione…");
-    status.id = "repoExplorerStatus";
-    status.setAttribute("role", "status");
-    status.setAttribute("aria-live", "polite");
-
-    const controls = create("div");
-
-    controls.style.cssText =
-      "display:grid;" +
-      "grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));" +
-      "gap:12px;margin:16px 0;";
-
-    const repoSelect = create("select");
-    repoSelect.id = "repoExplorerSource";
-    repoSelect.setAttribute(
-      "aria-label",
-      "Scegli repository"
-    );
-
-    const options = [
-      ["all", "Tutte le repository"],
-      ...SOURCES.map(repo => [repo.id, repo.label])
-    ];
-
-    options.forEach(([value, label]) => {
-      const option = create("option", label);
-      option.value = value;
-      repoSelect.appendChild(option);
-    });
-
-    const search = create("input");
-    search.type = "search";
-    search.id = "repoExplorerSearch";
-    search.placeholder = "Cerca file, percorso o estensione…";
-    search.setAttribute(
-      "aria-label",
-      "Cerca nei repository"
-    );
-    
-        [repoSelect, search].forEach(element => {
-      element.style.cssText =
-        "width:100%;min-width:0;padding:12px;" +
-        "border:1px solid var(--line);" +
-        "background:var(--bg);color:var(--ink);";
-    });
-
-    controls.append(repoSelect, search);
-
-    const breadcrumb = create("nav");
-    breadcrumb.id = "repoExplorerBreadcrumb";
-    breadcrumb.setAttribute(
-      "aria-label",
-      "Percorso cartelle"
-    );
-
-    breadcrumb.style.cssText =
-      "display:flex;gap:6px;flex-wrap:wrap;" +
-      "align-items:center;margin:14px 0;";
-
-    const errors = create("div");
-    errors.id = "repoExplorerErrors";
-
-    const list = create("div");
-    list.id = "repoExplorerList";
-
-    list.style.cssText =
-      "display:grid;" +
-      "grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));" +
-      "gap:10px;";
-
-    const refresh = create("button", "Aggiorna indice");
-    refresh.type = "button";
-    refresh.className = "theme-toggle";
-
-    refresh.addEventListener("click", () => {
-      refreshIndex().catch(error => {
-        if (error.name !== "AbortError") {
-          console.error("FAURE repository:", error);
-        }
-      });
-    });
-
-    explorer.append(
-      title,
-      status,
-      controls,
-      breadcrumb,
-      errors,
-      list,
-      refresh
-    );
-
-    const archive = $("#archive");
-
-    if (archive) {
-      archive.appendChild(explorer);
-    } else {
-      document.body.appendChild(explorer);
-    }
-
-    repoSelect.addEventListener("change", () => {
-      state.repo = repoSelect.value;
-      state.folder = "";
-      renderExplorer();
-    });
-
-    search.addEventListener("input", () => {
-      state.query = search.value
-        .trim()
-        .toLocaleLowerCase("it");
-
-      renderExplorer();
-    });
-
-    return explorer;
-  }
-
-  /* =======================================================
-     REPOSITORY INDEX — 4. FILTRO E NAVIGAZIONE
-     ======================================================= */
-
-  function getVisibleEntries() {
-    let items = state.entries;
-
-    if (state.repo !== "all") {
-      items = items.filter(
-        item => item.repoId === state.repo
-      );
-    }
-
-    if (state.query) {
-      return items.filter(item =>
-        item.type === "file" &&
-        `${item.name} ${item.path} ${item.repo} ${item.ext}`
-          .toLocaleLowerCase("it")
-          .includes(state.query)
-      );
-    }
-
-    if (state.repo === "all" && !state.folder) {
-      return items.filter(
-        item => !item.path.includes("/")
-      );
-    }
-
-    const prefix = state.folder
-      ? `${state.folder}/`
-      : "";
-
-    return items.filter(item => {
-      if (!prefix) {
-        return !item.path.includes("/");
-      }
-
-      if (!item.path.startsWith(prefix)) {
-        return false;
-      }
-
-      const rest = item.path.slice(prefix.length);
-
-      return rest.length > 0 && !rest.includes("/");
-    });
-  }
-
-  function renderBreadcrumb() {
-    const nav = $("#repoExplorerBreadcrumb");
-
-    if (!nav) return;
-
-    nav.replaceChildren();
-
-    const home = create("button", "Radice");
-    home.type = "button";
-    home.className = "theme-toggle";
-
-    home.addEventListener("click", () => {
-      state.folder = "";
-      renderExplorer();
-    });
-
-    nav.appendChild(home);
-
-    if (!state.folder) return;
-
-    const parts = state.folder.split("/");
-
-    parts.forEach((part, index) => {
-      nav.appendChild(create("span", "/"));
-
-      const button = create("button", part);
-      button.type = "button";
-      button.className = "theme-toggle";
-
-      button.addEventListener("click", () => {
-        state.folder = parts
-          .slice(0, index + 1)
-          .join("/");
-
-        renderExplorer();
-      });
-
-      nav.appendChild(button);
-    });
-  }
-  
-    /* =======================================================
-     REPOSITORY INDEX — 5. APERTURA FILE NEL VISUALIZZATORE
-     ======================================================= */
-
-  function openEntry(entry) {
-    const viewer = window.FAUREViewer;
-
-    if (!viewer || typeof viewer.openUrl !== "function") {
-      const status = $("#repoExplorerStatus");
-
-      if (status) {
-        status.textContent =
-          "Visualizzatore non disponibile. " +
-          "Verifica che il modulo FAUREViewer sia caricato.";
-      }
-
-      return;
-    }
-
-    viewer.openUrl({
-      title: entry.name,
-      url: entry.raw,
-      extension: entry.ext,
-      repository: entry.repoLabel,
-      path: entry.path,
-      size: entry.size,
-      owner: entry.owner,
-      repo: entry.repo,
-      branch: entry.branch
-    });
-  }
-
-  /* =======================================================
-     REPOSITORY INDEX — 6. RENDER DELL'INDICE
-     ======================================================= */
-
-  function renderExplorer() {
-    ensureExplorer();
-
-    const list = $("#repoExplorerList");
-    const errors = $("#repoExplorerErrors");
-
-    if (!list) return;
-
-    list.replaceChildren();
-    renderBreadcrumb();
-
-    if (errors) {
-      errors.replaceChildren();
-
-      state.sourceErrors.forEach(error => {
-        const message = create(
-          "p",
-          `${error.repo.repo}: ${error.message}`
-        );
-
-        message.style.cssText =
-          "padding:10px;border:1px solid var(--line);" +
-          "color:var(--muted);overflow-wrap:anywhere;";
-
-        errors.appendChild(message);
-      });
-    }
-
-    const items = getVisibleEntries();
-
-    if (!items.length) {
-      list.appendChild(
-        create(
-          "p",
-          state.query
-            ? "Nessun risultato."
-            : "Nessun elemento in questa cartella."
-        )
-      );
-
-      return;
-    }
-
-    items.forEach(entry => {
-      const button = create("button");
-
-      button.type = "button";
-
-      button.style.cssText =
-        "display:flex;flex-direction:column;" +
-        "align-items:flex-start;gap:8px;" +
-        "min-width:0;padding:15px;text-align:left;" +
-        "border:1px solid var(--line);" +
-        "background:var(--bg);color:var(--ink);" +
-        "cursor:pointer;";
-
-      const type = create(
-        "span",
-        entry.type === "dir"
-          ? "▰ CARTELLA"
-          : `${entry.ext || "FILE"} · DOCUMENTO`
-      );
-
-      type.style.cssText =
-        "font:10px var(--mono);color:var(--muted);";
-
-      const name = create("strong", entry.name);
-
-      name.style.cssText = "overflow-wrap:anywhere;";
-
-      const meta = create(
-        "small",
-        entry.type === "dir"
-          ? "Apri cartella →"
-          : `${entry.repoLabel} · ${formatSize(entry.size)}`
-      );
-
-      meta.style.cssText =
-        "overflow-wrap:anywhere;color:var(--muted);";
-
-      button.append(type, name, meta);
-
-      button.addEventListener("click", () => {
-        if (entry.type === "dir") {
-          state.repo = entry.repoId;
-          state.folder = entry.path;
-          state.query = "";
-
-          const repoSelect = $("#repoExplorerSource");
-          const search = $("#repoExplorerSearch");
-
-          if (repoSelect) {
-            repoSelect.value = entry.repoId;
-          }
-
-          if (search) {
-            search.value = "";
-          }
-
-          renderExplorer();
-          return;
-        }
-
-        openEntry(entry);
-      });
-
-      list.appendChild(button);
-    });
-  }
-  
-    /* =======================================================
-     REPOSITORY INDEX — 7. AGGIORNAMENTO INDICE
-     ======================================================= */
-
-  async function refreshIndex() {
-    const status = $("#repoExplorerStatus");
-
-    if (state.controller) {
-      state.controller.abort();
-    }
-
-    const controller = new AbortController();
-    state.controller = controller;
-
-    const requestId = ++state.requestId;
-    state.loading = true;
-
-    if (status) {
-      status.textContent = "Lettura degli indici GitHub…";
-    }
-
-    try {
-      const results = await Promise.allSettled(
-        SOURCES.map(async repo => ({
-          repo,
-          entries: await getTree(repo, controller.signal)
-        }))
-      );
-
-      if (requestId !== state.requestId) return;
-
-      const entries = [];
-      const errors = [];
-
-      results.forEach((result, index) => {
-        if (result.status === "fulfilled") {
-          entries.push(...result.value.entries);
-        } else if (result.reason?.name !== "AbortError") {
-          errors.push({
-            repo: SOURCES[index],
-            message:
-              result.reason?.message || "Errore sconosciuto"
-          });
-        }
-      });
-
-      state.entries = completeDirectories(entries);
-      state.sourceErrors = errors;
-
-      renderExplorer();
-
-      const fileCount = state.entries.filter(
-        item => item.type === "file"
-      ).length;
-
-      if (status) {
-        status.textContent =
-          `${fileCount} file · ` +
-          `${SOURCES.length - errors.length}/${SOURCES.length} ` +
-          "repository disponibili";
-      }
-    } finally {
-      if (requestId === state.requestId) {
-        state.loading = false;
-        state.controller = null;
-      }
-    }
-  }
-
-  /* =======================================================
-     REPOSITORY INDEX — 8. API PUBBLICA
-     ======================================================= */
-
-  ensureExplorer();
-
-  window.FAURERepository = Object.freeze({
-    refresh: refreshIndex,
-    render: renderExplorer,
-
-    getEntries: () => state.entries.slice(),
-
-    getSources: () =>
-      SOURCES.map(source => ({ ...source }))
-  });
-
-  refreshIndex().catch(error => {
-    if (error.name === "AbortError") return;
-
-    console.error(
-      "FAURE FOUNDATION — Repository:",
-      error
-    );
-
-    const status = $("#repoExplorerStatus");
-
-    if (status) {
-      status.textContent =
-        `Errore indice: ${error.message}`;
-    }
-  });
-
-  console.info(
-    "FAURE FOUNDATION — REPOSITORY INDEX inizializzato"
-  );
-})();
-
-/* =========================================================
-   FAURE FOUNDATION — FAUREViewer
-   PARTE 1 — CONFIGURAZIONE E FUNZIONI DI BASE
-   ========================================================= */
-
-(() => {
-  "use strict";
-
-  if (window.FAUREViewer) return;
-
-  const $ = (selector, scope = document) =>
-    scope.querySelector(selector);
-
-  const state = {
-    requestId: 0,
-    controller: null,
-    previousFocus: null,
-    previousOverflow: "",
-    currentDocument: null,
-    opening: false
-  };
-
-  const TEXT_EXTENSIONS = new Set([
-    "txt", "md", "markdown", "json", "jsonl",
-    "js", "mjs", "cjs", "jsx", "ts", "tsx",
-    "css", "scss", "html", "htm", "xml", "svg",
-    "yaml", "yml", "toml", "ini", "conf", "log",
-    "csv", "tsv", "py", "rb", "php", "java",
-    "c", "h", "cpp", "hpp", "cs", "go", "rs",
-    "sh", "bash", "sql", "r", "tex", "bib",
-    "diff", "patch", "gitignore", "dockerfile",
-    "makefile"
-  ]);
-
-  const IMAGE_EXTENSIONS = new Set([
-    "png", "jpg", "jpeg", "gif", "webp",
-    "avif", "bmp", "ico"
-  ]);
-
-  const create = (tag, className = "", text = null) => {
-    const element = document.createElement(tag);
-
-    if (className) element.className = className;
-
-    if (text !== null) {
-      element.textContent = text;
-    }
-
-    return element;
-  };
-
-  
-function safeUrl(value) {
-  try {
-    const url = new URL(value, location.href);
-
-    if (!["http:", "https:"].includes(url.protocol)) {
-      return null;
-    }
-
-    // Converte le pagine GitHub /blob/ in URL Raw.
-    if (
-      url.hostname === "github.com" &&
-      url.pathname.includes("/blob/")
-    ) {
-      const parts = url.pathname.split("/");
-
-      const blobIndex = parts.indexOf("blob");
-
-      if (
-        blobIndex === 3 &&
-        parts[1] &&
-        parts[2] &&
-        parts[4]
-      ) {
-        const owner = parts[1];
-        const repo = parts[2];
-        const branch = parts[4];
-        const path = parts.slice(5).join("/");
-
-        if (path) {
-          return (
-            "https://raw.githubusercontent.com/" +
-            `${owner}/${repo}/${branch}/${path}` +
-            url.search
-          );
-        }
-      }
-    }
-
-    return url.href;
-  } catch (_) {
-    return null;
-  }
-}
-
-
-  function getExtension(doc) {
-    const supplied = String(doc.extension || "")
-      .trim()
-      .toLowerCase()
-      .replace(/^\./, "");
-
-    if (supplied) return supplied;
-
-    const filename = String(
-      doc.path ||
-      doc.filename ||
-      doc.title ||
-      doc.url ||
-      ""
-    ).split(/[?#]/)[0];
-
-    const name = filename.split("/").pop() || "";
-    const index = name.lastIndexOf(".");
-
-    return index > 0
-      ? name.slice(index + 1).toLowerCase()
-      : "";
-  }
-
-  function setStatus(message) {
-    const status = $("#faureViewerStatus");
-
-    if (status) {
-      status.textContent = message;
-    }
-  }
-  
-    /* =======================================================
-     FAUREViewer — 2. CREAZIONE DEL VISUALIZZATORE
-     ======================================================= */
-
-  function buildViewer() {
-    let overlay = $("#faureViewer");
-
-    if (overlay) return overlay;
-
-    const style = create("style");
-    style.id = "faureViewerStyles";
-
-    style.textContent = `
-      #faureViewer {
-        position:fixed;
-        inset:0;
-        z-index:99999;
-        display:none;
-        align-items:center;
-        justify-content:center;
-        padding:clamp(8px,2vw,24px);
-        background:rgba(7,12,16,.78);
-        backdrop-filter:blur(8px);
-      }
-
-      #faureViewer.is-open {
-        display:flex;
-      }
-
-      #faureViewer .faure-viewer-panel {
-        display:flex;
-        flex-direction:column;
-        width:min(1200px,100%);
-        height:min(900px,94dvh);
-        min-height:240px;
-        overflow:hidden;
-        border:1px solid var(--line,#526068);
-        background:var(--bg,#f2f0e8);
-        color:var(--ink,#202a30);
-        box-shadow:0 24px 90px rgba(0,0,0,.35);
-      }
-
-      #faureViewer .faure-viewer-header {
-        display:flex;
-        flex-wrap:wrap;
-        align-items:center;
-        gap:12px;
-        padding:14px 18px;
-        border-bottom:1px solid var(--line,#526068);
-      }
-
-      #faureViewer .faure-viewer-heading {
-        flex:1 1 180px;
-        min-width:0;
-      }
-
-      #faureViewer .faure-viewer-title {
-        margin:0;
-        font:600 15px/1.45 system-ui,sans-serif;
-        overflow-wrap:anywhere;
-      }
-
-      #faureViewer .faure-viewer-meta {
-        margin:4px 0 0;
-        color:var(--muted,#68747a);
-        font:11px/1.5 monospace;
-        overflow-wrap:anywhere;
-      }
-
-      #faureViewer .faure-viewer-actions {
-        display:flex;
-        flex-wrap:wrap;
-        gap:7px;
-      }
-
-      #faureViewer .faure-viewer-button {
-        display:inline-block;
-        padding:9px 12px;
-        border:1px solid var(--line,#526068);
-        background:var(--surface,transparent);
-        color:inherit;
-        font:11px/1.4 monospace;
-        cursor:pointer;
-        text-decoration:none;
-      }
-
-      #faureViewer .faure-viewer-button:focus-visible {
-        outline:2px solid currentColor;
-        outline-offset:3px;
-      }
-
-      #faureViewer .faure-viewer-body {
-        position:relative;
-        flex:1;
-        min-height:0;
-        overflow:auto;
-        overscroll-behavior:contain;
-      }
-
-      #faureViewer .faure-viewer-status {
-        margin:0;
-        padding:22px;
-        color:var(--muted,#68747a);
-        font:13px/1.7 monospace;
-        overflow-wrap:anywhere;
-      }
-    `;
-
-    document.head.appendChild(style);
-
-    overlay = create("div");
-    overlay.id = "faureViewer";
-    overlay.setAttribute("aria-hidden", "true");
-
-    const panel = create("section", "faure-viewer-panel");
-
-    panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-labelledby", "faureViewerTitle");
-    panel.tabIndex = -1;
-
-    const header = create("header", "faure-viewer-header");
-    const heading = create("div", "faure-viewer-heading");
-
-    const title = create(
-      "h2",
-      "faure-viewer-title",
-      "Documento"
-    );
-
-    title.id = "faureViewerTitle";
-
-    const meta = create("p", "faure-viewer-meta");
-    meta.id = "faureViewerMeta";
-
-    heading.append(title, meta);
-
-    const actions = create("div", "faure-viewer-actions");
-
-    const download = create(
-      "a",
-      "faure-viewer-button",
-      "Scarica"
-    );
-
-    download.id = "faureViewerDownload";
-    download.setAttribute("download", "");
-
-    const external = create(
-      "a",
-      "faure-viewer-button",
-      "Nuova scheda ↗"
-    );
-
-    external.id = "faureViewerExternal";
-    external.target = "_blank";
-    external.rel = "noopener noreferrer";
-
-    const close = create(
-      "button",
-      "faure-viewer-button",
-      "Chiudi ✕"
-    );
-
-    close.id = "faureViewerClose";
-    close.type = "button";
-
-    actions.append(download, external, close);
-    header.append(heading, actions);
-
-    const body = create("div", "faure-viewer-body");
-    body.id = "faureViewerBody";
-
-    const status = create(
-      "p",
-      "faure-viewer-status",
-      "Pronto."
-    );
-
-    status.id = "faureViewerStatus";
-    status.setAttribute("role", "status");
-    status.setAttribute("aria-live", "polite");
-
-    body.appendChild(status);
-    panel.append(header, body);
-    overlay.appendChild(panel);
-    document.body.appendChild(overlay);
-
-    close.addEventListener("click", closeViewer);
-
-    overlay.addEventListener("click", event => {
-      if (event.target === overlay) {
-        closeViewer();
-      }
-    });
-
-    return overlay;
-  }
-  
-    /* =======================================================
-     FAUREViewer — 3. TASTIERA E GESTIONE DEL FOCUS
-     ======================================================= */
-
-  function installViewerKeyboard(overlay, panel) {
-    document.addEventListener("keydown", event => {
-      if (!overlay.classList.contains("is-open")) return;
-
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeViewer();
-        return;
-      }
-
-      if (event.key !== "Tab") return;
-
-      const focusable = [
-        ...panel.querySelectorAll(
-          'a[href],button:not(:disabled),' +
-          '[tabindex]:not([tabindex="-1"])'
-        )
-      ].filter(element =>
-        element.getClientRects().length > 0
-      );
-
-      if (!focusable.length) {
-        event.preventDefault();
-        panel.focus();
-        return;
-      }
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (
-        event.shiftKey &&
-        document.activeElement === first
-      ) {
-        event.preventDefault();
-        last.focus();
-      } else if (
-        !event.shiftKey &&
-        document.activeElement === last
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
-    });
-  }
-
-  /* =======================================================
-     FAUREViewer — 4. APERTURA E CHIUSURA
-     ======================================================= */
-
-  function showViewer(doc) {
-    const overlay = buildViewer();
-
-    state.previousFocus = document.activeElement;
-    state.previousOverflow = document.body.style.overflow;
-    state.currentDocument = doc;
-
-    $("#faureViewerTitle").textContent = doc.title;
-
-    $("#faureViewerMeta").textContent = [
-      doc.repository || doc.repo || "Archivio FAURE",
-      doc.path || "",
-      doc.extension
-        ? doc.extension.toUpperCase()
-        : ""
-    ].filter(Boolean).join(" · ");
-
-    const download = $("#faureViewerDownload");
-
-    download.href = doc.url;
-    download.download =
-      String(doc.path || doc.title || "documento")
-        .split("/")
-        .pop();
-
-    $("#faureViewerExternal").href = doc.url;
-
-    overlay.classList.add("is-open");
-    overlay.setAttribute("aria-hidden", "false");
-
-    document.body.style.overflow = "hidden";
-
-    $("#faureViewerClose").focus();
-  }
-
-  function closeViewer() {
-    const overlay = $("#faureViewer");
-
-    if (
-      !overlay ||
-      !overlay.classList.contains("is-open")
-    ) {
-      return;
-    }
-
-    state.requestId++;
-
-    if (state.controller) {
-      state.controller.abort();
-      state.controller = null;
-    }
-
-    state.opening = false;
-    state.currentDocument = null;
-
-    overlay.classList.remove("is-open");
-    overlay.setAttribute("aria-hidden", "true");
-
-    document.body.style.overflow = state.previousOverflow;
-
-    const previous = state.previousFocus;
-    state.previousFocus = null;
-
-    if (previous && typeof previous.focus === "function") {
-      previous.focus({ preventScroll: true });
-    }
-  }
-
-  /* =======================================================
-     FAUREViewer — 5. MESSAGGI DI ERRORE
-     ======================================================= */
-
-  function renderError(message, url = "") {
-    const body = $("#faureViewerBody");
-
-    if (!body) return;
-
-    body.replaceChildren();
-
-    const wrapper = create("div", "faure-viewer-error");
-
-    wrapper.append(
-      create("h3", "", "Documento non disponibile"),
-      create("p", "", message),
-      create(
-        "p",
-        "",
-        "Verifica che il repository sia pubblico, " +
-        "che il file esista e che GitHub consenta la richiesta."
-      )
-    );
-
-    if (url) {
-      const link = create(
-        "a",
-        "",
-        "Apri il file originale"
-      );
-
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-
-      wrapper.appendChild(link);
-    }
-
-    body.appendChild(wrapper);
-  }
-  
-    /* =======================================================
-     FAUREViewer — 6. VISUALIZZAZIONE TESTO
-     ======================================================= */
-
-  function renderText(text, ext) {
-    const body = $("#faureViewerBody");
-
-    if (!body) return;
-
-    body.replaceChildren();
-
-    const pre = create("pre", "faure-viewer-text");
-    const code = create("code");
-
-    code.textContent = text;
-    code.dataset.language = ext || "text";
-
-    pre.appendChild(code);
-    body.appendChild(pre);
-
-    setStatus(
-      `${text.length.toLocaleString("it")} caratteri · ` +
-      "Testo visualizzato senza esecuzione."
-    );
-  }
-
-  /* =======================================================
-     FAUREViewer — 7. VISUALIZZAZIONE IMMAGINI
-     ======================================================= */
-
-  function renderImage(url, title) {
-    const body = $("#faureViewerBody");
-
-    if (!body) return;
-
-    body.replaceChildren();
-
-    const wrapper = create(
-      "div",
-      "faure-viewer-image-wrap"
-    );
-
-    const img = create("img", "faure-viewer-image");
-
-    img.alt = title || "Immagine del documento";
-    img.src = url;
-    img.decoding = "async";
-
-    img.addEventListener("load", () => {
-      setStatus(
-        `${img.naturalWidth} × ${img.naturalHeight} px`
-      );
-    }, { once: true });
-
-    img.addEventListener("error", () => {
-      renderError(
-        "Impossibile caricare l'immagine.",
-        url
-      );
-    }, { once: true });
-
-    wrapper.appendChild(img);
-    body.appendChild(wrapper);
-
-    setStatus("Caricamento immagine…");
-  }
-
-  /* =======================================================
-     FAUREViewer — 8. VISUALIZZAZIONE PDF
-     ======================================================= */
-
-  function renderPDF(url) {
-    const body = $("#faureViewerBody");
-
-    if (!body) return;
-
-    body.replaceChildren();
-
-    const frame = create(
-      "iframe",
-      "faure-viewer-frame"
-    );
-
-    frame.title = "Visualizzatore PDF";
-    frame.loading = "eager";
-    frame.referrerPolicy = "no-referrer";
-    frame.src = url;
-
-    body.appendChild(frame);
-
-    setStatus(
-      "PDF incorporato. Se non viene visualizzato, " +
-      "utilizza Nuova scheda."
-    );
-  }
-  
-    /* =======================================================
-     FAUREViewer — 9. LETTURA DEI DOCUMENTI REMOTI
-     ======================================================= */
-
-  async function renderRemoteDocument(doc, requestId) {
-    const url = safeUrl(doc.url);
-
-    if (!url) {
-      renderError("URL del documento non valido.");
-      return;
-    }
-
-    const ext = getExtension(doc);
-
-    if (IMAGE_EXTENSIONS.has(ext)) {
-      renderImage(url, doc.title);
-      return;
-    }
-
-    if (ext === "pdf") {
-      renderPDF(url);
-      return;
-    }
-
-    if (!TEXT_EXTENSIONS.has(ext)) {
-      renderError(
-        `Il formato .${ext || "sconosciuto"} non dispone ` +
-        "di un'anteprima integrata. Puoi aprire o scaricare il file.",
-        url
-      );
-      return;
-    }
-
-    const controller = new AbortController();
-    state.controller = controller;
-
-    try {
-      setStatus("Lettura del documento…");
-
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          Accept: "text/plain, */*"
-        },
-        cache: "no-cache"
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const text = await response.text();
-
-      if (requestId !== state.requestId) return;
-
-      if (text.length > 5_000_000) {
-        renderError(
-          "Il documento supera i 5 MB di testo. " +
-          "Aprilo in una nuova scheda per evitare problemi di prestazioni.",
-          url
-        );
-        return;
-      }
-
-      renderText(text, ext);
-    } catch (error) {
-  if (error.name === "AbortError") return;
-  if (requestId !== state.requestId) return;
-
-  console.error("FAUREViewer — errore documento:", {
-    url,
-    message: error.message,
-    error
-  });
-
-  const message =
-    error instanceof TypeError
-      ? "Impossibile completare la richiesta. " +
-        "Verifica l'URL, la connessione e le eventuali " +
-        "limitazioni CORS dalla Console del browser."
-      : error.message ||
-        "Errore durante la lettura del documento.";
-
-  renderError(message, url);
-}
-}
-  
-    /* =======================================================
-     FAUREViewer — 10. APERTURA DOCUMENTI
-     ======================================================= */
-
-  async function openUrl(input) {
-    const doc = typeof input === "string"
-      ? { title: input, url: input }
-      : input;
-
-    if (!doc || typeof doc !== "object") {
-      throw new TypeError("Documento non valido.");
-    }
-
-    const url = safeUrl(doc.url || doc.sourceUrl);
-
-    if (!url) {
-      throw new TypeError("URL del documento non valido.");
-    }
-
-    const normalized = {
-      ...doc,
-      title: String(
-        doc.title || doc.path || "Documento"
-      ),
-      url,
-      extension: getExtension({
-        ...doc,
-        url,
-        title: doc.title || doc.path || ""
-      })
-    };
-
-    const requestId = ++state.requestId;
-
-    if (state.controller) {
-      state.controller.abort();
-      state.controller = null;
-    }
-
-    state.opening = true;
-
-    showViewer(normalized);
-
-    const body = $("#faureViewerBody");
-
-    body.replaceChildren(
-      create(
-        "p",
-        "faure-viewer-status",
-        "Apertura documento…"
-      )
-    );
-
-    try {
-      await renderRemoteDocument(
-        normalized,
-        requestId
-      );
-    } finally {
-      if (requestId === state.requestId) {
-        state.opening = false;
-      }
-    }
-  }
-
-  function openFile(input) {
-    return openUrl(input);
-  }
-
-  function isOpen() {
-    return Boolean(
-      $("#faureViewer")?.classList.contains("is-open")
-    );
-  }
-
-  /* =======================================================
-     FAUREViewer — 11. API PUBBLICA
-     ======================================================= */
-
-  window.FAUREViewer = Object.freeze({
-    openUrl,
-    openFile,
-    close: closeViewer,
-    isOpen,
-
-    getCurrentDocument: () =>
-      state.currentDocument
-        ? { ...state.currentDocument }
-        : null
-  });
-
-  console.info(
-    "FAURE FOUNDATION — VIEWER inizializzato"
-  );
-})();
-
-/* =========================================================
-   FAURE FOUNDATION — FAUREViewer
-   PARTE 2 — STILI DEL CONTENUTO
-   ========================================================= */
-
-(() => {
-  "use strict";
-
-  if (document.getElementById("faureViewerContentStyles")) {
-    return;
-  }
-
-  const style = document.createElement("style");
-  style.id = "faureViewerContentStyles";
-
-  style.textContent = `
-    #faureViewer .faure-viewer-text {
-      margin: 0;
-      padding: 24px;
-      overflow: auto;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      tab-size: 2;
-      font: 12px/1.75 ui-monospace, monospace;
-    }
-
-    #faureViewer .faure-viewer-text code {
-      font: inherit;
-    }
-
-    #faureViewer .faure-viewer-image-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100%;
-      padding: 20px;
-    }
-
-    #faureViewer .faure-viewer-image {
-      display: block;
-      max-width: 100%;
-      max-height: 75dvh;
-      object-fit: contain;
-    }
-
-    #faureViewer .faure-viewer-frame {
-      display: block;
-      width: 100%;
-      height: 100%;
-      min-height: 400px;
-      border: 0;
-      background: #fff;
-    }
-
-    #faureViewer .faure-viewer-error {
-      padding: 24px;
-      line-height: 1.7;
-      overflow-wrap: anywhere;
-    }
-
-    #faureViewer .faure-viewer-error a {
-      color: inherit;
-      text-decoration: underline;
-    }
-
-    #faureViewer .faure-viewer-error h3 {
-      margin-top: 0;
-    }
-
-    @media (max-width: 600px) {
-      #faureViewer {
-        padding: 0;
-      }
-
-      #faureViewer .faure-viewer-panel {
-        width: 100%;
-        height: 100dvh;
-        max-height: 100dvh;
-        border: 0;
-      }
-
-      #faureViewer .faure-viewer-header {
-        padding: 12px;
-      }
-
-      #faureViewer .faure-viewer-text {
-        padding: 14px;
-        font-size: 11px;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
-})();
-
-
   </script>
   
   <style>
@@ -5395,6 +3264,2138 @@ select:focus-visible {
   </footer>
 
 </div>
+<script>
+  /* =========================================================
+   FAURE FOUNDATION — CORE
+   1. Inizializzazione e tema chiaro/scuro
+   ========================================================= */
+(() => {
+  "use strict";
 
+  if (window.FAURECore) return;
+
+  const $ = (selector, scope = document) =>
+    scope.querySelector(selector);
+
+  const root = document.documentElement;
+  const THEME_KEY = "faure-foundation-theme";
+  const themeButton = $("#themeToggle");
+  const media = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  );
+
+  function readSavedTheme() {
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === "light" || saved === "dark") {
+        return saved;
+      }
+    } catch (_) {}
+
+    return media.matches ? "dark" : "light";
+  }
+
+  function applyTheme(theme, persist = true) {
+    const value = theme === "dark" ? "dark" : "light";
+    const dark = value === "dark";
+
+    root.dataset.theme = value;
+    root.style.colorScheme = value;
+
+    const meta = $('meta[name="theme-color"]');
+
+    if (meta) {
+      meta.content = dark ? "#202a30" : "#f2f0e8";
+    }
+
+    if (themeButton) {
+      themeButton.replaceChildren();
+
+      const label = document.createTextNode(
+        `${dark ? "LIGHT" : "DARK"} `
+      );
+
+      const icon = document.createElement("span");
+      icon.className = "theme-icon";
+      icon.textContent = dark ? "☼" : "◐";
+      icon.setAttribute("aria-hidden", "true");
+
+      themeButton.append(label, icon);
+
+      themeButton.setAttribute(
+        "aria-label",
+        dark
+          ? "Attiva modalità chiara"
+          : "Attiva modalità scura"
+      );
+
+      themeButton.setAttribute(
+        "aria-pressed",
+        String(dark)
+      );
+    }
+
+    if (persist) {
+      try {
+        localStorage.setItem(THEME_KEY, value);
+      } catch (_) {}
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("faure:themechange", {
+        detail: { theme: value }
+      })
+    );
+  }
+
+  applyTheme(readSavedTheme(), false);
+
+  themeButton?.addEventListener("click", () => {
+    applyTheme(
+      root.dataset.theme === "dark" ? "light" : "dark"
+    );
+  });
+
+  function syncSystemTheme() {
+    let saved = null;
+
+    try {
+      saved = localStorage.getItem(THEME_KEY);
+    } catch (_) {}
+
+    if (saved !== "light" && saved !== "dark") {
+      applyTheme(
+        media.matches ? "dark" : "light",
+        false
+      );
+    }
+  }
+
+  if (typeof media.addEventListener === "function") {
+    media.addEventListener("change", syncSystemTheme);
+  } else {
+    media.addListener(syncSystemTheme);
+  }
+    /* =======================================================
+     FAURE CORE — 2. MENU MOBILE
+     ======================================================= */
+
+  const menuButton = $("#menuToggle");
+  const nav = $("#mainNav");
+
+  function closeMenu() {
+    if (!nav) return;
+
+    nav.classList.remove("open");
+    menuButton?.setAttribute("aria-expanded", "false");
+  }
+
+  if (menuButton && nav) {
+    menuButton.setAttribute("aria-expanded", "false");
+
+    menuButton.addEventListener("click", () => {
+      const open = !nav.classList.contains("open");
+
+      nav.classList.toggle("open", open);
+      menuButton.setAttribute(
+        "aria-expanded",
+        String(open)
+      );
+    });
+
+    nav.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", closeMenu);
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeMenu();
+    });
+
+    document.addEventListener("click", event => {
+      if (
+        event.target instanceof Node &&
+        !nav.contains(event.target) &&
+        !menuButton.contains(event.target)
+      ) {
+        closeMenu();
+      }
+    });
+  }
+
+  /* =======================================================
+     FAURE CORE — 3. NAVIGAZIONE INTERNA
+     ======================================================= */
+
+  function navigateToHash() {
+    let id;
+
+    try {
+      id = decodeURIComponent(location.hash.slice(1));
+    } catch (_) {
+      return;
+    }
+
+    if (!id) return;
+
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    requestAnimationFrame(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }
+
+  window.addEventListener("hashchange", navigateToHash);
+  window.addEventListener("load", navigateToHash);
+  
+    /* =======================================================
+     FAURE CORE — 4. CATALOGO SCIENTIFICO
+     ======================================================= */
+
+  const paperList = $("#paperList");
+  const paperSearch = $("#paperSearch");
+  const paperFilter = $("#paperFilter");
+  const catalogStatus = $("#catalogStatus");
+  const archiveSource = $("#archiveSource");
+  const searchEmpty = $("#searchEmpty");
+
+  const categoryNames = {
+    certifications: "Certificazioni",
+    refutations: "Confutazioni",
+    validations: "Validazioni",
+    manuscripts: "Manoscritti",
+    theorems: "Teoremi",
+    proofs: "Dimostrazioni",
+    data: "Dati e verifiche",
+    protocols: "Protocolli",
+    bibliography: "Bibliografia",
+    datasets: "Dataset",
+    code: "Codice sorgente",
+    docs: "Documentazione",
+    pages: "Pagine web"
+  };
+
+  let catalogRequest = 0;
+
+  function setCatalogStatus(message) {
+    if (catalogStatus) {
+      catalogStatus.textContent = message;
+    }
+  }
+
+  function getDocumentExtension(doc) {
+    const supplied = String(doc.extension || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^\./, "");
+
+    if (supplied) return supplied;
+
+    const filename = String(
+      doc.filename || doc.file || doc.sourceUrl || ""
+    );
+
+    const match = filename.match(
+      /\.([a-z0-9]+)(?:[?#].*)?$/i
+    );
+
+    return match ? match[1].toLowerCase() : "";
+  }
+
+  function normalizeDocumentUrl(value) {
+    try {
+      const url = new URL(value, location.href);
+
+      if (!["https:", "http:"].includes(url.protocol)) {
+        return null;
+      }
+
+      return url.href;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function createDocumentRow(doc, category, label) {
+    const sourceUrl = normalizeDocumentUrl(doc.sourceUrl);
+
+    if (!sourceUrl) return null;
+
+    const link = document.createElement("a");
+
+    link.className = "paper-row";
+    link.href = sourceUrl;
+    link.dataset.type = category;
+    link.dataset.category = category;
+
+    link.dataset.search = [
+      doc.id,
+      doc.title,
+      doc.filename,
+      doc.file,
+      doc.type,
+      label,
+      doc.repository,
+      doc.extension
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase("it");
+
+    link.addEventListener("click", event => {
+      event.preventDefault();
+
+      const viewer = window.FAUREViewer;
+
+      if (!viewer || typeof viewer.openUrl !== "function") {
+        setCatalogStatus(
+          "Visualizzatore non disponibile. Riprova tra poco."
+        );
+        return;
+      }
+
+      viewer.openUrl({
+        title: String(doc.title),
+        url: sourceUrl,
+        extension: getDocumentExtension(doc),
+        repository: String(doc.repository || ""),
+        id: String(doc.id || "")
+      });
+    });
+
+    const title = document.createElement("strong");
+    title.textContent = String(doc.title);
+
+    const meta = document.createElement("span");
+    meta.className = "paper-status";
+
+    meta.textContent = [
+      label,
+      doc.repository || "Archivio documentale",
+      getDocumentExtension(doc) || "documento"
+    ].join(" · ");
+
+    link.append(title, meta);
+
+    return link;
+  }
+    /* =======================================================
+     FAURE CORE — 5. RICERCA E FILTRI
+     ======================================================= */
+
+  function filterPapers() {
+    if (!paperList) return;
+
+    const query = (paperSearch?.value || "")
+      .trim()
+      .toLocaleLowerCase("it");
+
+    const selected = paperFilter?.value || "all";
+
+    let visible = 0;
+
+    paperList.querySelectorAll(".archive-category")
+      .forEach(section => {
+        let sectionVisible = 0;
+
+        section.querySelectorAll(".paper-row")
+          .forEach(link => {
+            const matchesQuery =
+              !query ||
+              (link.dataset.search || "").includes(query);
+
+            const matchesType =
+              selected === "all" ||
+              link.dataset.type === selected;
+
+            const show = matchesQuery && matchesType;
+
+            link.hidden = !show;
+
+            if (show) {
+              visible++;
+              sectionVisible++;
+            }
+          });
+
+        section.hidden = sectionVisible === 0;
+
+        const count = section.querySelector(
+          ".archive-category-count"
+        );
+
+        if (count) {
+          count.textContent = String(sectionVisible);
+        }
+      });
+
+    if (searchEmpty) {
+      searchEmpty.hidden = visible !== 0;
+    }
+
+    if (paperList.dataset.loaded === "true") {
+      setCatalogStatus(
+        `${visible} documenti visualizzati`
+      );
+    }
+  }
+
+  /* =======================================================
+     FAURE CORE — 6. CARICAMENTO CATALOGO
+     ======================================================= */
+
+  async function loadScientificCatalog() {
+    if (!paperList) return;
+
+    const requestId = ++catalogRequest;
+
+    paperList.setAttribute("aria-busy", "true");
+    setCatalogStatus("Caricamento catalogo scientifico…");
+
+    const candidates = [
+      new URL(
+        "./documents/data/documents.json",
+        location.href
+      ).href,
+
+      "https://raw.githubusercontent.com/AUF2026/" +
+        "FAURE-FOUNDATION/main/documents/data/documents.json"
+    ];
+
+    let catalog = null;
+    let lastError = null;
+
+    for (const url of candidates) {
+      try {
+        const response = await fetch(url, {
+          cache: "no-cache",
+          headers: {
+            Accept: "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data || !Array.isArray(data.documents)) {
+          throw new Error("Formato JSON non valido.");
+        }
+
+        catalog = data;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (requestId !== catalogRequest) return;
+
+    if (!catalog) {
+      paperList.replaceChildren();
+      paperList.dataset.loaded = "false";
+
+      const message = document.createElement("p");
+      message.className = "search-empty";
+
+      message.textContent =
+        "Catalogo non disponibile: " +
+        (lastError?.message || "errore di rete") +
+        ".";
+
+      paperList.appendChild(message);
+      paperList.setAttribute("aria-busy", "false");
+
+      if (searchEmpty) searchEmpty.hidden = true;
+
+      setCatalogStatus(
+        "Impossibile caricare il catalogo JSON. " +
+        "Controlla il percorso del file e la connessione."
+      );
+
+      return;
+    }
+        /* =====================================================
+       FAURE CORE — 7. GENERAZIONE CATEGORIE
+       ===================================================== */
+
+    const groups = new Map();
+    const otherDocuments = [];
+
+    for (const doc of catalog.documents) {
+      if (
+        !doc ||
+        typeof doc.title !== "string" ||
+        !doc.title.trim() ||
+        typeof doc.sourceUrl !== "string"
+      ) {
+        continue;
+      }
+
+      const category = String(doc.category || "")
+        .trim()
+        .toLowerCase();
+
+      const label =
+        String(doc.categoryLabel || "").trim() ||
+        categoryNames[category] ||
+        "Altri documenti";
+
+      const link = createDocumentRow(doc, category, label);
+
+      if (!link) continue;
+
+      if (category && categoryNames[category]) {
+        if (!groups.has(category)) {
+          groups.set(category, []);
+        }
+
+        groups.get(category).push(link);
+      } else {
+        otherDocuments.push(link);
+      }
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    function appendGroup(id, label, links) {
+      if (!links.length) return;
+
+      links.sort((a, b) =>
+        a.querySelector("strong").textContent.localeCompare(
+          b.querySelector("strong").textContent,
+          "it"
+        )
+      );
+
+      const section = document.createElement("section");
+      section.className = "archive-category";
+      section.dataset.category = id;
+
+      const heading = document.createElement("div");
+      heading.className = "archive-category-heading";
+
+      const h3 = document.createElement("h3");
+      h3.textContent = label;
+
+      const count = document.createElement("span");
+      count.className = "archive-category-count";
+      count.textContent = String(links.length);
+
+      heading.append(h3, count);
+
+      const list = document.createElement("div");
+      list.className = "archive-category-documents";
+
+      links.forEach(link => list.appendChild(link));
+
+      section.append(heading, list);
+      fragment.appendChild(section);
+    }
+
+    Object.entries(categoryNames).forEach(([id, label]) => {
+      appendGroup(id, label, groups.get(id) || []);
+    });
+
+    appendGroup("other", "Altri documenti", otherDocuments);
+
+    paperList.replaceChildren(fragment);
+    paperList.dataset.loaded = "true";
+    paperList.setAttribute("aria-busy", "false");
+
+    if (archiveSource) {
+      archiveSource.textContent = Array.isArray(catalog.sources)
+  ? catalog.sources
+      .map(source => {
+        if (typeof source === "string") return source;
+
+        if (source && typeof source === "object") {
+          return (
+            source.label ||
+            source.name ||
+            source.repository ||
+            source.url ||
+            ""
+          );
+        }
+
+        return "";
+      })
+      .filter(Boolean)
+      .join(" · ")
+  : "";
+    }
+
+    const total = paperList.querySelectorAll(".paper-row").length;
+
+    setCatalogStatus(`${total} documenti indicizzati`);
+
+    filterPapers();
+  }
+
+  /* =====================================================
+     FAURE CORE — 8. EVENTI E API PUBBLICA
+     ===================================================== */
+
+  paperSearch?.addEventListener("input", filterPapers);
+  paperFilter?.addEventListener("change", filterPapers);
+  
+    window.FAURECore = Object.freeze({
+    applyTheme,
+    closeMenu,
+    filterPapers,
+    loadScientificCatalog,
+    getTheme: () => root.dataset.theme || "light"
+  });
+
+  loadScientificCatalog().catch(error => {
+    console.error(
+      "FAURE FOUNDATION — Catalogo:",
+      error
+    );
+
+    setCatalogStatus(
+      "Errore durante il caricamento del catalogo."
+    );
+
+    paperList?.setAttribute("aria-busy", "false");
+  });
+
+  console.info("FAURE FOUNDATION — CORE inizializzato");
+})();
+
+/* =========================================================
+   FAURE FOUNDATION — REPOSITORY INDEX
+   PARTE 1
+   ========================================================= */
+
+(() => {
+  "use strict";
+
+  if (window.FAURERepository) return;
+
+  const SOURCES = [
+    {
+      id: "faure",
+      label: "FAURE FOUNDATION",
+      owner: "AUF2026",
+      repo: "FAURE-FOUNDATION",
+      branch: "main"
+    },
+    {
+      id: "parent",
+      label: "AUF2026 — PARENT",
+      owner: "AUF2026",
+      repo: "AUF2026.github.io",
+      branch: "main"
+    }
+  ];
+
+  const state = {
+    entries: [],
+    sourceErrors: [],
+    repo: "all",
+    folder: "",
+    query: "",
+    loading: false,
+    requestId: 0,
+    controller: null
+  };
+
+  const $ = (selector, scope = document) =>
+    scope.querySelector(selector);
+
+  const create = (tag, text, className = "") => {
+    const element = document.createElement(tag);
+
+    if (text != null) element.textContent = text;
+    if (className) element.className = className;
+
+    return element;
+  };
+
+  const pathUrl = path =>
+    path.split("/").map(encodeURIComponent).join("/");
+
+  const apiUrl = repo =>
+    `https://api.github.com/repos/${repo.owner}/${repo.repo}`;
+
+  const rawUrl = (repo, path) =>
+    `https://raw.githubusercontent.com/${repo.owner}/` +
+    `${repo.repo}/${repo.branch}/${pathUrl(path)}`;
+
+  function extension(path) {
+    const name = path.split("/").pop() || "";
+    const index = name.lastIndexOf(".");
+
+    return index > 0
+      ? name.slice(index + 1).toLowerCase()
+      : "";
+  }
+
+  function formatSize(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return "";
+
+    if (bytes < 1024) return `${bytes} B`;
+
+    if (bytes < 1048576) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / 1048576).toFixed(2)} MB`;
+  }
+
+  async function fetchJSON(url, signal) {
+    const response = await fetch(url, {
+      signal,
+      headers: {
+        Accept: "application/vnd.github+json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+  
+    /* =======================================================
+     REPOSITORY INDEX — 2. LETTURA ALBERO GITHUB
+     ======================================================= */
+
+  async function getTree(repo, signal) {
+    const result = await fetchJSON(
+      `${apiUrl(repo)}/git/trees/${encodeURIComponent(repo.branch)}?recursive=1`,
+      signal
+    );
+
+    if (!Array.isArray(result.tree)) {
+      throw new Error(
+        "GitHub non ha restituito un indice valido."
+      );
+    }
+
+    if (result.truncated) {
+      throw new Error(
+        "Indice troppo grande per una scansione completa. " +
+        "È necessaria una scansione per directory."
+      );
+    }
+
+    return result.tree
+      .filter(item =>
+        item.path &&
+        (item.type === "blob" || item.type === "tree")
+      )
+      .map(item => ({
+        id: `${repo.id}:${item.path}`,
+        repoId: repo.id,
+        repoLabel: repo.label,
+        owner: repo.owner,
+        repo: repo.repo,
+        branch: repo.branch,
+        path: item.path,
+        name: item.path.split("/").pop(),
+        type: item.type === "tree" ? "dir" : "file",
+        size: item.size || 0,
+        sha: item.sha || "",
+        ext: item.type === "blob" ? extension(item.path) : "",
+        raw: item.type === "blob"
+          ? rawUrl(repo, item.path)
+          : ""
+      }));
+  }
+
+  function completeDirectories(entries) {
+    const all = new Map();
+
+    entries.forEach(entry => {
+      all.set(entry.id, entry);
+    });
+
+    entries.forEach(entry => {
+      const segments = entry.path.split("/");
+
+      for (let i = 1; i < segments.length; i++) {
+        const path = segments.slice(0, i).join("/");
+        const id = `${entry.repoId}:${path}`;
+
+        if (all.has(id)) continue;
+
+        all.set(id, {
+          ...entry,
+          id,
+          path,
+          name: segments[i - 1],
+          type: "dir",
+          size: 0,
+          sha: "",
+          ext: "",
+          raw: ""
+        });
+      }
+    });
+
+    return [...all.values()].sort((a, b) => {
+      if (a.repoId !== b.repoId) {
+        return a.repoId.localeCompare(b.repoId);
+      }
+
+      if (a.type !== b.type) {
+        return a.type === "dir" ? -1 : 1;
+      }
+
+      return a.path.localeCompare(b.path, "it");
+    });
+  }
+
+  /* =======================================================
+     REPOSITORY INDEX — 3. CREAZIONE INTERFACCIA
+     ======================================================= */
+
+  function ensureExplorer() {
+    let explorer = $("#repoExplorer");
+
+    if (explorer) return explorer;
+
+    explorer = create("section", null, "repo-explorer");
+    explorer.id = "repoExplorer";
+
+    explorer.style.cssText =
+      "margin:28px 0;padding:clamp(16px,3vw,28px);" +
+      "border:1px solid var(--line);" +
+      "background:var(--surface);";
+
+    const title = create("h3", "Repository documentali");
+
+    const status = create("p", "Inizializzazione…");
+    status.id = "repoExplorerStatus";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    const controls = create("div");
+
+    controls.style.cssText =
+      "display:grid;" +
+      "grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));" +
+      "gap:12px;margin:16px 0;";
+
+    const repoSelect = create("select");
+    repoSelect.id = "repoExplorerSource";
+    repoSelect.setAttribute(
+      "aria-label",
+      "Scegli repository"
+    );
+
+    const options = [
+      ["all", "Tutte le repository"],
+      ...SOURCES.map(repo => [repo.id, repo.label])
+    ];
+
+    options.forEach(([value, label]) => {
+      const option = create("option", label);
+      option.value = value;
+      repoSelect.appendChild(option);
+    });
+
+    const search = create("input");
+    search.type = "search";
+    search.id = "repoExplorerSearch";
+    search.placeholder = "Cerca file, percorso o estensione…";
+    search.setAttribute(
+      "aria-label",
+      "Cerca nei repository"
+    );
+    
+        [repoSelect, search].forEach(element => {
+      element.style.cssText =
+        "width:100%;min-width:0;padding:12px;" +
+        "border:1px solid var(--line);" +
+        "background:var(--bg);color:var(--ink);";
+    });
+
+    controls.append(repoSelect, search);
+
+    const breadcrumb = create("nav");
+    breadcrumb.id = "repoExplorerBreadcrumb";
+    breadcrumb.setAttribute(
+      "aria-label",
+      "Percorso cartelle"
+    );
+
+    breadcrumb.style.cssText =
+      "display:flex;gap:6px;flex-wrap:wrap;" +
+      "align-items:center;margin:14px 0;";
+
+    const errors = create("div");
+    errors.id = "repoExplorerErrors";
+
+    const list = create("div");
+    list.id = "repoExplorerList";
+
+    list.style.cssText =
+      "display:grid;" +
+      "grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));" +
+      "gap:10px;";
+
+    const refresh = create("button", "Aggiorna indice");
+    refresh.type = "button";
+    refresh.className = "theme-toggle";
+
+    refresh.addEventListener("click", () => {
+      refreshIndex().catch(error => {
+        if (error.name !== "AbortError") {
+          console.error("FAURE repository:", error);
+        }
+      });
+    });
+
+    explorer.append(
+      title,
+      status,
+      controls,
+      breadcrumb,
+      errors,
+      list,
+      refresh
+    );
+
+    const archive = $("#archive");
+
+    if (archive) {
+      archive.appendChild(explorer);
+    } else {
+      document.body.appendChild(explorer);
+    }
+
+    repoSelect.addEventListener("change", () => {
+      state.repo = repoSelect.value;
+      state.folder = "";
+      renderExplorer();
+    });
+
+    search.addEventListener("input", () => {
+      state.query = search.value
+        .trim()
+        .toLocaleLowerCase("it");
+
+      renderExplorer();
+    });
+
+    return explorer;
+  }
+
+  /* =======================================================
+     REPOSITORY INDEX — 4. FILTRO E NAVIGAZIONE
+     ======================================================= */
+
+  function getVisibleEntries() {
+    let items = state.entries;
+
+    if (state.repo !== "all") {
+      items = items.filter(
+        item => item.repoId === state.repo
+      );
+    }
+
+    if (state.query) {
+      return items.filter(item =>
+        item.type === "file" &&
+        `${item.name} ${item.path} ${item.repo} ${item.ext}`
+          .toLocaleLowerCase("it")
+          .includes(state.query)
+      );
+    }
+
+    if (state.repo === "all" && !state.folder) {
+      return items.filter(
+        item => !item.path.includes("/")
+      );
+    }
+
+    const prefix = state.folder
+      ? `${state.folder}/`
+      : "";
+
+    return items.filter(item => {
+      if (!prefix) {
+        return !item.path.includes("/");
+      }
+
+      if (!item.path.startsWith(prefix)) {
+        return false;
+      }
+
+      const rest = item.path.slice(prefix.length);
+
+      return rest.length > 0 && !rest.includes("/");
+    });
+  }
+
+  function renderBreadcrumb() {
+    const nav = $("#repoExplorerBreadcrumb");
+
+    if (!nav) return;
+
+    nav.replaceChildren();
+
+    const home = create("button", "Radice");
+    home.type = "button";
+    home.className = "theme-toggle";
+
+    home.addEventListener("click", () => {
+      state.folder = "";
+      renderExplorer();
+    });
+
+    nav.appendChild(home);
+
+    if (!state.folder) return;
+
+    const parts = state.folder.split("/");
+
+    parts.forEach((part, index) => {
+      nav.appendChild(create("span", "/"));
+
+      const button = create("button", part);
+      button.type = "button";
+      button.className = "theme-toggle";
+
+      button.addEventListener("click", () => {
+        state.folder = parts
+          .slice(0, index + 1)
+          .join("/");
+
+        renderExplorer();
+      });
+
+      nav.appendChild(button);
+    });
+  }
+  
+    /* =======================================================
+     REPOSITORY INDEX — 5. APERTURA FILE NEL VISUALIZZATORE
+     ======================================================= */
+
+  function openEntry(entry) {
+    const viewer = window.FAUREViewer;
+
+    if (!viewer || typeof viewer.openUrl !== "function") {
+      const status = $("#repoExplorerStatus");
+
+      if (status) {
+        status.textContent =
+          "Visualizzatore non disponibile. " +
+          "Verifica che il modulo FAUREViewer sia caricato.";
+      }
+
+      return;
+    }
+
+    viewer.openUrl({
+      title: entry.name,
+      url: entry.raw,
+      extension: entry.ext,
+      repository: entry.repoLabel,
+      path: entry.path,
+      size: entry.size,
+      owner: entry.owner,
+      repo: entry.repo,
+      branch: entry.branch
+    });
+  }
+
+  /* =======================================================
+     REPOSITORY INDEX — 6. RENDER DELL'INDICE
+     ======================================================= */
+
+  function renderExplorer() {
+    ensureExplorer();
+
+    const list = $("#repoExplorerList");
+    const errors = $("#repoExplorerErrors");
+
+    if (!list) return;
+
+    list.replaceChildren();
+    renderBreadcrumb();
+
+    if (errors) {
+      errors.replaceChildren();
+
+      state.sourceErrors.forEach(error => {
+        const message = create(
+          "p",
+          `${error.repo.repo}: ${error.message}`
+        );
+
+        message.style.cssText =
+          "padding:10px;border:1px solid var(--line);" +
+          "color:var(--muted);overflow-wrap:anywhere;";
+
+        errors.appendChild(message);
+      });
+    }
+
+    const items = getVisibleEntries();
+
+    if (!items.length) {
+      list.appendChild(
+        create(
+          "p",
+          state.query
+            ? "Nessun risultato."
+            : "Nessun elemento in questa cartella."
+        )
+      );
+
+      return;
+    }
+
+    items.forEach(entry => {
+      const button = create("button");
+
+      button.type = "button";
+
+      button.style.cssText =
+        "display:flex;flex-direction:column;" +
+        "align-items:flex-start;gap:8px;" +
+        "min-width:0;padding:15px;text-align:left;" +
+        "border:1px solid var(--line);" +
+        "background:var(--bg);color:var(--ink);" +
+        "cursor:pointer;";
+
+      const type = create(
+        "span",
+        entry.type === "dir"
+          ? "▰ CARTELLA"
+          : `${entry.ext || "FILE"} · DOCUMENTO`
+      );
+
+      type.style.cssText =
+        "font:10px var(--mono);color:var(--muted);";
+
+      const name = create("strong", entry.name);
+
+      name.style.cssText = "overflow-wrap:anywhere;";
+
+      const meta = create(
+        "small",
+        entry.type === "dir"
+          ? "Apri cartella →"
+          : `${entry.repoLabel} · ${formatSize(entry.size)}`
+      );
+
+      meta.style.cssText =
+        "overflow-wrap:anywhere;color:var(--muted);";
+
+      button.append(type, name, meta);
+
+      button.addEventListener("click", () => {
+        if (entry.type === "dir") {
+          state.repo = entry.repoId;
+          state.folder = entry.path;
+          state.query = "";
+
+          const repoSelect = $("#repoExplorerSource");
+          const search = $("#repoExplorerSearch");
+
+          if (repoSelect) {
+            repoSelect.value = entry.repoId;
+          }
+
+          if (search) {
+            search.value = "";
+          }
+
+          renderExplorer();
+          return;
+        }
+
+        openEntry(entry);
+      });
+
+      list.appendChild(button);
+    });
+  }
+  
+    /* =======================================================
+     REPOSITORY INDEX — 7. AGGIORNAMENTO INDICE
+     ======================================================= */
+
+  async function refreshIndex() {
+    const status = $("#repoExplorerStatus");
+
+    if (state.controller) {
+      state.controller.abort();
+    }
+
+    const controller = new AbortController();
+    state.controller = controller;
+
+    const requestId = ++state.requestId;
+    state.loading = true;
+
+    if (status) {
+      status.textContent = "Lettura degli indici GitHub…";
+    }
+
+    try {
+      const results = await Promise.allSettled(
+        SOURCES.map(async repo => ({
+          repo,
+          entries: await getTree(repo, controller.signal)
+        }))
+      );
+
+      if (requestId !== state.requestId) return;
+
+      const entries = [];
+      const errors = [];
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          entries.push(...result.value.entries);
+        } else if (result.reason?.name !== "AbortError") {
+          errors.push({
+            repo: SOURCES[index],
+            message:
+              result.reason?.message || "Errore sconosciuto"
+          });
+        }
+      });
+
+      state.entries = completeDirectories(entries);
+      state.sourceErrors = errors;
+
+      renderExplorer();
+
+      const fileCount = state.entries.filter(
+        item => item.type === "file"
+      ).length;
+
+      if (status) {
+        status.textContent =
+          `${fileCount} file · ` +
+          `${SOURCES.length - errors.length}/${SOURCES.length} ` +
+          "repository disponibili";
+      }
+    } finally {
+      if (requestId === state.requestId) {
+        state.loading = false;
+        state.controller = null;
+      }
+    }
+  }
+
+  /* =======================================================
+     REPOSITORY INDEX — 8. API PUBBLICA
+     ======================================================= */
+
+  ensureExplorer();
+
+  window.FAURERepository = Object.freeze({
+    refresh: refreshIndex,
+    render: renderExplorer,
+
+    getEntries: () => state.entries.slice(),
+
+    getSources: () =>
+      SOURCES.map(source => ({ ...source }))
+  });
+
+  refreshIndex().catch(error => {
+    if (error.name === "AbortError") return;
+
+    console.error(
+      "FAURE FOUNDATION — Repository:",
+      error
+    );
+
+    const status = $("#repoExplorerStatus");
+
+    if (status) {
+      status.textContent =
+        `Errore indice: ${error.message}`;
+    }
+  });
+
+  console.info(
+    "FAURE FOUNDATION — REPOSITORY INDEX inizializzato"
+  );
+})();
+
+/* =========================================================
+   FAURE FOUNDATION — FAUREViewer
+   PARTE 1 — CONFIGURAZIONE E FUNZIONI DI BASE
+   ========================================================= */
+
+(() => {
+  "use strict";
+
+  if (window.FAUREViewer) return;
+
+  const $ = (selector, scope = document) =>
+    scope.querySelector(selector);
+
+  const state = {
+    requestId: 0,
+    controller: null,
+    previousFocus: null,
+    previousOverflow: "",
+    currentDocument: null,
+    opening: false
+  };
+
+  const TEXT_EXTENSIONS = new Set([
+    "txt", "md", "markdown", "json", "jsonl",
+    "js", "mjs", "cjs", "jsx", "ts", "tsx",
+    "css", "scss", "html", "htm", "xml", "svg",
+    "yaml", "yml", "toml", "ini", "conf", "log",
+    "csv", "tsv", "py", "rb", "php", "java",
+    "c", "h", "cpp", "hpp", "cs", "go", "rs",
+    "sh", "bash", "sql", "r", "tex", "bib",
+    "diff", "patch", "gitignore", "dockerfile",
+    "makefile"
+  ]);
+
+  const IMAGE_EXTENSIONS = new Set([
+    "png", "jpg", "jpeg", "gif", "webp",
+    "avif", "bmp", "ico"
+  ]);
+
+  const create = (tag, className = "", text = null) => {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+
+    if (text !== null) {
+      element.textContent = text;
+    }
+
+    return element;
+  };
+
+  
+function safeUrl(value) {
+  try {
+    const url = new URL(value, location.href);
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return null;
+    }
+
+    // Converte le pagine GitHub /blob/ in URL Raw.
+    if (
+      url.hostname === "github.com" &&
+      url.pathname.includes("/blob/")
+    ) {
+      const parts = url.pathname.split("/");
+
+      const blobIndex = parts.indexOf("blob");
+
+      if (
+        blobIndex === 3 &&
+        parts[1] &&
+        parts[2] &&
+        parts[4]
+      ) {
+        const owner = parts[1];
+        const repo = parts[2];
+        const branch = parts[4];
+        const path = parts.slice(5).join("/");
+
+        if (path) {
+          return (
+            "https://raw.githubusercontent.com/" +
+            `${owner}/${repo}/${branch}/${path}` +
+            url.search
+          );
+        }
+      }
+    }
+
+    return url.href;
+  } catch (_) {
+    return null;
+  }
+}
+
+
+  function getExtension(doc) {
+    const supplied = String(doc.extension || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^\./, "");
+
+    if (supplied) return supplied;
+
+    const filename = String(
+      doc.path ||
+      doc.filename ||
+      doc.title ||
+      doc.url ||
+      ""
+    ).split(/[?#]/)[0];
+
+    const name = filename.split("/").pop() || "";
+    const index = name.lastIndexOf(".");
+
+    return index > 0
+      ? name.slice(index + 1).toLowerCase()
+      : "";
+  }
+
+  function setStatus(message) {
+    const status = $("#faureViewerStatus");
+
+    if (status) {
+      status.textContent = message;
+    }
+  }
+  
+    /* =======================================================
+     FAUREViewer — 2. CREAZIONE DEL VISUALIZZATORE
+     ======================================================= */
+
+  function buildViewer() {
+    let overlay = $("#faureViewer");
+
+    if (overlay) return overlay;
+
+    const style = create("style");
+    style.id = "faureViewerStyles";
+
+    style.textContent = `
+      #faureViewer {
+        position:fixed;
+        inset:0;
+        z-index:99999;
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:clamp(8px,2vw,24px);
+        background:rgba(7,12,16,.78);
+        backdrop-filter:blur(8px);
+      }
+
+      #faureViewer.is-open {
+        display:flex;
+      }
+
+      #faureViewer .faure-viewer-panel {
+        display:flex;
+        flex-direction:column;
+        width:min(1200px,100%);
+        height:min(900px,94dvh);
+        min-height:240px;
+        overflow:hidden;
+        border:1px solid var(--line,#526068);
+        background:var(--bg,#f2f0e8);
+        color:var(--ink,#202a30);
+        box-shadow:0 24px 90px rgba(0,0,0,.35);
+      }
+
+      #faureViewer .faure-viewer-header {
+        display:flex;
+        flex-wrap:wrap;
+        align-items:center;
+        gap:12px;
+        padding:14px 18px;
+        border-bottom:1px solid var(--line,#526068);
+      }
+
+      #faureViewer .faure-viewer-heading {
+        flex:1 1 180px;
+        min-width:0;
+      }
+
+      #faureViewer .faure-viewer-title {
+        margin:0;
+        font:600 15px/1.45 system-ui,sans-serif;
+        overflow-wrap:anywhere;
+      }
+
+      #faureViewer .faure-viewer-meta {
+        margin:4px 0 0;
+        color:var(--muted,#68747a);
+        font:11px/1.5 monospace;
+        overflow-wrap:anywhere;
+      }
+
+      #faureViewer .faure-viewer-actions {
+        display:flex;
+        flex-wrap:wrap;
+        gap:7px;
+      }
+
+      #faureViewer .faure-viewer-button {
+        display:inline-block;
+        padding:9px 12px;
+        border:1px solid var(--line,#526068);
+        background:var(--surface,transparent);
+        color:inherit;
+        font:11px/1.4 monospace;
+        cursor:pointer;
+        text-decoration:none;
+      }
+
+      #faureViewer .faure-viewer-button:focus-visible {
+        outline:2px solid currentColor;
+        outline-offset:3px;
+      }
+
+      #faureViewer .faure-viewer-body {
+        position:relative;
+        flex:1;
+        min-height:0;
+        overflow:auto;
+        overscroll-behavior:contain;
+      }
+
+      #faureViewer .faure-viewer-status {
+        margin:0;
+        padding:22px;
+        color:var(--muted,#68747a);
+        font:13px/1.7 monospace;
+        overflow-wrap:anywhere;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    overlay = create("div");
+    overlay.id = "faureViewer";
+    overlay.setAttribute("aria-hidden", "true");
+
+    const panel = create("section", "faure-viewer-panel");
+
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-modal", "true");
+    panel.setAttribute("aria-labelledby", "faureViewerTitle");
+    panel.tabIndex = -1;
+
+    const header = create("header", "faure-viewer-header");
+    const heading = create("div", "faure-viewer-heading");
+
+    const title = create(
+      "h2",
+      "faure-viewer-title",
+      "Documento"
+    );
+
+    title.id = "faureViewerTitle";
+
+    const meta = create("p", "faure-viewer-meta");
+    meta.id = "faureViewerMeta";
+
+    heading.append(title, meta);
+
+    const actions = create("div", "faure-viewer-actions");
+
+    const download = create(
+      "a",
+      "faure-viewer-button",
+      "Scarica"
+    );
+
+    download.id = "faureViewerDownload";
+    download.setAttribute("download", "");
+
+    const external = create(
+      "a",
+      "faure-viewer-button",
+      "Nuova scheda ↗"
+    );
+
+    external.id = "faureViewerExternal";
+    external.target = "_blank";
+    external.rel = "noopener noreferrer";
+
+    const close = create(
+      "button",
+      "faure-viewer-button",
+      "Chiudi ✕"
+    );
+
+    close.id = "faureViewerClose";
+    close.type = "button";
+
+    actions.append(download, external, close);
+    header.append(heading, actions);
+
+    const body = create("div", "faure-viewer-body");
+    body.id = "faureViewerBody";
+
+    const status = create(
+      "p",
+      "faure-viewer-status",
+      "Pronto."
+    );
+
+    status.id = "faureViewerStatus";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    body.appendChild(status);
+    panel.append(header, body);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    close.addEventListener("click", closeViewer);
+
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        closeViewer();
+      }
+    });
+
+    return overlay;
+  }
+  
+    /* =======================================================
+     FAUREViewer — 3. TASTIERA E GESTIONE DEL FOCUS
+     ======================================================= */
+
+  function installViewerKeyboard(overlay, panel) {
+    document.addEventListener("keydown", event => {
+      if (!overlay.classList.contains("is-open")) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeViewer();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = [
+        ...panel.querySelectorAll(
+          'a[href],button:not(:disabled),' +
+          '[tabindex]:not([tabindex="-1"])'
+        )
+      ].filter(element =>
+        element.getClientRects().length > 0
+      );
+
+      if (!focusable.length) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
+  /* =======================================================
+     FAUREViewer — 4. APERTURA E CHIUSURA
+     ======================================================= */
+
+  function showViewer(doc) {
+    const overlay = buildViewer();
+
+    state.previousFocus = document.activeElement;
+    state.previousOverflow = document.body.style.overflow;
+    state.currentDocument = doc;
+
+    $("#faureViewerTitle").textContent = doc.title;
+
+    $("#faureViewerMeta").textContent = [
+      doc.repository || doc.repo || "Archivio FAURE",
+      doc.path || "",
+      doc.extension
+        ? doc.extension.toUpperCase()
+        : ""
+    ].filter(Boolean).join(" · ");
+
+    const download = $("#faureViewerDownload");
+
+    download.href = doc.url;
+    download.download =
+      String(doc.path || doc.title || "documento")
+        .split("/")
+        .pop();
+
+    $("#faureViewerExternal").href = doc.url;
+
+    overlay.classList.add("is-open");
+    overlay.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+
+    $("#faureViewerClose").focus();
+  }
+
+  function closeViewer() {
+    const overlay = $("#faureViewer");
+
+    if (
+      !overlay ||
+      !overlay.classList.contains("is-open")
+    ) {
+      return;
+    }
+
+    state.requestId++;
+
+    if (state.controller) {
+      state.controller.abort();
+      state.controller = null;
+    }
+
+    state.opening = false;
+    state.currentDocument = null;
+
+    overlay.classList.remove("is-open");
+    overlay.setAttribute("aria-hidden", "true");
+
+    document.body.style.overflow = state.previousOverflow;
+
+    const previous = state.previousFocus;
+    state.previousFocus = null;
+
+    if (previous && typeof previous.focus === "function") {
+      previous.focus({ preventScroll: true });
+    }
+  }
+
+  /* =======================================================
+     FAUREViewer — 5. MESSAGGI DI ERRORE
+     ======================================================= */
+
+  function renderError(message, url = "") {
+    const body = $("#faureViewerBody");
+
+    if (!body) return;
+
+    body.replaceChildren();
+
+    const wrapper = create("div", "faure-viewer-error");
+
+    wrapper.append(
+      create("h3", "", "Documento non disponibile"),
+      create("p", "", message),
+      create(
+        "p",
+        "",
+        "Verifica che il repository sia pubblico, " +
+        "che il file esista e che GitHub consenta la richiesta."
+      )
+    );
+
+    if (url) {
+      const link = create(
+        "a",
+        "",
+        "Apri il file originale"
+      );
+
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      wrapper.appendChild(link);
+    }
+
+    body.appendChild(wrapper);
+  }
+  
+    /* =======================================================
+     FAUREViewer — 6. VISUALIZZAZIONE TESTO
+     ======================================================= */
+
+  function renderText(text, ext) {
+    const body = $("#faureViewerBody");
+
+    if (!body) return;
+
+    body.replaceChildren();
+
+    const pre = create("pre", "faure-viewer-text");
+    const code = create("code");
+
+    code.textContent = text;
+    code.dataset.language = ext || "text";
+
+    pre.appendChild(code);
+    body.appendChild(pre);
+
+    setStatus(
+      `${text.length.toLocaleString("it")} caratteri · ` +
+      "Testo visualizzato senza esecuzione."
+    );
+  }
+
+  /* =======================================================
+     FAUREViewer — 7. VISUALIZZAZIONE IMMAGINI
+     ======================================================= */
+
+  function renderImage(url, title) {
+    const body = $("#faureViewerBody");
+
+    if (!body) return;
+
+    body.replaceChildren();
+
+    const wrapper = create(
+      "div",
+      "faure-viewer-image-wrap"
+    );
+
+    const img = create("img", "faure-viewer-image");
+
+    img.alt = title || "Immagine del documento";
+    img.src = url;
+    img.decoding = "async";
+
+    img.addEventListener("load", () => {
+      setStatus(
+        `${img.naturalWidth} × ${img.naturalHeight} px`
+      );
+    }, { once: true });
+
+    img.addEventListener("error", () => {
+      renderError(
+        "Impossibile caricare l'immagine.",
+        url
+      );
+    }, { once: true });
+
+    wrapper.appendChild(img);
+    body.appendChild(wrapper);
+
+    setStatus("Caricamento immagine…");
+  }
+
+  /* =======================================================
+     FAUREViewer — 8. VISUALIZZAZIONE PDF
+     ======================================================= */
+
+  function renderPDF(url) {
+    const body = $("#faureViewerBody");
+
+    if (!body) return;
+
+    body.replaceChildren();
+
+    const frame = create(
+      "iframe",
+      "faure-viewer-frame"
+    );
+
+    frame.title = "Visualizzatore PDF";
+    frame.loading = "eager";
+    frame.referrerPolicy = "no-referrer";
+    frame.src = url;
+
+    body.appendChild(frame);
+
+    setStatus(
+      "PDF incorporato. Se non viene visualizzato, " +
+      "utilizza Nuova scheda."
+    );
+  }
+  
+    /* =======================================================
+     FAUREViewer — 9. LETTURA DEI DOCUMENTI REMOTI
+     ======================================================= */
+
+  async function renderRemoteDocument(doc, requestId) {
+    const url = safeUrl(doc.url);
+
+    if (!url) {
+      renderError("URL del documento non valido.");
+      return;
+    }
+
+    const ext = getExtension(doc);
+
+    if (IMAGE_EXTENSIONS.has(ext)) {
+      renderImage(url, doc.title);
+      return;
+    }
+
+    if (ext === "pdf") {
+      renderPDF(url);
+      return;
+    }
+
+    if (!TEXT_EXTENSIONS.has(ext)) {
+      renderError(
+        `Il formato .${ext || "sconosciuto"} non dispone ` +
+        "di un'anteprima integrata. Puoi aprire o scaricare il file.",
+        url
+      );
+      return;
+    }
+
+    const controller = new AbortController();
+    state.controller = controller;
+
+    try {
+      setStatus("Lettura del documento…");
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          Accept: "text/plain, */*"
+        },
+        cache: "no-cache"
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const text = await response.text();
+
+      if (requestId !== state.requestId) return;
+
+      if (text.length > 5_000_000) {
+        renderError(
+          "Il documento supera i 5 MB di testo. " +
+          "Aprilo in una nuova scheda per evitare problemi di prestazioni.",
+          url
+        );
+        return;
+      }
+
+      renderText(text, ext);
+    } catch (error) {
+  if (error.name === "AbortError") return;
+  if (requestId !== state.requestId) return;
+
+  console.error("FAUREViewer — errore documento:", {
+    url,
+    message: error.message,
+    error
+  });
+
+  const message =
+    error instanceof TypeError
+      ? "Impossibile completare la richiesta. " +
+        "Verifica l'URL, la connessione e le eventuali " +
+        "limitazioni CORS dalla Console del browser."
+      : error.message ||
+        "Errore durante la lettura del documento.";
+
+  renderError(message, url);
+}
+}
+  
+    /* =======================================================
+     FAUREViewer — 10. APERTURA DOCUMENTI
+     ======================================================= */
+
+  async function openUrl(input) {
+    const doc = typeof input === "string"
+      ? { title: input, url: input }
+      : input;
+
+    if (!doc || typeof doc !== "object") {
+      throw new TypeError("Documento non valido.");
+    }
+
+    const url = safeUrl(doc.url || doc.sourceUrl);
+
+    if (!url) {
+      throw new TypeError("URL del documento non valido.");
+    }
+
+    const normalized = {
+      ...doc,
+      title: String(
+        doc.title || doc.path || "Documento"
+      ),
+      url,
+      extension: getExtension({
+        ...doc,
+        url,
+        title: doc.title || doc.path || ""
+      })
+    };
+
+    const requestId = ++state.requestId;
+
+    if (state.controller) {
+      state.controller.abort();
+      state.controller = null;
+    }
+
+    state.opening = true;
+
+    showViewer(normalized);
+
+    const body = $("#faureViewerBody");
+
+    body.replaceChildren(
+      create(
+        "p",
+        "faure-viewer-status",
+        "Apertura documento…"
+      )
+    );
+
+    try {
+      await renderRemoteDocument(
+        normalized,
+        requestId
+      );
+    } finally {
+      if (requestId === state.requestId) {
+        state.opening = false;
+      }
+    }
+  }
+
+  function openFile(input) {
+    return openUrl(input);
+  }
+
+  function isOpen() {
+    return Boolean(
+      $("#faureViewer")?.classList.contains("is-open")
+    );
+  }
+
+  /* =======================================================
+     FAUREViewer — 11. API PUBBLICA
+     ======================================================= */
+
+  window.FAUREViewer = Object.freeze({
+    openUrl,
+    openFile,
+    close: closeViewer,
+    isOpen,
+
+    getCurrentDocument: () =>
+      state.currentDocument
+        ? { ...state.currentDocument }
+        : null
+  });
+
+  console.info(
+    "FAURE FOUNDATION — VIEWER inizializzato"
+  );
+})();
+
+/* =========================================================
+   FAURE FOUNDATION — FAUREViewer
+   PARTE 2 — STILI DEL CONTENUTO
+   ========================================================= */
+
+(() => {
+  "use strict";
+
+  if (document.getElementById("faureViewerContentStyles")) {
+    return;
+  }
+
+  const style = document.createElement("style");
+  style.id = "faureViewerContentStyles";
+
+  style.textContent = `
+    #faureViewer .faure-viewer-text {
+      margin: 0;
+      padding: 24px;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      tab-size: 2;
+      font: 12px/1.75 ui-monospace, monospace;
+    }
+
+    #faureViewer .faure-viewer-text code {
+      font: inherit;
+    }
+
+    #faureViewer .faure-viewer-image-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 20px;
+    }
+
+    #faureViewer .faure-viewer-image {
+      display: block;
+      max-width: 100%;
+      max-height: 75dvh;
+      object-fit: contain;
+    }
+
+    #faureViewer .faure-viewer-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      border: 0;
+      background: #fff;
+    }
+
+    #faureViewer .faure-viewer-error {
+      padding: 24px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    #faureViewer .faure-viewer-error a {
+      color: inherit;
+      text-decoration: underline;
+    }
+
+    #faureViewer .faure-viewer-error h3 {
+      margin-top: 0;
+    }
+
+    @media (max-width: 600px) {
+      #faureViewer {
+        padding: 0;
+      }
+
+      #faureViewer .faure-viewer-panel {
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border: 0;
+      }
+
+      #faureViewer .faure-viewer-header {
+        padding: 12px;
+      }
+
+      #faureViewer .faure-viewer-text {
+        padding: 14px;
+        font-size: 11px;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
+
+</script>
 </body>
 </html>
