@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#070b16">
+  <meta name="description" content="AUF2026 — Temporal Genesis. Modello illustrativo della generazione temporale.">
+
+  <title>AUF2026 — Temporal Genesis</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      --bg: #070b16;
+      --panel: #10182a;
+      --cyan: #61f3ff;
+      --violet: #a78bfa;
+      --gold: #ffdc8a;
+      --text: #e9f0ff;
+      --muted: #91a2c4;
+      --border: #263956;
+      --danger: #ff9a9a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background:
+        radial-gradient(
+          ellipse at 50% 0%,
+          #18254a 0%,
+          transparent 60%
+        ),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.6 system-ui, sans-serif;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      margin-inline: auto;
+      padding: 28px 18px 70px;
+    }
+
+    header {
+      padding: 24px 0;
+    }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 12px 0;
+      font-size: clamp(32px, 6vw, 64px);
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+    }
+
+    h1 span {
+      color: var(--cyan);
+    }
+
+    h2 {
+      margin-top: 8px;
+      font-size: clamp(21px, 4vw, 28px);
+    }
+
+    h3 {
+      margin-top: 24px;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .panel {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background:
+        linear-gradient(
+          145deg,
+          #111a2eeb,
+          #0a1020ee
+        );
+      box-shadow: 0 18px 70px #0005;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 1px solid #35516d;
+      border-radius: 10px;
+      background: #111e33;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      transition: border-color .2s ease;
+    }
+
+    button:hover {
+      border-color: var(--cyan);
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 3px;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .equation {
+      margin-block: 12px;
+      color: var(--cyan);
+      font: 18px/1.8 ui-monospace, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 18px 12px 48px;
+      }
+
+      .panel {
+        padding: 14px;
+        border-radius: 14px;
+      }
+
+      .toolbar button {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+    
+    /* AUF–TG: universo SVG */
+
+.node {
+  fill: #101d34;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+}
+
+.node-label {
+  fill: var(--text);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.edge {
+  stroke: var(--cyan);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 7 8;
+  animation: flow 2.5s linear infinite;
+}
+
+.pulse {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 8px var(--gold));
+}
+
+.star {
+  fill: #b6d5ff;
+  opacity: .65;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: .35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">
+        Faure Universal Tuple · AUF2026
+      </div>
+
+      <h1>
+        TEMPORAL <span>GENESIS</span>
+      </h1>
+
+      <p>
+        Legge di generazione temporale · AUF–TG
+        · Visualizzazione matematica
+      </p>
+    </header>
+
+
+<section class="panel" id="universePanel">
+  <div class="toolbar">
+    <button id="toggle">Ⅱ Pausa</button>
+    <button id="step">Avanza stato →</button>
+    <button id="reset">↺ Reset</button>
+  </div>
+
+  <svg id="universe" viewBox="0 0 900 410"
+       role="img" aria-labelledby="svgtitle svgdesc">
+
+    <title id="svgtitle">
+      Generazione della struttura temporale AUF
+    </title>
+
+    <desc id="svgdesc">
+      Quattro stati collegati da transizioni orientate
+      verso il futuro.
+    </desc>
+
+    <defs>
+      <radialGradient id="core">
+        <stop offset="0%" stop-color="#61f3ff"
+              stop-opacity=".3"/>
+        <stop offset="100%" stop-color="#61f3ff"
+              stop-opacity="0"/>
+      </radialGradient>
+
+      <marker id="arrow" markerWidth="9" markerHeight="9"
+              refX="7" refY="4" orient="auto">
+        <path d="M0 0 L8 4 L0 8 Z" fill="#61f3ff"/>
+      </marker>
+    </defs>
+
+    <circle cx="450" cy="200" r="185" fill="url(#core)"/>
+
+    <g id="stars"></g>
+
+    <g id="edges" marker-end="url(#arrow)">
+      <path class="edge" d="M145 235 H295"/>
+      <path class="edge" d="M345 235 H495"/>
+      <path class="edge" d="M545 235 H695"/>
+    </g>
+
+    <g id="nodes">
+      <circle class="node" cx="120" cy="235" r="25"/>
+      <circle class="node" cx="320" cy="235" r="25"/>
+      <circle class="node" cx="520" cy="235" r="25"/>
+      <circle class="node" cx="720" cy="235" r="25"/>
+
+      <text class="node-label" x="120" y="240">e₀</text>
+      <text class="node-label" x="320" y="240">e₁</text>
+      <text class="node-label" x="520" y="240">e₂</text>
+      <text class="node-label" x="720" y="240">e₃</text>
+    </g>
+
+    <text x="450" y="85" fill="#61f3ff"
+          text-anchor="middle" font-size="17"
+          letter-spacing="3">
+      TEMPORAL GENERATION
+    </text>
+
+    <text x="450" y="325" fill="#91a2c4"
+          text-anchor="middle" font-size="13">
+      passato ← predecessori · transizioni → futuro
+    </text>
+
+    <text id="stateLabel" x="450" y="365"
+          fill="#ffdc8a" text-anchor="middle"
+          font-size="14">
+      Stato visualizzato: e₀
+    </text>
+
+    <circle id="traveller" class="pulse"
+            cx="120" cy="235" r="6"/>
+  </svg>
+</section>
+ 
+    <section class="panel" id="fundamentalLaw">
+  <div class="eyebrow">Legge fondamentale</div>
+
+  <div class="equation">
+    ∀ t ∈ T, ∃ s ∈ T : s ≺ t
+  </div>
+
+  <div class="equation">
+    s ≺ t → a(s) &lt; a(t)
+  </div>
+
+  <p>
+    Ogni stato considerato possiede un predecessore
+    temporale. Lungo ogni transizione orientata verso
+    il futuro, il fattore di scala cresce strettamente.
+  </p>
+</section>
+
+<section class="panel" id="cosmologicalConstraint">
+  <div class="eyebrow">Vincolo cosmologico</div>
+
+  <div class="equation">
+    H(t)² = F(t)
+  </div>
+
+  <p>
+    Il vincolo quadratico appartiene al modello.
+    Da solo non determina il verso del tempo:
+    AUF–TG introduce esplicitamente una relazione
+    di precedenza e una legge di crescita.
+  </p>
+
+  <p class="small">
+    Modello teorico illustrativo. La legge AUF–TG
+    è un'ipotesi aggiuntiva e non una conseguenza
+    automatica della sola equazione cosmologica.
+  </p>
+</section>
+<section class="panel" id="dynamics">
+  <div class="eyebrow">AUF–TG / Dynamic engine</div>
+
+  <h2>Generazione degli stati</h2>
+
+  <p>
+    Genera nuovi stati temporali, osserva le transizioni
+    e controlla l'evoluzione del fattore di scala.
+  </p>
+
+  <div class="toolbar">
+    <button id="dynPlay">▶ Avvia evoluzione</button>
+    <button id="dynNext">+ Genera stato</button>
+    <button id="dynBack">← Torna indietro</button>
+    <button id="dynReset">↺ Ricomincia</button>
+  </div>
+
+  <svg id="dynSvg" viewBox="0 0 900 330"
+       role="img"
+       aria-label="Evoluzione degli stati temporali">
+
+    <defs>
+      <marker id="dynArrow" markerWidth="8"
+              markerHeight="8" refX="6" refY="4"
+              orient="auto">
+        <path d="M0 0 L8 4 L0 8 Z"
+              fill="#61f3ff"/>
+      </marker>
+
+      <linearGradient id="dynLine" x1="0" y1="0"
+                      x2="1" y2="0">
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="100%" stop-color="#61f3ff"/>
+      </linearGradient>
+    </defs>
+
+    <g id="dynLinks"></g>
+    <g id="dynNodes"></g>
+
+    <text x="450" y="28"
+          text-anchor="middle"
+          fill="#91a2c4"
+          font-size="12">
+      SCHEMA DINAMICO · PRECEDENZA TEMPORALE
+    </text>
+  </svg>
+
+  <div class="equation" id="dynEquation">
+    a(e₀) = 1
+  </div>
+
+  <p id="dynStatus" aria-live="polite">
+    Stato iniziale del modello illustrativo.
+  </p>
+</section>
+<section class="panel" id="transitionLog">
+  <div class="eyebrow">Osservabilità del modello</div>
+
+  <h2>Registro delle transizioni</h2>
+
+  <div id="dynLog" class="small" aria-live="polite">
+    Nessuna transizione registrata.
+  </div>
+</section>
+
+<section class="panel" id="dynamicChecks">
+  <div class="eyebrow">Verifica delle proprietà</div>
+
+  <h2>Controlli automatici</h2>
+
+  <div id="dynChecks" aria-live="polite">
+    <p>In attesa di generare gli stati.</p>
+  </div>
+
+  <p class="small">
+    Le verifiche riguardano esclusivamente gli stati
+    presenti nella simulazione. Non costituiscono una
+    dimostrazione matematica universale.
+  </p>
+</section>
+<section class="panel" id="lawLab">
+  <div class="eyebrow">AUF–TG / Laboratorio</div>
+
+  <h2>Leggi di crescita temporale</h2>
+
+  <p>
+    Modifica i parametri e osserva come cambia
+    il fattore di scala della sequenza.
+  </p>
+
+  <div class="law-controls">
+    <div>
+      <label for="growth">Parametro di crescita r</label>
+      <div class="equation" id="growthValue">0.20</div>
+
+      <input id="growth" type="range"
+             min="0.01" max="1" step="0.01"
+             value="0.20">
+    </div>
+
+    <div>
+      <label for="steps">Numero di transizioni</label>
+      <div class="equation" id="stepsValue">8</div>
+
+      <input id="steps" type="range"
+             min="2" max="20" step="1"
+             value="8">
+    </div>
+  </div>
+
+  <div class="equation">
+    aₙ = a₀(1 + r)ⁿ, &nbsp; a₀ = 1
+  </div>
+
+  <svg id="lawChart" viewBox="0 0 900 330"
+       role="img"
+       aria-label="Grafico del fattore di scala">
+
+    <g stroke="#263956" stroke-width="1">
+      <path d="M70 35 V270 H850"/>
+      <path d="M70 210 H850"/>
+      <path d="M70 150 H850"/>
+      <path d="M70 90 H850"/>
+    </g>
+
+    <path id="lawCurve"
+          d=""
+          fill="none"
+          stroke="#61f3ff"
+          stroke-width="3"
+          stroke-linejoin="round"/>
+
+    <g id="lawPoints"></g>
+
+    <text x="20" y="35"
+          fill="#91a2c4" font-size="12">aₙ</text>
+
+    <text x="845" y="300"
+          fill="#91a2c4" font-size="12">n</text>
+  </svg>
+
+  <div class="equation" id="lawResult">
+    a₈ = 4.2998
+  </div>
+
+  <p id="lawExplanation" aria-live="polite"></p>
+
+  <div class="toolbar">
+    <button id="lawRecalc">Ricalcola</button>
+    <button id="lawDefaults">Valori iniziali</button>
+  </div>
+</section>
+<section class="panel" id="lawTablePanel">
+  <div class="eyebrow">Analisi numerica</div>
+
+  <h2>Tabella degli stati</h2>
+
+  <div style="overflow-x:auto">
+    <table style="width:100%; border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px">
+            Stato
+          </th>
+
+          <th style="text-align:left; padding:8px">
+            Predecessore
+          </th>
+
+          <th style="text-align:right; padding:8px">
+            Fattore aₙ
+          </th>
+
+          <th style="text-align:right; padding:8px">
+            Incremento
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="lawTable">
+        <tr>
+          <td colspan="4"
+              style="padding:8px; color:var(--muted)">
+            In attesa dei calcoli.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="small">
+    Modello discreto illustrativo. La crescita esponenziale
+    deriva dalla regola aₙ₊₁ = aₙ(1 + r), con r maggiore
+    di zero. Non è una conseguenza automatica della
+    cosmologia standard.
+  </p>
+</section>
+<section class="panel" id="finalAudit">
+  <div class="eyebrow">AUF–TG / Verifica formale</div>
+
+  <h2>Verifica del modello</h2>
+
+  <p>
+    Il sistema controlla le proprietà della sequenza
+    finita generata nel laboratorio. I risultati numerici
+    non costituiscono una dimostrazione universale.
+  </p>
+
+  <div id="auditSummary" aria-live="polite">
+    Verifica non ancora eseguita.
+  </div>
+
+  <h3>Proprietà esaminate</h3>
+
+  <div id="auditProperties" aria-live="polite">
+    <p>In attesa dei controlli.</p>
+  </div>
+
+  <h3>Ipotesi e conseguenze</h3>
+
+  <div style="overflow-x:auto">
+    <table style="width:100%; border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px">
+            Enunciato
+          </th>
+          <th style="text-align:left; padding:8px">
+            Tipo
+          </th>
+          <th style="text-align:left; padding:8px">
+            Condizione
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td style="padding:8px">
+            Ogni stato non iniziale ha un predecessore
+          </td>
+          <td style="padding:8px">Definizione</td>
+          <td style="padding:8px">Sequenza costruita</td>
+        </tr>
+
+        <tr>
+          <td style="padding:8px">
+            aₙ₊₁ &gt; aₙ
+          </td>
+          <td style="padding:8px">Legge di crescita</td>
+          <td style="padding:8px">r &gt; 0</td>
+        </tr>
+
+        <tr>
+          <td style="padding:8px">
+            H² = F
+          </td>
+          <td style="padding:8px">Vincolo</td>
+          <td style="padding:8px">F deve essere definita</td>
+        </tr>
+
+        <tr>
+          <td style="padding:8px">
+            Esiste un primo stato assoluto
+          </td>
+          <td style="padding:8px">Questione strutturale</td>
+          <td style="padding:8px">Non dedotta dalla crescita</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="toolbar">
+    <button id="auditRun">Esegui verifica</button>
+  </div>
+
+  <p class="small" id="auditStatus" aria-live="polite">
+    In attesa di verifica.
+  </p>
+</section>
+</main>
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const svgNS = "http://www.w3.org/2000/svg";
+
+  const stars = $("stars");
+  const traveller = $("traveller");
+  const label = $("stateLabel");
+  const toggle = $("toggle");
+  const step = $("step");
+  const reset = $("reset");
+
+  if (!stars || !traveller || !label ||
+      !toggle || !step || !reset) {
+    console.error("AUF–TG: elementi SVG mancanti.");
+    return;
+  }
+
+  /* Stelle riproducibili, senza numeri casuali esterni. */
+  let seed = 2026;
+
+  function random() {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  }
+
+  for (let i = 0; i < 95; i++) {
+    const star = document.createElementNS(svgNS, "circle");
+
+    star.setAttribute("cx", random() * 880 + 10);
+    star.setAttribute("cy", random() * 390 + 10);
+    star.setAttribute("r", random() * 1.5 + 0.3);
+    star.setAttribute("class", "star");
+
+    stars.appendChild(star);
+  }
+
+  const positions = [120, 320, 520, 720];
+
+  let index = 0;
+  let running = true;
+  let last = 0;
+  let animationId = null;
+
+  function render() {
+    traveller.setAttribute("cx", positions[index]);
+    label.textContent = "Stato visualizzato: e" + index;
+  }
+
+  
+function animate(now) {
+  if (document.hidden) {
+    animationId = null;
+    return;
+  }
+
+  if (running && now - last >= 1000) {
+    index = (index + 1) % positions.length;
+    render();
+    last = now;
+  }
+
+  animationId = requestAnimationFrame(animate);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    if (animationId !== null) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  } else if (animationId === null) {
+    last = 0;
+    animationId = requestAnimationFrame(animate);
+  }
+});
+
+
+  toggle.addEventListener("click", () => {
+    running = !running;
+
+    toggle.textContent = running
+      ? "Ⅱ Pausa"
+      : "▶ Riprendi";
+  });
+
+  step.addEventListener("click", () => {
+    index = (index + 1) % positions.length;
+    render();
+  });
+
+  reset.addEventListener("click", () => {
+    index = 0;
+    last = 0;
+    render();
+  });
+
+  render();
+  animationId = requestAnimationFrame(animate);
+})();
+</script>
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+
+  const svg = $("dynSvg");
+  const links = $("dynLinks");
+  const nodes = $("dynNodes");
+
+  if (!svg || !links || !nodes) return;
+
+  const play = $("dynPlay");
+  const next = $("dynNext");
+  const back = $("dynBack");
+  const reset = $("dynReset");
+
+  const equation = $("dynEquation");
+  const status = $("dynStatus");
+  const log = $("dynLog");
+  const checks = $("dynChecks");
+
+  if (!play || !next || !back || !reset ||
+      !equation || !status || !log || !checks) {
+    console.error("AUF–TG: interfaccia dinamica incompleta.");
+    return;
+  }
+
+  const MAX_STATES = 20;
+  const GROWTH = 0.20;
+
+  let count = 1;
+  let running = false;
+  let timer = null;
+
+  function makeSvg(tag, attrs, text) {
+    const el = document.createElementNS(NS, tag);
+
+    Object.entries(attrs).forEach(([key, value]) => {
+      el.setAttribute(key, String(value));
+    });
+
+    if (text !== undefined) {
+      el.textContent = text;
+    }
+
+    return el;
+  }
+
+  function scale(n) {
+    return Math.pow(1 + GROWTH, n);
+  }
+
+  function render() {
+    links.replaceChildren();
+    nodes.replaceChildren();
+
+    const visible = Math.min(count, MAX_STATES);
+    const left = 45;
+    const right = 855;
+    const spacing = visible > 1
+      ? (right - left) / (visible - 1)
+      : 0;
+
+    for (let i = 0; i < visible; i++) {
+      const x = visible === 1 ? 450 : left + i * spacing;
+      const y = 165;
+
+      if (i > 0) {
+        const previousX = left + (i - 1) * spacing;
+
+        links.appendChild(makeSvg("path", {
+          d: `M ${previousX + 17} ${y} L ${x - 20} ${y}`,
+          stroke: "url(#dynLine)",
+          "stroke-width": 2,
+          fill: "none",
+          "marker-end": "url(#dynArrow)"
+        }));
+      }
+
+      const radius = Math.min(19, 12 + i * 0.4);
+
+      nodes.appendChild(makeSvg("circle", {
+        cx: x,
+        cy: y,
+        r: radius,
+        fill: "#101d34",
+        stroke: "#61f3ff",
+        "stroke-width": 1.5
+      }));
+
+      nodes.appendChild(makeSvg("text", {
+        x,
+        y: y + 4,
+        fill: "#e9f0ff",
+        "font-size": 11,
+        "text-anchor": "middle"
+      }, `e${i}`));
+    }
+
+    const current = visible - 1;
+
+    equation.textContent =
+      `a(e${current}) = ${scale(current).toFixed(4)}`;
+
+    status.textContent =
+      `${visible} stati generati. Ultimo stato: e${current}.`;
+
+    log.replaceChildren();
+
+    for (let i = 1; i < visible; i++) {
+      const row = document.createElement("p");
+      row.textContent =
+        `e${i - 1} → e${i} | ` +
+        `${scale(i - 1).toFixed(4)} → ${scale(i).toFixed(4)}`;
+
+      log.appendChild(row);
+    }
+
+    if (visible === 1) {
+      log.textContent = "Nessuna transizione registrata.";
+    }
+
+    checks.replaceChildren();
+
+    const result = document.createElement("p");
+    result.textContent =
+      `✓ Predecessori e crescita verificati su ${visible} stati.`;
+    result.style.color = "#61f3ff";
+
+    checks.appendChild(result);
+
+    back.disabled = count <= 1;
+    next.disabled = count >= MAX_STATES;
+  }
+
+  function stop() {
+    running = false;
+
+    if (timer !== null) {
+      clearInterval(timer);
+      timer = null;
+    }
+
+    play.textContent = "▶ Avvia evoluzione";
+  }
+
+  function advance() {
+    if (count >= MAX_STATES) {
+      stop();
+      status.textContent =
+        `Limite raggiunto: ${MAX_STATES} stati.`;
+      return;
+    }
+
+    count++;
+    render();
+  }
+
+  play.addEventListener("click", () => {
+    if (running) {
+      stop();
+      return;
+    }
+
+    if (count >= MAX_STATES) count = 1;
+
+    running = true;
+    play.textContent = "Ⅱ Pausa";
+
+    timer = setInterval(advance, 1200);
+  });
+
+  next.addEventListener("click", advance);
+
+  back.addEventListener("click", () => {
+    stop();
+
+    if (count > 1) {
+      count--;
+      render();
+    }
+  });
+
+  reset.addEventListener("click", () => {
+    stop();
+    count = 1;
+    render();
+  });
+
+  render();
+})();
+</script>
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+
+  const growth = $("growth");
+  const steps = $("steps");
+  const curve = $("lawCurve");
+  const points = $("lawPoints");
+  const table = $("lawTable");
+
+  if (!growth || !steps || !curve || !points || !table) {
+    console.error("AUF–TG: laboratorio incompleto.");
+    return;
+  }
+
+  const growthValue = $("growthValue");
+  const stepsValue = $("stepsValue");
+  const result = $("lawResult");
+  const explanation = $("lawExplanation");
+
+  const recalc = $("lawRecalc");
+  const defaults = $("lawDefaults");
+
+  function calculate() {
+    const r = Number(growth.value);
+    const n = Number(steps.value);
+
+    growthValue.textContent = r.toFixed(2);
+    stepsValue.textContent = String(n);
+
+    const values = Array.from(
+      { length: n + 1 },
+      (_, i) => Math.pow(1 + r, i)
+    );
+
+    const maxValue = values[n];
+
+    /* Coordinate del grafico */
+    const left = 70;
+    const right = 850;
+    const top = 35;
+    const bottom = 270;
+
+    const x = i => left + (i / n) * (right - left);
+
+    const y = value =>
+      bottom - (value / maxValue) * (bottom - top);
+
+    curve.setAttribute(
+      "d",
+      values.map((value, i) =>
+        `${i === 0 ? "M" : "L"} ${x(i)} ${y(value)}`
+      ).join(" ")
+    );
+
+    points.replaceChildren();
+
+    values.forEach((value, i) => {
+      const circle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
+      circle.setAttribute("cx", x(i));
+      circle.setAttribute("cy", y(value));
+      circle.setAttribute("r", "4");
+      circle.setAttribute("fill", "#ffdc8a");
+
+      points.appendChild(circle);
+    });
+
+    result.textContent =
+      `a${n} = ${maxValue.toFixed(4)}`;
+
+    explanation.textContent =
+      `Con r = ${r.toFixed(2)}, ogni transizione ` +
+      `moltiplica il fattore di scala per ${(1 + r).toFixed(2)}. ` +
+      `La sequenza contiene ${n + 1} stati.`;
+
+    /* Aggiornamento della tabella */
+    table.replaceChildren();
+
+    values.forEach((value, i) => {
+      const row = document.createElement("tr");
+      const predecessor = i === 0 ? "—" : `e${i - 1}`;
+      const increment = i === 0
+        ? "—"
+        : (value - values[i - 1]).toFixed(4);
+
+      const cells = [
+        `e${i}`,
+        predecessor,
+        value.toFixed(4),
+        increment
+      ];
+
+      cells.forEach((text, j) => {
+        const cell = document.createElement("td");
+
+        cell.textContent = text;
+        cell.style.padding = "8px";
+        cell.style.borderTop = "1px solid #263956";
+        cell.style.textAlign = j >= 2 ? "right" : "left";
+
+        row.appendChild(cell);
+      });
+
+      table.appendChild(row);
+    });
+  }
+
+  growth.addEventListener("input", calculate);
+  steps.addEventListener("input", calculate);
+  recalc.addEventListener("click", calculate);
+
+  defaults.addEventListener("click", () => {
+    growth.value = "0.20";
+    steps.value = "8";
+    calculate();
+  });
+
+  calculate();
+})();
+</script>
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+
+  const growth = $("growth");
+  const steps = $("steps");
+  const run = $("auditRun");
+
+  const summary = $("auditSummary");
+  const properties = $("auditProperties");
+  const status = $("auditStatus");
+
+  if (!growth || !steps || !run ||
+      !summary || !properties || !status) {
+    console.error("AUF–TG: verifica formale incompleta.");
+    return;
+  }
+
+  
+function audit() {
+    const r = Number(growth.value);
+    const n = Number(steps.value);
+
+    const states = Array.from(
+      { length: n + 1 },
+      (_, i) => ({
+        state: i,
+        predecessor: i === 0 ? null : i - 1,
+        a: Math.pow(1 + r, i)
+      })
+    );
+
+    const checks = [
+      {
+        label: "Predecessore definito per ogni stato non iniziale",
+        ok: states.every((s, i) =>
+          i === 0
+            ? s.predecessor === null
+            : s.predecessor === i - 1
+        )
+      },
+      {
+        label: "Crescita stretta del fattore di scala",
+        ok: states.every((s, i) =>
+          i === 0 || s.a > states[i - 1].a
+        )
+      },
+      {
+        label: "Ricorrenza aₙ₊₁ = aₙ(1 + r)",
+        ok: states.every((s, i) =>
+          i === 0 ||
+          Math.abs(
+            s.a - states[i - 1].a * (1 + r)
+          ) < 1e-9
+        )
+      },
+      {
+        label: "Fattori di scala finiti e positivi",
+        ok: states.every(s =>
+          Number.isFinite(s.a) && s.a > 0
+        )
+      }
+    ];
+
+    properties.replaceChildren();
+
+    checks.forEach((check, index) => {
+      const item = document.createElement("p");
+
+      item.textContent =
+        `${check.ok ? "✓" : "✗"} ${check.label}`;
+
+      item.style.color =
+        check.ok ? "#61f3ff" : "#ff9a9a";
+
+      item.style.opacity = "0";
+      item.style.transform = "translateY(8px)";
+      item.style.transition =
+        "opacity 250ms ease, transform 250ms ease";
+
+      properties.appendChild(item);
+
+      requestAnimationFrame(() => {
+        item.style.opacity = "1";
+        item.style.transform = "translateY(0)";
+      });
+    });
+
+    const passed = checks.every(check => check.ok);
+
+    summary.textContent = passed
+      ? "Tutti i controlli numerici sono superati."
+      : "Uno o più controlli non sono superati.";
+
+    summary.style.color =
+      passed ? "#61f3ff" : "#ff9a9a";
+
+    summary.style.opacity = "0.5";
+
+    requestAnimationFrame(() => {
+      summary.style.transition = "opacity 250ms ease";
+      summary.style.opacity = "1";
+    });
+
+    status.textContent =
+      `Verificati ${states.length} stati con r = ` +
+      `${r.toFixed(2)}. Esito limitato alla sequenza finita.`;
+  }
+
+  run.addEventListener("click", audit);
+  growth.addEventListener("input", audit);
+  steps.addEventListener("input", audit);
+
+  audit();
+})();
+
+</script>
+
+  </body>
+</html>
