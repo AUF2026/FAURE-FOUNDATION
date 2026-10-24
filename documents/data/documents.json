@@ -2,15 +2,15 @@
   "institution": "FAURE FOUNDATION",
   "catalogTitle": "Official Scientific Register",
   "schemaVersion": 3,
-  "generatedAt": "2026-10-22T16:34:56.953070+00:00",
-  "count": 96,
+  "generatedAt": "2026-10-24T20:50:12.340082+00:00",
+  "count": 98,
   "categoryCounts": {
-    "certifications": 0,
+    "certifications": 1,
     "refutations": 1,
     "validations": 15,
     "manuscripts": 7,
     "theorems": 0,
-    "proofs": 15,
+    "proofs": 16,
     "data": 0,
     "protocols": 0,
     "bibliography": 1,
@@ -24,7 +24,7 @@
       "id": "certifications",
       "label": "Certificazioni",
       "type": "CERTIFICATION",
-      "count": 0
+      "count": 1
     },
     {
       "id": "refutations",
@@ -54,7 +54,7 @@
       "id": "proofs",
       "label": "Dimostrazioni",
       "type": "PROOF",
-      "count": 15
+      "count": 16
     },
     {
       "id": "data",
@@ -136,6 +136,36 @@
       "sourceUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/bibliography/index.html",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/bibliography/index.html",
       "sourcePageUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/bibliography/index.html",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "certifications-e94256f76198097f83f8",
+      "title": "Faure Universal Tuple",
+      "category": "certifications",
+      "categoryLabel": "Certificazioni",
+      "type": "CERTIFICATION",
+      "file": "documents/certifications/Faure_Universal_Tuple.html",
+      "filename": "Faure_Universal_Tuple.html",
+      "extension": "html",
+      "sizeBytes": 26745,
+      "sha256": "7c62512dc43081728443ae9e1e5b359eddbf2ab9c8016d16259777572bbade28",
+      "repository": "FAURE-FOUNDATION",
+      "repositoryUrl": "https://github.com/AUF2026/FAURE-FOUNDATION",
+      "sourceUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/certifications/Faure_Universal_Tuple.html",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/FAURE-FOUNDATION/main/documents/certifications/Faure_Universal_Tuple.html",
+      "sourcePageUrl": "https://github.com/AUF2026/FAURE-FOUNDATION/blob/main/documents/certifications/Faure_Universal_Tuple.html",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
@@ -646,6 +676,36 @@
       "sourceUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-UNIVERSAL-STABILIZATION.lean",
       "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/FAURE-THEOREM-UNIVERSAL-STABILIZATION.lean",
       "sourcePageUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/FAURE-THEOREM-UNIVERSAL-STABILIZATION.lean",
+      "verification": {
+        "status": "NOT_RECORDED",
+        "report": null,
+        "verifier": null,
+        "verifiedAt": null,
+        "method": null
+      },
+      "identifiers": {
+        "doi": null,
+        "orcid": null,
+        "hal": null
+      },
+      "externalLinks": []
+    },
+    {
+      "id": "proofs-858749345e834eaa8b0c",
+      "title": "Faure Universal Tuple",
+      "category": "proofs",
+      "categoryLabel": "Dimostrazioni",
+      "type": "PROOF",
+      "file": "proofs/Faure_Universal_Tuple.lean",
+      "filename": "Faure_Universal_Tuple.lean",
+      "extension": "lean",
+      "sizeBytes": 11092,
+      "sha256": "3e797b951698e506623648ee8ab0cabf1a7ce7e60a36852728f59a433d429be8",
+      "repository": "AUF2026.github.io",
+      "repositoryUrl": "https://github.com/AUF2026/AUF2026.github.io",
+      "sourceUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/Faure_Universal_Tuple.lean",
+      "downloadUrl": "https://raw.githubusercontent.com/AUF2026/AUF2026.github.io/main/proofs/Faure_Universal_Tuple.lean",
+      "sourcePageUrl": "https://github.com/AUF2026/AUF2026.github.io/blob/main/proofs/Faure_Universal_Tuple.lean",
       "verification": {
         "status": "NOT_RECORDED",
         "report": null,
