@@ -234,6 +234,932 @@
   animation: glow 2s ease-in-out infinite;
 }
 
+    /* =========================================================
+   AUF–TG HYPOTHESIS TESTING ENGINE
+   CSS — Interfaccia completa del motore matematico
+   ========================================================= */
+
+/* ---------- CONTENITORE PRINCIPALE ---------- */
+
+#aufHypFormula,
+#aufHypRecurrence,
+#aufHypInitial,
+#aufHypAdditional,
+#aufHypIterations,
+#aufHypTolerance,
+#aufHypSeed,
+#aufHypStatus,
+#aufHypSummary,
+#aufHypResults,
+#aufHypCounterexamples,
+#aufHypHistory,
+#aufHypRun,
+#aufHypClear,
+#aufHypExport,
+#aufHypImport,
+#aufHypFile {
+  font-family: inherit;
+}
+
+#aufHypFormula,
+#aufHypRecurrence,
+#aufHypInitial,
+#aufHypAdditional,
+#aufHypIterations,
+#aufHypTolerance,
+#aufHypSeed {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #080f20;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.65;
+  outline: none;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+/* ---------- CAMPI MATEMATICI ---------- */
+
+#aufHypFormula,
+#aufHypRecurrence,
+#aufHypInitial,
+#aufHypAdditional {
+  display: block;
+  resize: vertical;
+  min-height: 90px;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  tab-size: 2;
+}
+
+#aufHypFormula {
+  min-height: 76px;
+  border-color: #286879;
+  background:
+    linear-gradient(135deg, #0a192b, #0a1020);
+}
+
+#aufHypRecurrence {
+  border-color: #4e4588;
+}
+
+#aufHypInitial {
+  min-height: 110px;
+}
+
+#aufHypAdditional {
+  min-height: 120px;
+}
+
+#aufHypIterations,
+#aufHypTolerance,
+#aufHypSeed {
+  min-height: 44px;
+}
+
+/* ---------- FOCUS E INTERAZIONE ---------- */
+
+#aufHypFormula:focus,
+#aufHypRecurrence:focus,
+#aufHypInitial:focus,
+#aufHypAdditional:focus,
+#aufHypIterations:focus,
+#aufHypTolerance:focus,
+#aufHypSeed:focus {
+  border-color: var(--cyan);
+  background: #0b172a;
+  box-shadow:
+    0 0 0 3px #61f3ff15,
+    0 0 22px #61f3ff0d;
+}
+
+#aufHypFormula::placeholder,
+#aufHypRecurrence::placeholder,
+#aufHypInitial::placeholder,
+#aufHypAdditional::placeholder {
+  color: #627493;
+  opacity: 1;
+}
+
+#aufHypFormula:disabled,
+#aufHypRecurrence:disabled,
+#aufHypInitial:disabled,
+#aufHypAdditional:disabled,
+#aufHypIterations:disabled,
+#aufHypTolerance:disabled,
+#aufHypSeed:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* ---------- ETICHETTE ---------- */
+
+label[for^="aufHyp"] {
+  display: block;
+  margin: 15px 0 7px;
+  color: #d9e7ff;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .025em;
+}
+
+label[for="aufHypFormula"]::after {
+  content: " · IPOTESI";
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+label[for="aufHypRecurrence"]::after {
+  content: " · RICORRENZA";
+  color: var(--violet);
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+/* ---------- TOOLBAR E PULSANTI ---------- */
+
+#aufHypRun,
+#aufHypClear,
+#aufHypExport,
+#aufHypImport {
+  position: relative;
+  min-height: 44px;
+  padding: 10px 17px;
+  border: 1px solid #35516d;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #152641, #10182a);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .025em;
+  cursor: pointer;
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+#aufHypRun {
+  border-color: #37cddc;
+  background: linear-gradient(135deg, #123c51, #12243d);
+  color: #bdfaff;
+  box-shadow: inset 0 0 18px #61f3ff0b;
+}
+
+#aufHypRun:hover:not(:disabled) {
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 20px #61f3ff20,
+    inset 0 0 16px #61f3ff10;
+}
+
+#aufHypClear:hover:not(:disabled) {
+  border-color: var(--danger);
+  box-shadow: 0 0 16px #ff9a9a12;
+}
+
+#aufHypExport:hover:not(:disabled),
+#aufHypImport:hover:not(:disabled) {
+  border-color: var(--violet);
+  box-shadow: 0 0 16px #a78bfa1a;
+}
+
+#aufHypRun:active:not(:disabled),
+#aufHypClear:active:not(:disabled),
+#aufHypExport:active:not(:disabled),
+#aufHypImport:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#aufHypRun:disabled,
+#aufHypClear:disabled,
+#aufHypExport:disabled,
+#aufHypImport:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Se i pulsanti sono dentro una toolbar */
+
+.toolbar:has(#aufHypRun) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-block: 18px;
+}
+
+.toolbar:has(#aufHypRun) button {
+  flex: 0 1 auto;
+}
+
+/* ---------- IMPORT FILE ---------- */
+
+#aufHypFile {
+  display: none;
+}
+
+/* ---------- STATO DEL MOTORE ---------- */
+
+#aufHypStatus {
+  display: block;
+  min-height: 48px;
+  margin-block: 14px;
+  padding: 13px 15px;
+  border: 1px solid #28546b;
+  border-left: 3px solid var(--cyan);
+  border-radius: 10px;
+  background: #0b1b2b;
+  color: #aaf8ff;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+#aufHypStatus:empty {
+  display: none;
+}
+
+/* ---------- RIEPILOGO E RISULTATI ---------- */
+
+#aufHypSummary,
+#aufHypResults,
+#aufHypCounterexamples,
+#aufHypHistory {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, #0e192c, #090f1e);
+  color: var(--text);
+}
+
+#aufHypSummary,
+#aufHypResults,
+#aufHypCounterexamples {
+  margin-top: 10px;
+  padding: 15px;
+}
+
+#aufHypSummary {
+  border-left: 3px solid var(--cyan);
+}
+
+#aufHypResults {
+  border-left: 3px solid var(--violet);
+}
+
+#aufHypCounterexamples {
+  border-left: 3px solid var(--gold);
+}
+
+/* ---------- OUTPUT JSON ---------- */
+
+#aufHypSummary pre,
+#aufHypResults pre,
+#aufHypCounterexamples pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  border: 1px solid #22344f;
+  border-radius: 9px;
+  background: #070d19;
+  color: #b9e8ff;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+/* Evidenziazione visiva differenziata */
+
+#aufHypSummary pre {
+  color: #a8f7ff;
+}
+
+#aufHypResults pre {
+  color: #c9baff;
+}
+
+#aufHypCounterexamples pre {
+  color: #ffdcac;
+}
+
+/* ---------- CRONOLOGIA ---------- */
+
+#aufHypHistory {
+  margin-top: 12px;
+  padding: 15px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+#aufHypHistory ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 24px;
+}
+
+#aufHypHistory li {
+  padding: 10px 12px;
+  border: 1px solid #263956;
+  border-radius: 8px;
+  background: #0c1526;
+  color: #c4d6f4;
+  overflow-wrap: anywhere;
+}
+
+#aufHypHistory li::marker {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+/* ---------- TITOLI DELLE SEZIONI ---------- */
+
+.panel:has(#aufHypFormula) {
+  position: relative;
+  isolation: isolate;
+}
+
+.panel:has(#aufHypFormula)::before {
+  content: "AUF–TG / HYPOTHESIS ENGINE";
+  display: block;
+  margin-bottom: 16px;
+  color: var(--cyan);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.panel:has(#aufHypSummary) h2,
+.panel:has(#aufHypResults) h2,
+.panel:has(#aufHypCounterexamples) h2,
+.panel:has(#aufHypHistory) h2 {
+  color: var(--text);
+  font-size: 18px;
+  letter-spacing: .015em;
+}
+
+/* ---------- ACCESSIBILITÀ ---------- */
+
+#aufHypRun:focus-visible,
+#aufHypClear:focus-visible,
+#aufHypExport:focus-visible,
+#aufHypImport:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+#aufHypSummary,
+#aufHypResults,
+#aufHypCounterexamples,
+#aufHypHistory {
+  scroll-margin-top: 24px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (min-width: 760px) {
+  .panel:has(#aufHypIterations) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    align-items: start;
+  }
+
+  .panel:has(#aufHypIterations) > h2,
+  .panel:has(#aufHypIterations) > p,
+  .panel:has(#aufHypIterations) > .toolbar,
+  .panel:has(#aufHypIterations) > #aufHypStatus {
+    grid-column: 1 / -1;
+  }
+
+  .panel:has(#aufHypIterations) > label[for="aufHypFormula"],
+  .panel:has(#aufHypIterations) > #aufHypFormula,
+  .panel:has(#aufHypIterations) > label[for="aufHypRecurrence"],
+  .panel:has(#aufHypIterations) > #aufHypRecurrence,
+  .panel:has(#aufHypIterations) > label[for="aufHypInitial"],
+  .panel:has(#aufHypIterations) > #aufHypInitial,
+  .panel:has(#aufHypIterations) > label[for="aufHypAdditional"],
+  .panel:has(#aufHypIterations) > #aufHypAdditional {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  #aufHypRun,
+  #aufHypClear,
+  #aufHypExport,
+  #aufHypImport {
+    flex: 1 1 140px;
+    padding-inline: 10px;
+  }
+
+  #aufHypSummary,
+  #aufHypResults,
+  #aufHypCounterexamples,
+  #aufHypHistory {
+    padding: 10px;
+  }
+
+  #aufHypSummary pre,
+  #aufHypResults pre,
+  #aufHypCounterexamples pre {
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  #aufHypFormula,
+  #aufHypRecurrence,
+  #aufHypInitial,
+  #aufHypAdditional {
+    font-size: 12px;
+  }
+}
+
+/* ---------- RIDUZIONE ANIMAZIONI ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  #aufHypFormula,
+  #aufHypRecurrence,
+  #aufHypInitial,
+  #aufHypAdditional,
+  #aufHypIterations,
+  #aufHypTolerance,
+  #aufHypSeed,
+  #aufHypRun,
+  #aufHypClear,
+  #aufHypExport,
+  #aufHypImport {
+    transition: none;
+  }
+}
+
+
+/* =========================================================
+   AUF–TG MANUAL
+   Menu didattico a tendina — tema cosmico
+   Namespace isolato: .auf-manual
+   ========================================================= */
+
+.auf-manual {
+  --auf-manual-bg: #0a1020;
+  --auf-manual-panel: #10182a;
+  --auf-manual-border: #263956;
+  --auf-manual-cyan: #61f3ff;
+  --auf-manual-violet: #a78bfa;
+  --auf-manual-gold: #ffdc8a;
+  --auf-manual-text: #e9f0ff;
+  --auf-manual-muted: #91a2c4;
+
+  width: 100%;
+  min-width: 0;
+  margin-block: 24px;
+  color: var(--auf-manual-text);
+  font: inherit;
+}
+
+/* ---------- INTESTAZIONE ---------- */
+
+.auf-manual .auf-manual__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  margin-bottom: 18px;
+  overflow: hidden;
+
+  border: 1px solid #286879;
+  border-radius: 18px;
+
+  background:
+    radial-gradient(
+      ellipse at 0% 0%,
+      #61f3ff13,
+      transparent 65%
+    ),
+    linear-gradient(145deg, #111e33, #0a1020);
+
+  box-shadow:
+    0 16px 45px #0004,
+    inset 0 1px 0 #ffffff08;
+}
+
+.auf-manual .auf-manual__header::after {
+  content: "";
+  position: absolute;
+  right: -35px;
+  top: -65px;
+  width: 150px;
+  height: 150px;
+  border: 1px solid #61f3ff20;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 18px #61f3ff06,
+    0 0 0 38px #61f3ff04;
+  pointer-events: none;
+}
+
+.auf-manual .auf-manual__icon {
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+
+  border: 1px solid #61f3ff55;
+  border-radius: 14px;
+  background: #61f3ff0d;
+
+  color: var(--auf-manual-cyan);
+  font-size: 29px;
+
+  text-shadow: 0 0 18px #61f3ff80;
+  box-shadow: inset 0 0 18px #61f3ff0b;
+}
+
+.auf-manual .auf-manual__header h2 {
+  margin: 0;
+  color: var(--auf-manual-text);
+  font-size: clamp(20px, 4vw, 29px);
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+
+.auf-manual .auf-manual__header p {
+  margin: 7px 0 0;
+  color: var(--auf-manual-muted);
+  font-size: 13px;
+}
+
+/* ---------- SINGOLA SEZIONE ---------- */
+
+.auf-manual .auf-section {
+  position: relative;
+  margin-block: 10px;
+  overflow: clip;
+
+  border: 1px solid var(--auf-manual-border);
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #111a2eeb,
+      #0a1020ee
+    );
+
+  box-shadow: 0 8px 24px #0002;
+
+  transition:
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease;
+}
+
+.auf-manual .auf-section:hover {
+  border-color: #42617f;
+  box-shadow: 0 10px 30px #0003;
+}
+
+.auf-manual .auf-section[open] {
+  border-color: #286879;
+  box-shadow:
+    0 12px 34px #0003,
+    inset 0 1px 0 #61f3ff09;
+}
+
+/* ---------- RIGA CLICCABILE ---------- */
+
+.auf-manual .auf-section > summary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  min-height: 66px;
+  padding: 16px 50px 16px 17px;
+
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+
+  color: var(--auf-manual-text);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
+}
+
+.auf-manual .auf-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.auf-manual .auf-section > summary::marker {
+  content: "";
+}
+
+/* Icona iniziale */
+
+.auf-manual .auf-section > summary > span:first-child {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+
+  border: 1px solid #35516d;
+  border-radius: 10px;
+  background: #15243a;
+
+  color: var(--auf-manual-cyan);
+  font-size: 19px;
+  line-height: 1;
+
+  transition:
+    color .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.auf-manual .auf-section > summary:hover {
+  background: #61f3ff05;
+}
+
+.auf-manual .auf-section > summary:hover > span:first-child {
+  border-color: #61f3ff80;
+  background: #61f3ff0c;
+  transform: translateY(-1px);
+}
+
+.auf-manual .auf-section[open] > summary {
+  background:
+    linear-gradient(
+      90deg,
+      #61f3ff0b,
+      transparent 80%
+    );
+  color: var(--auf-manual-cyan);
+}
+
+.auf-manual .auf-section[open] > summary > span:first-child {
+  border-color: #61f3ff65;
+  background: #61f3ff10;
+  box-shadow: 0 0 16px #61f3ff0a;
+}
+
+/* Chevron disegnato in CSS */
+
+.auf-manual .auf-section > summary::after {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+
+  width: 8px;
+  height: 8px;
+
+  border-right: 2px solid var(--auf-manual-muted);
+  border-bottom: 2px solid var(--auf-manual-muted);
+
+  transform: translateY(-70%) rotate(45deg);
+
+  transition:
+    transform .22s ease,
+    border-color .22s ease;
+}
+
+.auf-manual .auf-section[open] > summary::after {
+  border-color: var(--auf-manual-cyan);
+  transform: translateY(-25%) rotate(225deg);
+}
+
+/* ---------- CONTENUTO APERTO ---------- */
+
+.auf-manual .auf-section__content {
+  padding: 5px 22px 22px;
+  border-top: 1px solid #263956;
+
+  color: var(--auf-manual-text);
+  animation: aufManualReveal .24s ease both;
+}
+
+.auf-manual .auf-section__content h3 {
+  margin: 18px 0 10px;
+  color: var(--auf-manual-cyan);
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.auf-manual .auf-section__content h4 {
+  margin: 18px 0 8px;
+  color: var(--auf-manual-violet);
+  font-size: 14px;
+}
+
+.auf-manual .auf-section__content p {
+  margin: 10px 0;
+  color: var(--auf-manual-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.auf-manual .auf-section__content strong {
+  color: var(--auf-manual-text);
+  font-weight: 700;
+}
+
+.auf-manual .auf-section__content ul,
+.auf-manual .auf-section__content ol {
+  padding-left: 23px;
+  color: var(--auf-manual-muted);
+}
+
+.auf-manual .auf-section__content li {
+  margin-block: 8px;
+  padding-left: 3px;
+  line-height: 1.7;
+}
+
+.auf-manual .auf-section__content li::marker {
+  color: var(--auf-manual-cyan);
+}
+
+/* ---------- CODICE ED ESEMPI ---------- */
+
+.auf-manual .auf-section__content code {
+  padding: 2px 6px;
+  border: 1px solid #263956;
+  border-radius: 5px;
+  background: #080f20;
+
+  color: var(--auf-manual-cyan);
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: .92em;
+  overflow-wrap: anywhere;
+}
+
+.auf-manual .auf-section__content pre {
+  max-width: 100%;
+  margin: 14px 0;
+  padding: 17px;
+
+  overflow-x: auto;
+  border: 1px solid #286879;
+  border-radius: 11px;
+
+  background:
+    linear-gradient(145deg, #0b1929, #070d19);
+
+  box-shadow: inset 0 0 24px #61f3ff05;
+
+  color: #b9e8ff;
+  font: 13px/1.8
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  tab-size: 2;
+  white-space: pre;
+}
+
+.auf-manual .auf-section__content pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* ---------- ACCESSIBILITÀ ---------- */
+
+.auf-manual .auf-section > summary:focus-visible {
+  outline: 2px solid var(--auf-manual-cyan);
+  outline-offset: -4px;
+  border-radius: 10px;
+}
+
+.auf-manual .auf-section > summary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------- ANIMAZIONE ---------- */
+
+@keyframes aufManualReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 600px) {
+  .auf-manual {
+    margin-block: 18px;
+  }
+
+  .auf-manual .auf-manual__header {
+    gap: 12px;
+    padding: 17px;
+    border-radius: 14px;
+  }
+
+  .auf-manual .auf-manual__icon {
+    flex-basis: 43px;
+    width: 43px;
+    height: 43px;
+    font-size: 25px;
+  }
+
+  .auf-manual .auf-manual__header p {
+    font-size: 12px;
+  }
+
+  .auf-manual .auf-section {
+    border-radius: 11px;
+  }
+
+  .auf-manual .auf-section > summary {
+    min-height: 61px;
+    gap: 10px;
+    padding: 13px 42px 13px 12px;
+    font-size: 13px;
+  }
+
+  .auf-manual .auf-section > summary > span:first-child {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
+  }
+
+  .auf-manual .auf-section > summary::after {
+    right: 16px;
+  }
+
+  .auf-manual .auf-section__content {
+    padding: 4px 14px 17px;
+  }
+
+  .auf-manual .auf-section__content pre {
+    padding: 12px;
+    font-size: 11px;
+  }
+}
+
+/* ---------- RIDUZIONE ANIMAZIONI ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .auf-manual .auf-section,
+  .auf-manual .auf-section > summary,
+  .auf-manual .auf-section > summary::after,
+  .auf-manual .auf-section > summary > span:first-child {
+    transition: none;
+  }
+
+  .auf-manual .auf-section__content {
+    animation: none;
+  }
+}
+    
   </style>
 </head>
 
@@ -650,6 +1576,1238 @@
     In attesa di verifica.
   </p>
 </section>
+    <!-- AUF–TG HYPOTHESIS TESTING ENGINE -->
+<section class="auf-engine" id="aufHypothesisEngine">
+
+  <header class="auf-header">
+    <div class="auf-eyebrow">
+      AUF–TG / HYPOTHESIS TESTING ENGINE
+    </div>
+
+    <h2>Laboratorio delle ipotesi</h2>
+
+    <p>
+      Definizione, simulazione e analisi di ipotesi
+      matematiche mediante test numerici controllati.
+    </p>
+  </header>
+
+  <div class="auf-toolbar">
+    <button type="button" id="aufHypRun">
+      Esegui test
+    </button>
+
+    <button type="button" id="aufHypClear">
+      Pulisci input
+    </button>
+
+    <button type="button" id="aufHypExport">
+      Esporta JSON
+    </button>
+
+    <button type="button" id="aufHypImport">
+      Importa JSON
+    </button>
+
+    <input
+      type="file"
+      id="aufHypFile"
+      accept=".json,application/json"
+      hidden
+    >
+  </div>
+
+  <div class="auf-section">
+    <h3>Ipotesi da verificare</h3>
+
+    <label for="aufHypFormula">
+      Formula o condizione matematica
+    </label>
+
+    <textarea
+      id="aufHypFormula"
+      rows="3"
+      placeholder="a(n+1) > a(n)"
+    ></textarea>
+  </div>
+
+  <div class="auf-section">
+    <h3>Ricorrenza</h3>
+
+    <label for="aufHypRecurrence">
+      Regola di evoluzione
+    </label>
+
+    <textarea
+      id="aufHypRecurrence"
+      rows="3"
+      placeholder="a(n+1) = a(n)*(1+r)"
+    ></textarea>
+  </div>
+
+  <div class="auf-section">
+    <h3>Condizioni iniziali e parametri</h3>
+
+    <label for="aufHypInitial">
+      Valori iniziali
+    </label>
+
+    <textarea
+      id="aufHypInitial"
+      rows="3"
+      placeholder="a(0)=1; r=0.2"
+    ></textarea>
+
+    <label for="aufHypAdditional">
+      Ipotesi aggiuntive
+    </label>
+
+    <textarea
+      id="aufHypAdditional"
+      rows="3"
+      placeholder="Una condizione per riga"
+    ></textarea>
+  </div>
+
+  <div class="auf-section">
+    <h3>Configurazione del test</h3>
+
+    <label for="aufHypIterations">
+      Numero di iterazioni
+    </label>
+    <input
+      id="aufHypIterations"
+      type="number"
+      min="1"
+      max="100000"
+      step="1"
+      value="1000"
+    >
+
+    <label for="aufHypTolerance">
+      Tolleranza numerica
+    </label>
+    <input
+      id="aufHypTolerance"
+      type="number"
+      min="0"
+      max="1"
+      step="any"
+      value="0.000000001"
+    >
+
+    <label for="aufHypSeed">
+      Seed numerico
+    </label>
+    <input
+      id="aufHypSeed"
+      type="number"
+      step="1"
+      value="2026"
+    >
+  </div>
+
+  <div class="auf-section">
+    <h3>Stato della verifica</h3>
+    <p id="aufHypStatus" aria-live="polite">
+      Motore in attesa di inizializzazione.
+    </p>
+
+    <div id="aufHypSummary" aria-live="polite">
+      Nessun test eseguito.
+    </div>
+  </div>
+
+  <div class="auf-section">
+    <h3>Risultati</h3>
+    <div id="aufHypResults" aria-live="polite">
+      I risultati compariranno qui.
+    </div>
+  </div>
+
+  <div class="auf-section">
+    <h3>Controesempi e diagnostica</h3>
+    <div id="aufHypCounterexamples" aria-live="polite">
+      Nessun controesempio disponibile.
+    </div>
+  </div>
+
+  <div class="auf-section">
+    <h3>Registro delle esecuzioni</h3>
+    <div id="aufHypHistory" aria-live="polite">
+      Nessuna esecuzione registrata.
+    </div>
+  </div>
+
+  <footer class="auf-footer">
+    I test numerici non equivalgono a dimostrazioni
+    matematiche universali. I dati importati saranno
+    convalidati prima dell'esecuzione.
+  </footer>
+
+</section>
+<!-- =====================================================
+     AUF–TG — GUIDA INTERATTIVA DEL MOTORE
+     Inserire subito dopo la sezione del motore esistente
+     ===================================================== -->
+
+<section class="aufGuide" id="aufGuide">
+
+  <details class="aufGuide__main">
+
+    <summary class="aufGuide__summary">
+      <span class="aufGuide__summaryIcon">✦</span>
+
+      <span class="aufGuide__summaryText">
+        <strong>AUF–TG · Guida al motore matematico</strong>
+        <small>
+          Esperimenti, formule, controesempi e prossimi sviluppi
+        </small>
+      </span>
+
+      <span class="aufGuide__badge">GUIDA</span>
+      <span class="aufGuide__chevron" aria-hidden="true">⌄</span>
+    </summary>
+
+    <div class="aufGuide__content">
+
+      <!-- INTRODUZIONE -->
+
+      <header class="aufGuide__hero">
+        <div class="aufGuide__eyebrow">
+          AUF–TG / HYPOTHESIS TESTING ENGINE
+        </div>
+
+        <h2>
+          Il tuo primo
+          <span>laboratorio matematico</span>
+        </h2>
+
+        <p>
+          Trasforma AUF–TG in uno strumento per impostare
+          un'ipotesi, simulare una successione, individuare
+          i controesempi e capire perché un test è stato
+          superato oppure fallito.
+        </p>
+
+        <div class="aufGuide__heroTags">
+          <span>⌘ Formule</span>
+          <span>↗ Simulazioni</span>
+          <span>◈ Controesempi</span>
+          <span>⌁ Diagnostica</span>
+        </div>
+      </header>
+
+      <!-- COME SI USA -->
+
+      <section class="aufGuide__section">
+
+        <div class="aufGuide__sectionHead">
+          <span class="aufGuide__sectionIcon">01</span>
+          <div>
+            <h3>Come si usa il motore</h3>
+            <p>Segui questi cinque passaggi.</p>
+          </div>
+        </div>
+
+        <div class="aufGuide__steps">
+
+          <article class="aufGuide__step">
+            <div class="aufGuide__stepIcon">ƒ</div>
+            <div>
+              <h4>Inserisci l'ipotesi principale</h4>
+              <p>
+                Definisci la proprietà da verificare:
+                uguaglianza, disuguaglianza o condizione logica.
+              </p>
+              <code>a(n+1) &gt; a(n)</code>
+            </div>
+          </article>
+
+          <article class="aufGuide__step">
+            <div class="aufGuide__stepIcon aufGuide__violet">↻</div>
+            <div>
+              <h4>Definisci la ricorrenza</h4>
+              <p>
+                Descrivi come viene calcolato il termine
+                successivo della successione.
+              </p>
+              <code>a(n+1) = a(n) + 2</code>
+            </div>
+          </article>
+
+          <article class="aufGuide__step">
+            <div class="aufGuide__stepIcon aufGuide__gold">∑</div>
+            <div>
+              <h4>Inserisci le condizioni iniziali</h4>
+              <p>
+                Assegna il termine iniziale e le eventuali
+                variabili aggiuntive.
+              </p>
+              <code>a(0) = 1</code>
+            </div>
+          </article>
+
+          <article class="aufGuide__step">
+            <div class="aufGuide__stepIcon aufGuide__green">⚙</div>
+            <div>
+              <h4>Imposta i parametri</h4>
+              <p>
+                Scegli le iterazioni e la tolleranza numerica.
+                Il seed viene validato, ma non è ancora utilizzato
+                nei calcoli.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__step">
+            <div class="aufGuide__stepIcon">▶</div>
+            <div>
+              <h4>Esegui e interpreta il risultato</h4>
+              <p>
+                Controlla lo stato, il riepilogo, i risultati
+                numerici, i controesempi e la cronologia.
+                Puoi esportare la configurazione in JSON.
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- SINTASSI -->
+
+      <section class="aufGuide__section">
+
+        <div class="aufGuide__sectionHead">
+          <span class="aufGuide__sectionIcon">02</span>
+          <div>
+            <h3>Formule e sintassi supportate</h3>
+            <p>Le regole da conoscere prima di iniziare.</p>
+          </div>
+        </div>
+
+        <div class="aufGuide__syntaxGrid">
+
+          <div class="aufGuide__miniCard">
+            <h4>Operatori aritmetici</h4>
+            <code>+ &nbsp; - &nbsp; * &nbsp; /</code>
+            <code>% &nbsp; ^</code>
+            <p>
+              Per le potenze usa ^. Per moltiplicare,
+              scrivi sempre l'operatore esplicito.
+            </p>
+          </div>
+
+          <div class="aufGuide__miniCard">
+            <h4>Confronti</h4>
+            <code>== &nbsp; != &nbsp; &lt; &nbsp; &gt;</code>
+            <code>&lt;= &nbsp; &gt;=</code>
+            <p>
+              Usa == per l'uguaglianza e !=
+              per la disuguaglianza.
+            </p>
+          </div>
+
+          <div class="aufGuide__miniCard">
+            <h4>Operatori logici</h4>
+            <code>&amp;&amp; &nbsp; ||</code>
+            <p>
+              Consentono di combinare condizioni
+              booleane.
+            </p>
+          </div>
+
+          <div class="aufGuide__miniCard">
+            <h4>Funzioni matematiche</h4>
+            <code>abs() sqrt() pow()</code>
+            <code>sin() cos() tan()</code>
+            <code>exp() log() log10()</code>
+            <code>min() max() round()</code>
+            <p>
+              Sono disponibili anche floor() e ceil().
+              Le funzioni richiedono le parentesi.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="aufGuide__notice">
+          <span class="aufGuide__noticeIcon">ⓘ</span>
+          <div>
+            <strong>Attenzione alla notazione</strong>
+            <p>
+              Scrivi <code>2*a(n)</code>, non
+              <code>2a(n)</code>. La successione corrente
+              si indica con <code>a(n)</code>, quella successiva
+              con <code>a(n+1)</code>. Nella ricorrenza usa
+              <code>a(n+1)=...</code> e nelle condizioni iniziali
+              <code>a(0)=...</code>.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ESPERIMENTI -->
+
+      <section class="aufGuide__section">
+
+        <div class="aufGuide__sectionHead">
+          <span class="aufGuide__sectionIcon">03</span>
+          <div>
+            <h3>Esperimenti pronti da testare</h3>
+            <p>
+              Apri un esperimento, copia le formule e inseriscile
+              nei campi del motore.
+            </p>
+          </div>
+        </div>
+
+        <div class="aufGuide__experimentList">
+
+          <!-- TEST 1 -->
+
+          <details class="aufGuide__experiment" id="aufExample1">
+            <summary>
+              <span class="aufGuide__experimentIcon">↗</span>
+              <span class="aufGuide__experimentTitle">
+                <strong>Test 1 — Successione crescente</strong>
+                <small>Facile · 10 iterazioni</small>
+              </span>
+              <span class="aufGuide__expected aufGuide__pass">
+                SUPERATO
+              </span>
+              <span class="aufGuide__chevron">⌄</span>
+            </summary>
+
+            <div class="aufGuide__experimentBody">
+              <p>
+                Verifica che la successione aumenti di 2
+                a ogni passaggio.
+              </p>
+
+              <label>Ipotesi principale</label>
+              <pre class="aufGuide__code">a(n+1) &gt; a(n)</pre>
+
+              <label>Ricorrenza</label>
+              <pre class="aufGuide__code">a(n+1) = a(n) + 2</pre>
+
+              <label>Condizioni iniziali</label>
+              <pre class="aufGuide__code">a(0) = 1</pre>
+
+              <label>Ipotesi aggiuntive, una per riga</label>
+              <pre class="aufGuide__code">a(n+1) == a(n) + 2
+a(n+1) &gt; a(n)</pre>
+
+              <div class="aufGuide__parameters">
+                <span>Iterazioni: <b>10</b></span>
+                <span>Tolleranza: <b>1e-9</b></span>
+                <span>Seed: <b>2026</b></span>
+              </div>
+
+              <button
+                type="button"
+                class="aufGuide__copy"
+                data-auf-copy="aufExample1">
+                ▣ Copia configurazione
+              </button>
+
+              <div class="aufGuide__expectedBox">
+                <strong>Risultato atteso</strong>
+                <p>
+                  Successione: 1, 3, 5, 7, 9, …, 21.
+                  Tutte le 10 transizioni devono rispettare
+                  l'ipotesi principale e quelle aggiuntive.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <!-- TEST 2 -->
+
+          <details class="aufGuide__experiment" id="aufExample2">
+            <summary>
+              <span class="aufGuide__experimentIcon aufGuide__red">!</span>
+              <span class="aufGuide__experimentTitle">
+                <strong>Test 2 — Ricerca dei controesempi</strong>
+                <small>Facile · 5 iterazioni</small>
+              </span>
+              <span class="aufGuide__expected aufGuide__fail">
+                VIOLAZIONI
+              </span>
+              <span class="aufGuide__chevron">⌄</span>
+            </summary>
+
+            <div class="aufGuide__experimentBody">
+              <p>
+                La successione decresce, mentre l'ipotesi
+                sostiene che debba crescere.
+              </p>
+
+              <label>Ipotesi principale</label>
+              <pre class="aufGuide__code">a(n+1) &gt; a(n)</pre>
+
+              <label>Ricorrenza</label>
+              <pre class="aufGuide__code">a(n+1) = a(n) - 1</pre>
+
+              <label>Condizioni iniziali</label>
+              <pre class="aufGuide__code">a(0) = 3</pre>
+
+              <label>Ipotesi aggiuntive</label>
+              <pre class="aufGuide__code">a(n+1) == a(n) - 1</pre>
+
+              <div class="aufGuide__parameters">
+                <span>Iterazioni: <b>5</b></span>
+                <span>Tolleranza: <b>1e-9</b></span>
+                <span>Seed: <b>2026</b></span>
+              </div>
+
+              <button
+                type="button"
+                class="aufGuide__copy"
+                data-auf-copy="aufExample2">
+                ▣ Copia configurazione
+              </button>
+
+              <div class="aufGuide__expectedBox">
+                <strong>Risultato atteso</strong>
+                <p>
+                  Successione: 3, 2, 1, 0, -1, -2.
+                  Sono attese 5 violazioni dell'ipotesi principale.
+                  L'uguaglianza aggiuntiva deve invece essere
+                  rispettata in tutti i passaggi.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <!-- TEST 3 -->
+
+          <details class="aufGuide__experiment" id="aufExample3">
+            <summary>
+              <span class="aufGuide__experimentIcon">2ˣ</span>
+              <span class="aufGuide__experimentTitle">
+                <strong>Test 3 — Crescita esponenziale</strong>
+                <small>Intermedio · 10 iterazioni</small>
+              </span>
+              <span class="aufGuide__expected aufGuide__pass">
+                SUPERATO
+              </span>
+              <span class="aufGuide__chevron">⌄</span>
+            </summary>
+
+            <div class="aufGuide__experimentBody">
+              <p>
+                Verifica una successione che raddoppia
+                a ogni iterazione.
+              </p>
+
+              <label>Ipotesi principale</label>
+              <pre class="aufGuide__code">a(n+1) == 2*a(n)</pre>
+
+              <label>Ricorrenza</label>
+              <pre class="aufGuide__code">a(n+1) = 2*a(n)</pre>
+
+              <label>Condizioni iniziali</label>
+              <pre class="aufGuide__code">a(0) = 1</pre>
+
+              <label>Ipotesi aggiuntive</label>
+              <pre class="aufGuide__code">a(n+1) &gt; a(n)
+a(n+1) &gt;= 2*a(n)</pre>
+
+              <div class="aufGuide__parameters">
+                <span>Iterazioni: <b>10</b></span>
+                <span>Tolleranza: <b>1e-9</b></span>
+                <span>Seed: <b>2026</b></span>
+              </div>
+
+              <button
+                type="button"
+                class="aufGuide__copy"
+                data-auf-copy="aufExample3">
+                ▣ Copia configurazione
+              </button>
+
+              <div class="aufGuide__expectedBox">
+                <strong>Risultato atteso</strong>
+                <p>
+                  I termini vanno da 1 a 1024.
+                  Le 10 verifiche devono essere superate.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <!-- TEST 4 -->
+
+          <details class="aufGuide__experiment" id="aufExample4">
+            <summary>
+              <span class="aufGuide__experimentIcon aufGuide__violet">%</span>
+              <span class="aufGuide__experimentTitle">
+                <strong>Test 4 — Crescita con parametro</strong>
+                <small>Intermedio · 20 iterazioni</small>
+              </span>
+              <span class="aufGuide__expected aufGuide__pass">
+                SUPERATO
+              </span>
+              <span class="aufGuide__chevron">⌄</span>
+            </summary>
+
+            <div class="aufGuide__experimentBody">
+              <p>
+                Simula una crescita del 5% per ogni iterazione,
+                usando una variabile definita dall'utente.
+              </p>
+
+              <label>Ipotesi principale</label>
+              <pre class="aufGuide__code">a(n+1) == a(n)*(1+r)</pre>
+
+              <label>Ricorrenza</label>
+              <pre class="aufGuide__code">a(n+1) = a(n)*(1+r)</pre>
+
+              <label>Condizioni iniziali</label>
+              <pre class="aufGuide__code">a(0) = 100
+r = 0.05</pre>
+
+              <label>Ipotesi aggiuntive</label>
+              <pre class="aufGuide__code">a(n+1) &gt; a(n)
+a(n+1) &gt;= a(n)</pre>
+
+              <div class="aufGuide__parameters">
+                <span>Iterazioni: <b>20</b></span>
+                <span>Tolleranza: <b>1e-9</b></span>
+                <span>Seed: <b>2026</b></span>
+              </div>
+
+              <button
+                type="button"
+                class="aufGuide__copy"
+                data-auf-copy="aufExample4">
+                ▣ Copia configurazione
+              </button>
+
+              <div class="aufGuide__expectedBox">
+                <strong>Risultato atteso</strong>
+                <p>
+                  Il valore finale è circa 265,3298.
+                  Tutte le 20 verifiche devono essere superate.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <!-- TEST 5 -->
+
+          <details class="aufGuide__experiment" id="aufExample5">
+            <summary>
+              <span class="aufGuide__experimentIcon aufGuide__gold">⌁</span>
+              <span class="aufGuide__experimentTitle">
+                <strong>Test 5 — Controesempio al primo passo</strong>
+                <small>Intermedio · 10 iterazioni</small>
+              </span>
+              <span class="aufGuide__expected aufGuide__fail">
+                1 VIOLAZIONE
+              </span>
+              <span class="aufGuide__chevron">⌄</span>
+            </summary>
+
+            <div class="aufGuide__experimentBody">
+              <p>
+                L'ipotesi fallisce soltanto alla prima transizione:
+                è un test utile per verificare l'individuazione
+                dei controesempi.
+              </p>
+
+              <label>Ipotesi principale</label>
+              <pre class="aufGuide__code">a(n+1) &gt; a(n)</pre>
+
+              <label>Ricorrenza</label>
+              <pre class="aufGuide__code">a(n+1) = a(n) + n</pre>
+
+              <label>Condizioni iniziali</label>
+              <pre class="aufGuide__code">a(0) = 1</pre>
+
+              <div class="aufGuide__parameters">
+                <span>Iterazioni: <b>10</b></span>
+                <span>Tolleranza: <b>1e-9</b></span>
+                <span>Seed: <b>2026</b></span>
+              </div>
+
+              <button
+                type="button"
+                class="aufGuide__copy"
+                data-auf-copy="aufExample5">
+                ▣ Copia configurazione
+              </button>
+
+              <div class="aufGuide__expectedBox">
+                <strong>Risultato atteso</strong>
+                <p>
+                  La prima transizione è 1 → 1, quindi l'ipotesi
+                  è falsa. Le successive 9 transizioni sono crescenti.
+                  Sono attese 1 violazione e 9 verifiche superate.
+                </p>
+              </div>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- SVILUPPI FUTURI -->
+
+      <section class="aufGuide__section">
+
+        <div class="aufGuide__sectionHead">
+          <span class="aufGuide__sectionIcon">04</span>
+          <div>
+            <h3>Cosa aggiungeremo alla pagina</h3>
+            <p>
+              Le funzionalità previste per la prossima evoluzione
+              di AUF–TG.
+            </p>
+          </div>
+        </div>
+
+        <div class="aufGuide__features">
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon">▥</div>
+            <div>
+              <div class="aufGuide__featureTop">
+                <h4>Grafico interattivo</h4>
+                <span>PRIORITÀ ALTA</span>
+              </div>
+              <p>
+                Visualizzazione di a(n), zoom, tooltip e punti
+                che evidenziano le violazioni in rosso.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon aufGuide__gold">⌕</div>
+            <div>
+              <h4>Tabella dei controesempi</h4>
+              <p>
+                Indice, valore corrente, valore successivo,
+                formula verificata e motivo della violazione.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon aufGuide__violet">ƒ</div>
+            <div>
+              <h4>Editor matematico intelligente</h4>
+              <p>
+                Controlli sintattici, evidenziazione degli errori,
+                funzioni rapide e suggerimenti sulle variabili.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon aufGuide__green">◴</div>
+            <div>
+              <h4>Avanzamento e annullamento</h4>
+              <p>
+                Barra di avanzamento, tempo trascorso e
+                annullamento dei calcoli lunghi, con esecuzione
+                suddivisa in blocchi o tramite Web Worker.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon">▦</div>
+            <div>
+              <h4>Libreria di esperimenti</h4>
+              <p>
+                Successioni aritmetiche, geometriche, convergenza,
+                divergenza, oscillazioni e controesempi caricabili
+                con un clic.
+              </p>
+            </div>
+          </article>
+
+          <article class="aufGuide__feature">
+            <div class="aufGuide__featureIcon aufGuide__red">⌁</div>
+            <div>
+              <h4>Pannello diagnostico</h4>
+              <p>
+                Registro degli errori, avvisi, informazioni
+                ed esportazione delle diagnostiche in JSON.
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- MIGLIORAMENTI TECNICI -->
+
+      <section class="aufGuide__section">
+
+        <div class="aufGuide__sectionHead">
+          <span class="aufGuide__sectionIcon">05</span>
+          <div>
+            <h3>Miglioramenti tecnici necessari</h3>
+            <p>
+              Le correzioni che renderanno il motore
+              più robusto.
+            </p>
+          </div>
+        </div>
+
+        <div class="aufGuide__notice aufGuide__noticeWarning">
+          <span class="aufGuide__noticeIcon">⚠</span>
+          <div>
+            <strong>Validazione del parser</strong>
+            <p>
+              safeParseMath() esiste, ma il codice utilizza
+              ancora parseMath() direttamente in diversi punti.
+              I limiti di lunghezza, token e annidamento devono
+              essere applicati in modo uniforme.
+            </p>
+          </div>
+        </div>
+
+        <div class="aufGuide__notice">
+          <span class="aufGuide__noticeIcon">↗</span>
+          <div>
+            <strong>Prestazioni numeriche</strong>
+            <p>
+              Evita di rianalizzare le condizioni iniziali
+              a ogni iterazione. Calcola minimo e massimo con
+              un ciclo, senza passare array molto grandi
+              a Math.min() o Math.max().
+            </p>
+          </div>
+        </div>
+
+        <div class="aufGuide__notice aufGuide__noticeWarning">
+          <span class="aufGuide__noticeIcon">∴</span>
+          <div>
+            <strong>Test numerico non significa dimostrazione</strong>
+            <p>
+              Un'ipotesi che supera tutte le iterazioni
+              controllate non è automaticamente vera per
+              ogni n. La dimostrazione matematica universale
+              richiede un metodo distinto.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ROADMAP -->
+
+      <section class="aufGuide__roadmap">
+
+        <div class="aufGuide__eyebrow">AUF–TG / ROADMAP</div>
+        <h3>Il prossimo passo</h3>
+        <p>
+          Prima rendiamo il motore facile da usare; poi
+          trasformiamo i risultati in visualizzazioni
+          matematiche interattive.
+        </p>
+
+        <ol>
+          <li>
+            <span>01</span>
+            <div>
+              <strong>Esperimenti caricabili con un clic</strong>
+              <small>Configurazioni pronte all'uso.</small>
+            </div>
+          </li>
+          <li>
+            <span>02</span>
+            <div>
+              <strong>Tabella dei controesempi</strong>
+              <small>Individuazione precisa delle violazioni.</small>
+            </div>
+          </li>
+          <li>
+            <span>03</span>
+            <div>
+              <strong>Grafico interattivo</strong>
+              <small>Successioni e punti critici.</small>
+            </div>
+          </li>
+          <li>
+            <span>04</span>
+            <div>
+              <strong>Parser e diagnostica robusti</strong>
+              <small>Validazione e prestazioni.</small>
+            </div>
+          </li>
+          <li>
+            <span>05</span>
+            <div>
+              <strong>Controllo dei calcoli lunghi</strong>
+              <small>Avanzamento e annullamento.</small>
+            </div>
+          </li>
+        </ol>
+
+        <div class="aufGuide__footer">
+          <span class="aufGuide__footerMark">✦</span>
+          <p>
+            AUF–TG — Dall'ipotesi numerica all'analisi
+            matematica interattiva.
+          </p>
+        </div>
+
+      </section>
+
+    </div>
+  </details>
+</section>
+
+
+
+<!-- AUF–TG · MANUALE TECNICO -->
+<section id="aufManual" class="panel auf-manual">
+
+  <header class="auf-manual__header">
+    <div class="auf-manual__icon" aria-hidden="true">∑</div>
+    <div>
+      <span class="eyebrow">AUF–TG / DOCUMENTAZIONE</span>
+      <h2>Manuale <span>tecnico interattivo</span></h2>
+      <p>
+        Guida pratica all'utilizzo del verificatore numerico:
+        formule, ricorrenze, esempi e controesempi.
+      </p>
+    </div>
+  </header>
+
+  <!-- SEZIONE 01 -->
+  <details class="auf-section" open>
+    <summary>
+      <span aria-hidden="true">01</span>
+      Panoramica e primo utilizzo
+    </summary>
+
+    <div class="auf-section__content">
+
+      <h3>A cosa serve AUF–TG</h3>
+
+      <p>
+        Il motore simula una successione numerica definita
+        da una condizione iniziale e da una ricorrenza.
+        Successivamente verifica un'ipotesi sui termini
+        calcolati e segnala le violazioni trovate.
+      </p>
+
+      <p>
+        <strong>Attenzione:</strong> il risultato è una verifica
+        numerica limitata alle iterazioni eseguite, non una
+        dimostrazione matematica valida per ogni indice.
+      </p>
+
+      <h3>Come eseguire il primo test</h3>
+
+      <ol>
+        <li>Nel campo dell'ipotesi inserisci una formula da verificare.</li>
+        <li>Nel campo della ricorrenza definisci come ottenere il termine successivo.</li>
+        <li>Inserisci la condizione iniziale della successione.</li>
+        <li>Scegli il numero di iterazioni e la tolleranza numerica.</li>
+        <li>Premi il pulsante di esecuzione e consulta il riepilogo.</li>
+      </ol>
+
+      <h3>Esempio completo</h3>
+
+      <p>Consideriamo la successione geometrica:</p>
+
+      <pre><code>a(0) = 1
+a(n+1) = a(n) * 2</code></pre>
+
+      <p>Vogliamo verificare che ogni termine sia positivo:</p>
+
+      <pre><code>a(n) > 0</code></pre>
+
+      <p>
+        Dopo 5 iterazioni, il motore calcola i termini da
+        <code>a(0)</code> ad <code>a(5)</code>:
+      </p>
+
+      <pre><code>1, 2, 4, 8, 16, 32</code></pre>
+
+      <p>
+        L'ipotesi risulta verificata per tutti i termini
+        controllati. Questo esito non dimostra da solo
+        l'affermazione per ogni numero naturale.
+      </p>
+
+    </div>
+  </details>
+
+  <!-- SEZIONE 02 -->
+  <details class="auf-section">
+    <summary>
+      <span aria-hidden="true">02</span>
+      Campi, formule e sintassi
+    </summary>
+
+    <div class="auf-section__content">
+
+      <h3>Ipotesi principale</h3>
+
+      <p>
+        Il campo dell'ipotesi accetta espressioni numeriche
+        e confronti. Il parser riconosce gli operatori
+        aritmetici e relazionali implementati nel motore.
+      </p>
+
+      <pre><code>a(n) > 0
+a(n+1) >= a(n)
+a(n+1) == 2 * a(n)</code></pre>
+
+      <h3>Condizioni iniziali</h3>
+
+      <p>
+        Le condizioni iniziali definiscono i valori disponibili
+        prima dell'avvio della simulazione. Ogni assegnazione
+        deve essere separata da un punto e virgola oppure
+        da una nuova riga.
+      </p>
+
+      <pre><code>a(0) = 1
+r = 0.2</code></pre>
+
+      <h3>Ricorrenza</h3>
+
+      <p>
+        La ricorrenza deve rispettare la forma
+        <code>a(n+1) = espressione</code>. Il nome della
+        successione deve corrispondere a quello della
+        condizione iniziale.
+      </p>
+
+      <pre><code>a(n+1) = a(n) * (1 + r)</code></pre>
+
+      <p>
+        In questo esempio ogni termine viene moltiplicato
+        per <code>1.2</code>. Con valore iniziale pari a
+        <code>1</code>, i primi termini sono
+        <code>1</code>, <code>1.2</code>, <code>1.44</code>
+        e <code>1.728</code>.
+      </p>
+
+      <h3>Funzioni matematiche disponibili</h3>
+
+      <p>
+        Il parser implementato nel codice supporta
+        <code>abs</code>, <code>sqrt</code>, <code>floor</code>,
+        <code>ceil</code>, <code>round</code>, <code>exp</code>,
+        <code>log</code>, <code>log10</code>, <code>sin</code>,
+        <code>cos</code>, <code>tan</code>, <code>min</code>,
+        <code>max</code> e <code>pow</code>, oltre alle costanti
+        <code>pi</code> ed <code>e</code>.
+      </p>
+
+      <p>
+        Le espressioni vengono analizzate tramite un parser
+        dedicato e un albero sintattico; non viene utilizzato
+        <code>eval()</code>.
+      </p>
+
+    </div>
+  </details>
+<!-- SEZIONE 03 -->
+<details class="auf-section">
+  <summary>
+    <span aria-hidden="true">03</span>
+    Verifica delle ipotesi
+  </summary>
+
+  <div class="auf-section__content">
+
+    <h3>Che cosa verifica il motore</h3>
+
+    <p>
+      Il motore calcola la successione e valuta l'ipotesi
+      per ogni indice n compreso tra zero e il numero
+      di iterazioni richiesto meno uno.
+    </p>
+
+    <p>
+      Durante la verifica sono disponibili le variabili
+      <code>n</code>, <code>a_current</code> e
+      <code>a_next</code>, dove il nome interno della
+      successione sostituisce la lettera a.
+    </p>
+
+    <h3>Esempio: verificare una crescita stretta</h3>
+
+    <p>Imposta questi valori nei campi del motore:</p>
+
+    <pre><code>Condizione iniziale:
+a(0) = 1
+
+Ricorrenza:
+a(n+1) = 2 * a(n)
+
+Ipotesi:
+a(n+1) > a(n)</code></pre>
+
+    <p>
+      Ogni termine è il doppio del precedente. Per questa
+      configurazione, il confronto risulta vero a ogni
+      iterazione verificata.
+    </p>
+
+    <h3>Esempio: trovare un controesempio</h3>
+
+    <p>
+      Mantieni la stessa condizione iniziale e ricorrenza,
+      ma sostituisci l'ipotesi con:
+    </p>
+
+    <pre><code>a(n+1) < a(n)</code></pre>
+
+    <p>
+      Il motore segnalerà una violazione già all'indice
+      <code>n = 0</code>, perché <code>2 &lt; 1</code>
+      è falso.
+    </p>
+
+    <h3>Come interpretare l'esito</h3>
+
+    <ul>
+      <li>
+        <strong>Superato numericamente:</strong>
+        tutti i controlli completati sono risultati veri.
+      </li>
+      <li>
+        <strong>Controesempi:</strong>
+        almeno una valutazione dell'ipotesi è risultata falsa.
+      </li>
+      <li>
+        <strong>Errore:</strong>
+        la valutazione è stata interrotta da un problema
+        di sintassi o di calcolo.
+      </li>
+    </ul>
+
+    <p>
+      <strong>Limite:</strong> il codice attuale registra
+      l'indice, il valore corrente e quello successivo
+      dei controesempi, ma non salva in ogni caso la
+      formula completa della violazione principale.
+    </p>
+
+  </div>
+</details>
+
+<!-- SEZIONE 04 -->
+<details class="auf-section">
+  <summary>
+    <span aria-hidden="true">04</span>
+    Risultati e dati numerici
+  </summary>
+
+  <div class="auf-section__content">
+
+    <h3>Riepilogo dell'esecuzione</h3>
+
+    <p>
+      Al termine del test, il pannello di riepilogo mostra
+      lo stato della verifica, il numero di iterazioni
+      controllate, le verifiche superate e le violazioni
+      rilevate.
+    </p>
+
+    <p>
+      Il pannello dei risultati riporta il nome della
+      successione, il valore iniziale, quello finale,
+      il minimo, il massimo e gli ultimi dieci termini
+      calcolati.
+    </p>
+
+    <h3>Come leggere un controesempio</h3>
+
+    <p>
+      Ogni controesempio registrato contiene l'indice
+      dell'iterazione, il tipo di ipotesi violata e i
+      valori corrente e successivo.
+    </p>
+
+    <pre><code>{
+  "iteration": 0,
+  "type": "ipotesi principale",
+  "current": 1,
+  "next": 2
+}</code></pre>
+
+    <p>
+      Questo è un esempio illustrativo del formato
+      dell'oggetto prodotto dal codice, non un risultato
+      generato automaticamente dalla pagina.
+    </p>
+
+    <h3>Limiti dei risultati attuali</h3>
+
+    <ul>
+      <li>
+        I controesempi visualizzati sono limitati ai primi
+        cento registrati.
+      </li>
+      <li>
+        Il riepilogo distingue le violazioni principali
+        da quelle delle ipotesi aggiuntive.
+      </li>
+      <li>
+        Le diagnostiche raccolgono errori di valutazione,
+        ma il codice attuale non offre ancora un pannello
+        diagnostico completo con esportazione dedicata
+        collegata all'interfaccia.
+      </li>
+    </ul>
+
+    <p>
+      Il numero di iterazioni indica quanti passaggi
+      della ricorrenza sono stati eseguiti. Con cinque
+      iterazioni, per esempio, vengono calcolati sei
+      termini, da <code>a(0)</code> ad <code>a(5)</code>.
+    </p>
+
+  </div>
+</details>
+
+<div id="aufJsonTools" class="auf-json-tools">
+  <button type="button" id="aufExportJson">
+    Esporta JSON
+  </button>
+
+  <button type="button" id="aufImportJson">
+    Importa JSON
+  </button>
+
+  <input
+    type="file"
+    id="aufJsonFile"
+    accept=".json,application/json"
+    hidden
+  />
+
+  <span
+    id="aufJsonStatus"
+    role="status"
+    aria-live="polite"
+  ></span>
+</div>
+
+</section>
+
+
+</div>
+
+
+
+
 </main>
 <script>
 (() => {
@@ -946,6 +3104,135 @@ document.addEventListener("visibilitychange", () => {
   });
 
   render();
+  /* AUF–TG — Import / Export JSON */
+
+const aufJsonExport = document.getElementById("aufExportJson");
+const aufJsonImport = document.getElementById("aufImportJson");
+const aufJsonFile = document.getElementById("aufJsonFile");
+const aufJsonStatus = document.getElementById("aufJsonStatus");
+
+if (aufJsonExport && aufJsonImport && aufJsonFile && aufJsonStatus) {
+
+  aufJsonExport.addEventListener("click", () => {
+    try {
+      const data = {
+        format: "auf-tg-hypothesis",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        configuration: {
+          formula: ui.formula.value,
+          recurrence: ui.recurrence.value,
+          initial: ui.initial.value,
+          additional: ui.additional.value,
+          iterations: ui.iterations.value,
+          tolerance: ui.tolerance.value,
+          seed: ui.seed.value
+        },
+        lastResult: state.lastResult
+      };
+
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json;charset=utf-8" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "auf-tg-hypothesis.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      aufJsonStatus.textContent = "Esportazione completata.";
+    } catch (error) {
+      aufJsonStatus.textContent =
+        "Errore export: " + error.message;
+    }
+  });
+
+  aufJsonImport.addEventListener("click", () => {
+    aufJsonFile.click();
+  });
+
+  aufJsonFile.addEventListener("change", async () => {
+    const file = aufJsonFile.files?.[0];
+    if (!file) return;
+
+    try {
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error("File superiore a 2 MB.");
+      }
+
+      const data = JSON.parse(await file.text());
+
+      if (
+        !data ||
+        data.format !== "auf-tg-hypothesis" ||
+        data.version !== 1 ||
+        !data.configuration
+      ) {
+        throw new Error("Formato JSON AUF–TG non valido.");
+      }
+
+      const c = data.configuration;
+
+      for (const key of [
+        "formula", "recurrence", "initial", "additional"
+      ]) {
+        if (typeof c[key] !== "string") {
+          throw new Error("Campo non valido: " + key);
+        }
+      }
+
+      const iterations = Number(c.iterations);
+      const tolerance = Number(c.tolerance);
+      const seed = Number(c.seed);
+
+      if (
+        !Number.isInteger(iterations) ||
+        iterations < 1 ||
+        iterations > MAX_ITERATIONS ||
+        !Number.isFinite(tolerance) ||
+        tolerance < 0 ||
+        tolerance > 1 ||
+        !Number.isSafeInteger(seed)
+      ) {
+        throw new Error("Parametri numerici non validi.");
+      }
+
+      // Applica i dati solo dopo averli validati.
+      ui.formula.value = c.formula;
+      ui.recurrence.value = c.recurrence;
+      ui.initial.value = c.initial;
+      ui.additional.value = c.additional;
+      ui.iterations.value = String(iterations);
+      ui.tolerance.value = String(tolerance);
+      ui.seed.value = String(seed);
+
+      state.lastResult = null;
+
+      setText(ui.summary, "Configurazione importata.");
+      setText(ui.results, "Esegui un nuovo test.");
+      setText(ui.counterexamples, "Nessun controesempio disponibile.");
+
+      aufJsonStatus.textContent = "Importazione completata.";
+      setStatus("Configurazione JSON caricata.");
+    } catch (error) {
+      aufJsonStatus.textContent =
+        "Errore import: " + error.message;
+    } finally {
+      aufJsonFile.value = "";
+    }
+  });
+
+} else {
+  console.error(
+    "AUF–TG: controlla gli ID aufExportJson, aufImportJson, aufJsonFile e aufJsonStatus."
+  );
+}
 })();
 </script>
 <script>
@@ -1192,6 +3479,1430 @@ function audit() {
   audit();
 })();
 
+  /* AUF–TG HYPOTHESIS TESTING ENGINE
+   Parte 1 — Inizializzazione e controlli
+*/
+(() => {
+  "use strict";
+
+  const PREFIX = "aufHyp";
+  const $ = id => document.getElementById(PREFIX + id);
+
+  const ui = {
+    formula: $("Formula"),
+    recurrence: $("Recurrence"),
+    initial: $("Initial"),
+    additional: $("Additional"),
+    iterations: $("Iterations"),
+    tolerance: $("Tolerance"),
+    seed: $("Seed"),
+    run: $("Run"),
+    clear: $("Clear"),
+    export: $("Export"),
+    import: $("Import"),
+    file: $("File"),
+    status: $("Status"),
+    summary: $("Summary"),
+    results: $("Results"),
+    counterexamples: $("Counterexamples"),
+    history: $("History")
+  };
+
+  const required = [
+    "formula", "recurrence", "initial", "additional",
+    "iterations", "tolerance", "seed", "run", "clear",
+    "export", "import", "file", "status", "summary",
+    "results", "counterexamples", "history"
+  ];
+
+  const missing = required.filter(key => !ui[key]);
+
+  if (missing.length) {
+    console.error(
+      "[AUF–TG] Elementi HTML mancanti:",
+      missing
+    );
+    return;
+  }
+
+  const state = {
+    running: false,
+    executions: [],
+    lastResult: null,
+    version: "1.0.0"
+  };
+
+  const MAX_ITERATIONS = 100000;
+  const MAX_HISTORY = 50;
+
+  function setStatus(message) {
+    ui.status.textContent = String(message);
+  }
+
+  function setText(element, message) {
+    element.textContent = String(message);
+  }
+
+  function readConfig() {
+    const iterations = Number(ui.iterations.value);
+    const tolerance = Number(ui.tolerance.value);
+    const seed = Number(ui.seed.value);
+
+    if (
+      !Number.isInteger(iterations) ||
+      iterations < 1 ||
+      iterations > MAX_ITERATIONS
+    ) {
+      throw new Error(
+        `Le iterazioni devono essere comprese tra 1 e ${MAX_ITERATIONS}.`
+      );
+    }
+
+    if (
+      !Number.isFinite(tolerance) ||
+      tolerance < 0 ||
+      tolerance > 1
+    ) {
+      throw new Error(
+        "La tolleranza deve essere un numero compreso tra 0 e 1."
+      );
+    }
+
+    if (!Number.isSafeInteger(seed)) {
+      throw new Error(
+        "Il seed deve essere un intero sicuro."
+      );
+    }
+
+    return {
+      formula: ui.formula.value.trim(),
+      recurrence: ui.recurrence.value.trim(),
+      initial: ui.initial.value.trim(),
+      additional: ui.additional.value.trim(),
+      iterations,
+      tolerance,
+      seed
+    };
+  }
+
+  function renderHistory() {
+    ui.history.replaceChildren();
+
+    if (!state.executions.length) {
+      setText(ui.history, "Nessuna esecuzione registrata.");
+      return;
+    }
+
+    const list = document.createElement("ol");
+
+    for (const execution of state.executions) {
+      const item = document.createElement("li");
+
+      item.textContent =
+        `${execution.timestamp} — ${execution.status}`;
+
+      list.appendChild(item);
+    }
+
+    ui.history.appendChild(list);
+  }
+
+  function recordExecution(status) {
+    state.executions.unshift({
+      timestamp: new Date().toLocaleString(),
+      status
+    });
+
+    state.executions.length = Math.min(
+      state.executions.length,
+      MAX_HISTORY
+    );
+
+    renderHistory();
+  }
+
+  setStatus("Motore inizializzato. In attesa del modulo di calcolo.");
+
+  console.info(
+    `[AUF–TG] Motore inizializzato — versione ${state.version}`
+  );
+
+  /* AUF–TG — Parte 2
+   Parser matematico controllato
+*/
+
+function tokenizeMath(source) {
+  const tokens = [];
+  let i = 0;
+
+  while (i < source.length) {
+    const rest = source.slice(i);
+
+    if (/^\s+/.test(rest)) {
+      i += rest.match(/^\s+/)[0].length;
+      continue;
+    }
+
+    const number = rest.match(
+      /^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i
+    );
+
+    if (number) {
+      tokens.push({
+        type: "number",
+        value: Number(number[0])
+      });
+
+      i += number[0].length;
+      continue;
+    }
+
+    const identifier = rest.match(/^[a-zA-Z_]\w*/);
+
+    if (identifier) {
+      tokens.push({
+        type: "identifier",
+        value: identifier[0]
+      });
+
+      i += identifier[0].length;
+      continue;
+    }
+
+    const operator = rest.match(
+      /^(?:<=|>=|==|!=|&&|\|\||[+\-*/%^<>()!,])/
+    );
+
+    if (operator) {
+      tokens.push({
+        type: "operator",
+        value: operator[0]
+      });
+
+      i += operator[0].length;
+      continue;
+    }
+
+    throw new Error(
+      `Simbolo non ammesso alla posizione ${i}: "${source[i]}"`
+    );
+  }
+
+  tokens.push({ type: "eof", value: "" });
+
+  return tokens;
+}
+
+function parseMath(source) {
+  const tokens = tokenizeMath(source);
+  let position = 0;
+
+  const functions = {
+    abs: Math.abs,
+    sqrt: Math.sqrt,
+    floor: Math.floor,
+    ceil: Math.ceil,
+    round: Math.round,
+    exp: Math.exp,
+    log: Math.log,
+    log10: Math.log10,
+    sin: Math.sin,
+    cos: Math.cos,
+    tan: Math.tan,
+    min: Math.min,
+    max: Math.max,
+    pow: Math.pow
+  };
+
+  function peek() {
+    return tokens[position];
+  }
+
+  function take(value) {
+    if (peek().value === value) {
+      position++;
+      return true;
+    }
+
+    return false;
+  }
+
+  function expect(value) {
+    if (!take(value)) {
+      throw new Error(`Atteso "${value}".`);
+    }
+  }
+
+  function primary() {
+    const token = peek();
+
+    if (take("(")) {
+      const node = expression(0);
+      expect(")");
+      return node;
+    }
+
+    if (take("+")) {
+      return { type: "unary", op: "+", arg: primary() };
+    }
+
+    if (take("-")) {
+      return { type: "unary", op: "-", arg: primary() };
+    }
+
+    if (token.type === "number") {
+      position++;
+      return { type: "number", value: token.value };
+    }
+
+    if (token.type === "identifier") {
+      position++;
+
+      const name = token.value;
+
+      if (take("(")) {
+        if (!Object.prototype.hasOwnProperty.call(functions, name)) {
+          throw new Error(`Funzione non supportata: ${name}`);
+        }
+
+        const args = [];
+
+        if (!take(")")) {
+          do {
+            args.push(expression(0));
+          } while (take(","));
+
+          expect(")");
+        }
+
+        return { type: "call", name, args };
+      }
+
+      if (name === "pi") {
+        return { type: "number", value: Math.PI };
+      }
+
+      if (name === "e") {
+        return { type: "number", value: Math.E };
+      }
+
+      return { type: "variable", name };
+    }
+
+    throw new Error(
+      `Espressione incompleta vicino a "${token.value}".`
+    );
+  }
+
+  const precedence = {
+    "||": 1,
+    "&&": 2,
+    "==": 3,
+    "!=": 3,
+    "<": 4,
+    "<=": 4,
+    ">": 4,
+    ">=": 4,
+    "+": 5,
+    "-": 5,
+    "*": 6,
+    "/": 6,
+    "%": 6,
+    "^": 7
+  };
+
+  function expression(minPrecedence) {
+    let left = primary();
+
+    while (true) {
+      const op = peek().value;
+      const p = precedence[op];
+
+      if (p === undefined || p < minPrecedence) {
+        break;
+      }
+
+      position++;
+
+      const right = expression(
+        p + (op === "^" ? 0 : 1)
+      );
+
+      left = {
+        type: "binary",
+        op,
+        left,
+        right
+      };
+    }
+
+    return left;
+  }
+
+  const ast = expression(0);
+
+  if (peek().type !== "eof") {
+    throw new Error(
+      `Token inatteso: "${peek().value}".`
+    );
+  }
+
+  return ast;
+}
+
+function evaluateMath(ast, variables = {}) {
+  function finite(value) {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      throw new Error("Il calcolo ha prodotto un valore non finito.");
+    }
+
+    return value;
+  }
+
+  switch (ast.type) {
+    case "number":
+      return ast.value;
+
+    case "variable": {
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          variables,
+          ast.name
+        )
+      ) {
+        throw new Error(
+          `Variabile non definita: ${ast.name}`
+        );
+      }
+
+      return finite(variables[ast.name]);
+    }
+
+    case "unary": {
+      const value = evaluateMath(ast.arg, variables);
+
+      return ast.op === "-" ? -value : value;
+    }
+
+    case "call": {
+      const functions = {
+        abs: Math.abs,
+        sqrt: Math.sqrt,
+        floor: Math.floor,
+        ceil: Math.ceil,
+        round: Math.round,
+        exp: Math.exp,
+        log: Math.log,
+        log10: Math.log10,
+        sin: Math.sin,
+        cos: Math.cos,
+        tan: Math.tan,
+        min: Math.min,
+        max: Math.max,
+        pow: Math.pow
+      };
+
+      const arities = {
+        abs: [1, 1],
+        sqrt: [1, 1],
+        floor: [1, 1],
+        ceil: [1, 1],
+        round: [1, 1],
+        exp: [1, 1],
+        log: [1, 1],
+        log10: [1, 1],
+        sin: [1, 1],
+        cos: [1, 1],
+        tan: [1, 1],
+        min: [1, Infinity],
+        max: [1, Infinity],
+        pow: [2, 2]
+      };
+
+      const args = ast.args.map(arg =>
+        evaluateMath(arg, variables)
+      );
+
+      const [min, max] = arities[ast.name];
+
+      if (args.length < min || args.length > max) {
+        throw new Error(
+          `Numero di argomenti non valido per ${ast.name}().`
+        );
+      }
+
+      return finite(functions[ast.name](...args));
+    }
+
+    case "binary": {
+      const a = evaluateMath(ast.left, variables);
+
+      // Cortocircuito logico
+      if (ast.op === "&&" && !a) return 0;
+      if (ast.op === "||" && a) return 1;
+
+      const b = evaluateMath(ast.right, variables);
+      let result;
+
+      switch (ast.op) {
+        case "+": result = a + b; break;
+        case "-": result = a - b; break;
+        case "*": result = a * b; break;
+
+        case "/":
+          if (b === 0) throw new Error("Divisione per zero.");
+          result = a / b;
+          break;
+
+        case "%":
+          if (b === 0) throw new Error("Modulo per zero.");
+          result = a % b;
+          break;
+
+        case "^": result = a ** b; break;
+
+        case "<": return Number(a < b);
+        case "<=": return Number(a <= b);
+        case ">": return Number(a > b);
+        case ">=": return Number(a >= b);
+        case "==": return Number(a === b);
+        case "!=": return Number(a !== b);
+        case "&&": return Number(Boolean(a) && Boolean(b));
+        case "||": return Number(Boolean(a) || Boolean(b));
+
+        default:
+          throw new Error(`Operatore non supportato: ${ast.op}`);
+      }
+
+      return finite(result);
+    }
+
+    default:
+      throw new Error("Nodo matematico non riconosciuto.");
+  }
+}
+  /* AUF–TG — Parte 3
+   Condizioni iniziali e ricorrenze
+*/
+
+function parseAssignments(source) {
+  const variables = Object.create(null);
+  const sequences = Object.create(null);
+
+  if (!source.trim()) {
+    throw new Error("Inserisci le condizioni iniziali.");
+  }
+
+  const entries = source
+    .split(/[;\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  for (const entry of entries) {
+    const sequenceMatch = entry.match(
+      /^([a-zA-Z_]\w*)\s*\(\s*0\s*\)\s*=\s*(.+)$/
+    );
+
+    const variableMatch = entry.match(
+      /^([a-zA-Z_]\w*)\s*=\s*(.+)$/
+    );
+
+    if (sequenceMatch) {
+      const name = sequenceMatch[1];
+      const expression = parseMath(sequenceMatch[2]);
+      const value = evaluateMath(expression, variables);
+
+      sequences[name] = [value];
+      variables[name] = value;
+      continue;
+    }
+
+    if (variableMatch) {
+      const name = variableMatch[1];
+
+      if (name === "pi" || name === "e") {
+        throw new Error(`Il nome "${name}" è riservato.`);
+      }
+
+      const expression = parseMath(variableMatch[2]);
+      const value = evaluateMath(expression, variables);
+
+      variables[name] = value;
+      continue;
+    }
+
+    throw new Error(
+      `Condizione iniziale non riconosciuta: ${entry}`
+    );
+  }
+
+  return { variables, sequences };
+}
+
+function parseRecurrence(source) {
+  const match = source.trim().match(
+    /^([a-zA-Z_]\w*)\s*\(\s*n\s*\+\s*1\s*\)\s*=\s*(.+)$/i
+  );
+
+  if (!match) {
+    throw new Error(
+      "Formato ricorrenza non valido. " +
+      "Usa, per esempio, a(n+1)=a(n)*(1+r)."
+    );
+  }
+
+  const name = match[1];
+  let expressionSource = match[2].trim();
+
+  // Converte a(n) nella variabile interna a_n.
+  expressionSource = expressionSource.replace(
+    new RegExp(`\\b${name}\\s*\\(\\s*n\\s*\\)`, "g"),
+    `${name}_n`
+  );
+
+  // Rifiuta notazioni di successione non riconosciute.
+  if (/[a-zA-Z_]\w*\s*\(/.test(
+    expressionSource.replace(
+      /\b(abs|sqrt|floor|ceil|round|exp|log|log10|sin|cos|tan|min|max|pow)\s*\(/g,
+      ""
+    )
+  )) {
+    throw new Error(
+      "Notazione di successione o funzione non supportata."
+    );
+  }
+
+  return {
+    name,
+    expression: parseMath(expressionSource)
+  };
+}
+
+function simulateRecurrence(config) {
+  const initial = parseAssignments(config.initial);
+  const recurrence = parseRecurrence(config.recurrence);
+
+  const name = recurrence.name;
+  const sequence = initial.sequences[name];
+
+  if (!sequence || sequence.length !== 1) {
+    throw new Error(
+      `Manca la condizione iniziale ${name}(0)=valore.`
+    );
+  }
+
+  const values = [sequence[0]];
+
+  for (let n = 0; n < config.iterations; n++) {
+    const variables = Object.assign(
+      Object.create(null),
+      initial.variables
+    );
+
+    variables.n = n;
+    variables[`${name}_n`] = values[n];
+
+    const next = evaluateMath(
+      recurrence.expression,
+      variables
+    );
+
+    if (!Number.isFinite(next)) {
+      throw new Error(
+        `Valore non finito alla iterazione ${n + 1}.`
+      );
+    }
+
+    values.push(next);
+  }
+
+  return {
+    name,
+    values,
+    iterations: config.iterations,
+    initialValue: values[0],
+    finalValue: values[values.length - 1],
+    minimum: Math.min(...values),
+    maximum: Math.max(...values)
+  };
+}
+  /* AUF–TG — Parte 4
+   Verificatore numerico delle ipotesi
+*/
+
+function compileHypothesis(source, sequenceName) {
+  if (!source.trim()) {
+    throw new Error("Inserisci un'ipotesi da verificare.");
+  }
+
+  // Converte a(n+1) e a(n) in variabili interne.
+  const normalized = source.replace(
+    new RegExp(
+      `\\b${sequenceName}\\s*\\(\\s*n\\s*\\+\\s*1\\s*\\)`,
+      "g"
+    ),
+    `${sequenceName}_next`
+  ).replace(
+    new RegExp(
+      `\\b${sequenceName}\\s*\\(\\s*n\\s*\\)`,
+      "g"
+    ),
+    `${sequenceName}_current`
+  );
+
+  return parseMath(normalized);
+}
+
+function evaluateHypothesis(ast, variables, tolerance) {
+  /*
+   * Per i confronti di uguaglianza, la tolleranza
+   * è applicata alla differenza tra i membri.
+   * Gli altri confronti restano confronti ordinari.
+   */
+  if (ast.type === "binary" && ast.op === "==") {
+    const left = evaluateMath(ast.left, variables);
+    const right = evaluateMath(ast.right, variables);
+
+    return Math.abs(left - right) <= tolerance;
+  }
+
+  if (ast.type === "binary" && ast.op === "!=") {
+    const left = evaluateMath(ast.left, variables);
+    const right = evaluateMath(ast.right, variables);
+
+    return Math.abs(left - right) > tolerance;
+  }
+
+  return Boolean(evaluateMath(ast, variables));
+}
+
+function verifyHypotheses(config, simulation) {
+  const name = simulation.name;
+
+  const mainAst = compileHypothesis(
+    config.formula,
+    name
+  );
+
+  const additionalSources = config.additional
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const additionalAsts = additionalSources.map(source => ({
+    source,
+    ast: compileHypothesis(source, name)
+  }));
+
+  const failures = [];
+  const diagnostics = [];
+
+  let mainPassed = 0;
+  let mainFailed = 0;
+  let additionalFailed = 0;
+
+  for (let n = 0; n < simulation.iterations; n++) {
+    const variables = Object.assign(
+      Object.create(null),
+      parseAssignments(config.initial).variables
+    );
+
+    variables.n = n;
+    variables[`${name}_current`] = simulation.values[n];
+    variables[`${name}_next`] = simulation.values[n + 1];
+
+    let mainOK;
+
+    try {
+      mainOK = evaluateHypothesis(
+        mainAst,
+        variables,
+        config.tolerance
+      );
+    } catch (error) {
+      diagnostics.push({
+        iteration: n,
+        message: error.message
+      });
+
+      break;
+    }
+
+    if (mainOK) {
+      mainPassed++;
+    } else {
+      mainFailed++;
+
+      failures.push({
+        iteration: n,
+        type: "ipotesi principale",
+        current: simulation.values[n],
+        next: simulation.values[n + 1]
+      });
+    }
+
+    for (const item of additionalAsts) {
+      try {
+        const passed = evaluateHypothesis(
+          item.ast,
+          variables,
+          config.tolerance
+        );
+
+        if (!passed) {
+          additionalFailed++;
+
+          failures.push({
+            iteration: n,
+            type: "ipotesi aggiuntiva",
+            formula: item.source,
+            current: simulation.values[n],
+            next: simulation.values[n + 1]
+          });
+        }
+      } catch (error) {
+        diagnostics.push({
+          iteration: n,
+          formula: item.source,
+          message: error.message
+        });
+
+        break;
+      }
+    }
+
+    if (diagnostics.length) break;
+  }
+
+  return {
+    status: diagnostics.length
+      ? "errore"
+      : mainFailed || additionalFailed
+        ? "controesempi"
+        : "superato numericamente",
+
+    iterationsChecked: mainPassed + mainFailed,
+    mainPassed,
+    mainFailed,
+    additionalFailed,
+    failures: failures.slice(0, 100),
+    diagnostics,
+    universalProof: false
+  };
+}
+  /* AUF–TG — Parte 5
+   Eventi UI, esecuzione e risultati
+*/
+
+function renderObject(element, data) {
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(data, null, 2);
+  element.replaceChildren(pre);
+}
+
+function runHypothesisTest() {
+  if (state.running) return;
+
+  state.running = true;
+  ui.run.disabled = true;
+  setStatus("Test in esecuzione...");
+
+  try {
+    const config = readConfig();
+
+    if (!config.formula) {
+      throw new Error("Inserisci l'ipotesi da verificare.");
+    }
+
+    if (!config.recurrence) {
+      throw new Error("Inserisci una ricorrenza.");
+    }
+
+    const simulation = simulateRecurrence(config);
+    const verification = verifyHypotheses(
+      config,
+      simulation
+    );
+
+    const result = {
+      version: state.version,
+      timestamp: new Date().toISOString(),
+      configuration: config,
+      simulation,
+      verification
+    };
+
+    state.lastResult = result;
+
+    setStatus(
+      verification.status === "errore"
+        ? "Test interrotto: controlla la diagnostica."
+        : verification.status === "controesempi"
+          ? "Test completato: trovate violazioni."
+          : "Test completato numericamente."
+    );
+
+    renderObject(ui.summary, {
+      stato: verification.status,
+      iterazioni: verification.iterationsChecked,
+      verificheSuperate: verification.mainPassed,
+      violazioniPrincipali: verification.mainFailed,
+      violazioniAggiuntive: verification.additionalFailed,
+      dimostrazioneUniversale: false
+    });
+
+    renderObject(ui.results, {
+      successione: simulation.name,
+      valoreIniziale: simulation.initialValue,
+      valoreFinale: simulation.finalValue,
+      minimo: simulation.minimum,
+      massimo: simulation.maximum,
+      ultimiValori: simulation.values.slice(-10)
+    });
+
+    renderObject(ui.counterexamples, {
+      controesempi: verification.failures,
+      diagnostica: verification.diagnostics
+    });
+
+    recordExecution(verification.status);
+
+  } catch (error) {
+    setStatus("Errore durante il test.");
+
+    renderObject(ui.summary, {
+      errore: error.message
+    });
+
+    renderObject(ui.counterexamples, {
+      errore: error.message
+    });
+
+    state.lastResult = null;
+    recordExecution("errore");
+  } finally {
+    state.running = false;
+    ui.run.disabled = false;
+  }
+}
+
+function clearHypothesisInputs() {
+  if (state.running) return;
+
+  ui.formula.value = "";
+  ui.recurrence.value = "";
+  ui.initial.value = "";
+  ui.additional.value = "";
+  ui.iterations.value = "1000";
+  ui.tolerance.value = "0.000000001";
+  ui.seed.value = "2026";
+
+  state.lastResult = null;
+
+  setStatus("Input puliti. Motore in attesa.");
+
+  setText(ui.summary, "Nessun test eseguito.");
+  setText(ui.results, "I risultati compariranno qui.");
+  setText(
+    ui.counterexamples,
+    "Nessun controesempio disponibile."
+  );
+}
+
+ui.run.addEventListener("click", runHypothesisTest);
+ui.clear.addEventListener("click", clearHypothesisInputs);
+  
+  /* AUF–TG — Parte 6
+   Import/export JSON con validazione
+*/
+
+const JSON_FORMAT = "auf-tg-hypothesis";
+const JSON_VERSION = 1;
+const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
+
+function buildExportData() {
+  return {
+    format: JSON_FORMAT,
+    version: JSON_VERSION,
+    exportedAt: new Date().toISOString(),
+
+    configuration: {
+      formula: ui.formula.value,
+      recurrence: ui.recurrence.value,
+      initial: ui.initial.value,
+      additional: ui.additional.value,
+      iterations: ui.iterations.value,
+      tolerance: ui.tolerance.value,
+      seed: ui.seed.value
+    },
+
+    lastResult: state.lastResult
+  };
+}
+
+function downloadJSON(data) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob(
+    [json],
+    { type: "application/json;charset=utf-8" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download =
+    `auf-tg-hypothesis-${new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportHypothesisJSON() {
+  try {
+    downloadJSON(buildExportData());
+    setStatus("Esportazione JSON avviata.");
+  } catch (error) {
+    setStatus(`Errore di esportazione: ${error.message}`);
+  }
+}
+
+function validateImportedData(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Il file deve contenere un oggetto JSON.");
+  }
+
+  if (data.format !== JSON_FORMAT) {
+    throw new Error("Il formato del file non è AUF–TG.");
+  }
+
+  if (data.version !== JSON_VERSION) {
+    throw new Error("Versione JSON non supportata.");
+  }
+
+  const c = data.configuration;
+
+  if (!c || typeof c !== "object" || Array.isArray(c)) {
+    throw new Error("Configurazione mancante o non valida.");
+  }
+
+  const textFields = [
+    "formula",
+    "recurrence",
+    "initial",
+    "additional"
+  ];
+
+  for (const key of textFields) {
+    if (typeof c[key] !== "string" || c[key].length > 50000) {
+      throw new Error(`Campo non valido: ${key}.`);
+    }
+  }
+
+  const iterations = Number(c.iterations);
+  const tolerance = Number(c.tolerance);
+  const seed = Number(c.seed);
+
+  if (
+    !Number.isInteger(iterations) ||
+    iterations < 1 ||
+    iterations > MAX_ITERATIONS
+  ) {
+    throw new Error("Numero di iterazioni non valido.");
+  }
+
+  if (
+    !Number.isFinite(tolerance) ||
+    tolerance < 0 ||
+    tolerance > 1
+  ) {
+    throw new Error("Tolleranza non valida.");
+  }
+
+  if (!Number.isSafeInteger(seed)) {
+    throw new Error("Seed non valido.");
+  }
+
+  return {
+    formula: c.formula,
+    recurrence: c.recurrence,
+    initial: c.initial,
+    additional: c.additional,
+    iterations: String(iterations),
+    tolerance: String(tolerance),
+    seed: String(seed)
+  };
+}
+
+async function importHypothesisJSON(file) {
+  if (!file) return;
+
+  if (file.size > MAX_IMPORT_BYTES) {
+    throw new Error("Il file supera il limite di 2 MB.");
+  }
+
+  const text = await file.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Il file non contiene JSON valido.");
+  }
+
+  // Convalida tutto prima di modificare l'interfaccia.
+  const c = validateImportedData(data);
+
+  ui.formula.value = c.formula;
+  ui.recurrence.value = c.recurrence;
+  ui.initial.value = c.initial;
+  ui.additional.value = c.additional;
+  ui.iterations.value = c.iterations;
+  ui.tolerance.value = c.tolerance;
+  ui.seed.value = c.seed;
+
+  state.lastResult = null;
+
+  setStatus("Configurazione JSON importata correttamente.");
+  setText(ui.summary, "Configurazione caricata; esegui un nuovo test.");
+  setText(ui.results, "Nessun nuovo test eseguito.");
+  setText(ui.counterexamples, "Nessun controesempio disponibile.");
+}
+
+ui.export.addEventListener("click", exportHypothesisJSON);
+
+ui.import.addEventListener("click", () => {
+  ui.file.click();
+});
+
+ui.file.addEventListener("change", async () => {
+  const file = ui.file.files?.[0];
+
+  try {
+    await importHypothesisJSON(file);
+  } catch (error) {
+    setStatus(`Importazione fallita: ${error.message}`);
+  } finally {
+    ui.file.value = "";
+  }
+});
+  /* AUF–TG — Parte 7
+   Stabilità e diagnostica
+*/
+
+const AUF_LIMITS = Object.freeze({
+  expressionLength: 2000,
+  tokenCount: 500,
+  nestingDepth: 64,
+  displayedCounterexamples: 100
+});
+
+const aufDiagnostics = [];
+
+function aufLog(level, message, details = null) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    level,
+    message: String(message),
+    details
+  };
+
+  aufDiagnostics.unshift(entry);
+
+  if (aufDiagnostics.length > 200) {
+    aufDiagnostics.length = 200;
+  }
+
+  const method =
+    level === "error" ? "error" :
+    level === "warn" ? "warn" : "info";
+
+  console[method]("[AUF–TG]", message, details ?? "");
+}
+
+function validateExpressionSource(source) {
+  if (typeof source !== "string") {
+    throw new Error("L'espressione deve essere una stringa.");
+  }
+
+  if (!source.trim()) {
+    throw new Error("L'espressione è vuota.");
+  }
+
+  if (source.length > AUF_LIMITS.expressionLength) {
+    throw new Error(
+      `Espressione troppo lunga: limite ${AUF_LIMITS.expressionLength} caratteri.`
+    );
+  }
+
+  let depth = 0;
+  let maxDepth = 0;
+
+  for (const char of source) {
+    if (char === "(") {
+      depth++;
+      maxDepth = Math.max(maxDepth, depth);
+    } else if (char === ")") {
+      depth--;
+
+      if (depth < 0) {
+        throw new Error("Parentesi chiusa senza apertura.");
+      }
+    }
+  }
+
+  if (depth !== 0) {
+    throw new Error("Parentesi non bilanciate.");
+  }
+
+  if (maxDepth > AUF_LIMITS.nestingDepth) {
+    throw new Error(
+      `Annidamento eccessivo: massimo ${AUF_LIMITS.nestingDepth} livelli.`
+    );
+  }
+
+  const tokens = tokenizeMath(source);
+
+  if (tokens.length > AUF_LIMITS.tokenCount + 1) {
+    throw new Error(
+      `Troppe operazioni: limite ${AUF_LIMITS.tokenCount} token.`
+    );
+  }
+
+  return true;
+}
+
+function safeParseMath(source) {
+  validateExpressionSource(source);
+  return parseMath(source);
+}
+
+function getAufDiagnostics() {
+  return aufDiagnostics.map(entry => ({ ...entry }));
+}
+
+function exportAufDiagnostics() {
+  downloadJSON({
+    format: "auf-tg-diagnostics",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    entries: getAufDiagnostics()
+  });
+}
+
+function resetAufDiagnostics() {
+  aufDiagnostics.length = 0;
+  aufLog("info", "Registro diagnostico azzerato.");
+}
+
+/*
+ * Controllo preliminare delle espressioni inserite.
+ * Non sostituisce la validazione del parser durante
+ * l'esecuzione del test.
+ */
+function validateCurrentInputs() {
+  const config = readConfig();
+
+  if (config.formula) {
+    validateExpressionSource(
+      config.formula
+        .replace(/\b[a-zA-Z_]\w*\s*\([^()]*\)/g, "1")
+    );
+  }
+
+  if (config.recurrence) {
+    validateExpressionSource(config.recurrence);
+  }
+
+  if (config.initial) {
+    for (const entry of config.initial.split(/[;\n]+/)) {
+      const trimmed = entry.trim();
+      if (!trimmed) continue;
+
+      const match = trimmed.match(/^[^=]+=(.+)$/);
+
+      if (!match) {
+        throw new Error(
+          `Condizione iniziale non valida: ${trimmed}`
+        );
+      }
+
+      validateExpressionSource(match[1].trim());
+    }
+  }
+
+  return true;
+}
+
+/* Avvolge il test con diagnostica senza nascondere gli errori. */
+const aufOriginalRun = runHypothesisTest;
+
+runHypothesisTest = function () {
+  try {
+    validateCurrentInputs();
+    aufLog("info", "Validazione preliminare completata.");
+  } catch (error) {
+    aufLog("error", "Validazione preliminare fallita.", {
+      message: error.message
+    });
+
+    setStatus(`Input non valido: ${error.message}`);
+    renderObject(ui.summary, { errore: error.message });
+    return;
+  }
+
+  try {
+    aufOriginalRun();
+
+    if (state.lastResult) {
+      aufLog("info", "Esecuzione terminata.", {
+        status: state.lastResult.verification.status,
+        iterations: state.lastResult.verification.iterationsChecked
+      });
+    }
+  } catch (error) {
+    aufLog("error", "Errore inatteso durante il test.", {
+      message: error.message
+    });
+
+    setStatus("Errore inatteso: consultare la console.");
+  }
+};
+
+aufLog("info", "Modulo diagnostico inizializzato.");
+})();
+  
+</script>
+
+<script>
+(() => {
+  "use strict";
+
+  const root = document.getElementById("aufManual");
+  if (!root) return;
+
+  const toggle = root.querySelector("#aufManualToggle");
+  const content = root.querySelector("#aufManualContent");
+  const sections = [
+    ...root.querySelectorAll(".auf-doc-section")
+  ];
+  const links = [
+    ...content.querySelectorAll('a[href^="#"]')
+  ];
+
+  if (!toggle || !content) {
+    console.error(
+      "AUF–TG: indice del manuale incompleto."
+    );
+    return;
+  }
+
+  // Apertura e chiusura dell'indice.
+  toggle.addEventListener("click", () => {
+    const expanded =
+      toggle.getAttribute("aria-expanded") === "true";
+
+    toggle.setAttribute(
+      "aria-expanded",
+      String(!expanded)
+    );
+
+    content.hidden = expanded;
+    toggle.classList.toggle(
+      "is-collapsed",
+      expanded
+    );
+  });
+
+  // Navigazione esclusivamente all'interno del manuale.
+  links.forEach(link => {
+    link.addEventListener("click", event => {
+      const id = link.getAttribute("href").slice(1);
+      const target = root.querySelector(
+        "#" + CSS.escape(id)
+      );
+
+      if (!target) {
+        event.preventDefault();
+        console.warn(
+          "AUF–TG: sezione non trovata:",
+          id
+        );
+        return;
+      }
+
+      // Mantiene visibile l'indice durante la navigazione.
+      content.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.classList.remove("is-collapsed");
+
+      links.forEach(item => {
+        item.removeAttribute("aria-current");
+      });
+
+      link.setAttribute("aria-current", "location");
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      // Aggiorna l'URL senza uscire dal manuale.
+      history.replaceState(null, "", "#" + id);
+    });
+  });
+
+  // Evidenzia la sezione corrispondente all'URL iniziale.
+  function activateFromHash() {
+    const id = decodeURIComponent(
+      location.hash.slice(1)
+    );
+
+    if (!id) return;
+
+    const link = links.find(
+      item => item.getAttribute("href") === "#" + id
+    );
+
+    if (!link) return;
+
+    links.forEach(item => {
+      item.removeAttribute("aria-current");
+    });
+
+    link.setAttribute("aria-current", "location");
+  }
+
+  activateFromHash();
+
+  // Controllo degli ID delle sezioni documentate.
+  const ids = sections.map(section => section.id);
+  const duplicates = ids.filter(
+    (id, index) => ids.indexOf(id) !== index
+  );
+
+  if (duplicates.length) {
+    console.error(
+      "AUF–TG: ID duplicati nel manuale:",
+      [...new Set(duplicates)]
+    );
+  }
+
+  console.info(
+    `AUF–TG: manuale inizializzato, ` +
+    `${sections.length} sezioni, ` +
+    `${links.length} collegamenti.`
+  );
+  
+  
+})();
+  
 </script>
 
   </body>
